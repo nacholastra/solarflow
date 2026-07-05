@@ -14,7 +14,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Logo href="/" />
-        <nav className="hidden items-center gap-7 text-sm text-muted-foreground lg:flex">
+        <nav className="hidden items-center gap-7 text-sm text-muted-foreground lg:flex" aria-label="Secciones principales">
           {links.map(({ href, label }) => (
             <a key={href} href={href} className="transition-colors hover:text-foreground">
               {label}

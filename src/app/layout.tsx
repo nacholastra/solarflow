@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { BRAND } from "@/lib/config/brand";
+import { getSiteUrl } from "@/lib/config/site";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
@@ -11,8 +12,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: BRAND.name,
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: `${BRAND.name} — ${BRAND.tagline}`,
+    template: `%s | ${BRAND.name}`,
+  },
   description: BRAND.tagline,
+  applicationName: BRAND.name,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

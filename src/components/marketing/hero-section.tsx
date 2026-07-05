@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden border-b border-border/60">
+    <section className="relative overflow-hidden border-b border-border/60" aria-labelledby="hero-heading">
       <div className="absolute inset-0 dot-grid opacity-40" />
       <div className="relative mx-auto grid max-w-6xl gap-12 px-6 py-16 md:py-24 lg:grid-cols-2 lg:items-center lg:gap-16">
         <div>
@@ -14,7 +14,7 @@ export function HeroSection() {
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             Plataforma B2B para instaladoras en España
           </p>
-          <h1 className="text-4xl font-semibold leading-[1.08] tracking-tight md:text-5xl lg:text-[3.25rem]">
+          <h1 id="hero-heading" className="text-4xl font-semibold leading-[1.08] tracking-tight md:text-5xl lg:text-[3.25rem]">
             Capta más clientes solares con un simulador que{" "}
             <span className="text-muted-foreground">vende por ti</span>
           </h1>
