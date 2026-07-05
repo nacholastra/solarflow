@@ -7,11 +7,10 @@ import {
   Contact,
   Kanban,
   LogOut,
-  Play,
-  Settings,
   Sun,
   Users,
   CreditCard,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BRAND } from "@/lib/config/brand";
@@ -23,8 +22,7 @@ const nav = [
   { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
   { href: "/dashboard/crm", label: "CRM", icon: Kanban },
   { href: "/dashboard/contacts", label: "Base de Contactos", icon: Contact },
-  { href: "/dashboard/simulator", label: "Configurar Simulador", icon: Settings },
-  { href: "/dashboard/simulator/preview", label: "Probar Simulador", icon: Play },
+  { href: "/dashboard/simulator", label: "Simulador", icon: Zap },
   { href: "/dashboard/team", label: "Mi Equipo", icon: Users },
   { href: "/dashboard/subscription", label: "Suscripción y Perfil", icon: CreditCard },
 ];
