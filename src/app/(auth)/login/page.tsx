@@ -3,14 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { BRAND } from "@/lib/config/brand";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,43 +45,57 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex items-center gap-2 font-bold text-xl">
-            <Sun className="h-6 w-6 text-amber-500" />
-            {BRAND.name}
+    <AuthShell>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Iniciar sesión</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Accede a tu panel de instaladora</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {errorMsg && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive">
+              {errorMsg}
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-11 bg-background"
+              required
+            />
           </div>
-          <CardTitle>Iniciar sesión</CardTitle>
-          <CardDescription>Accede a tu panel de instaladora</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {errorMsg && (
-              <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {errorMsg}
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            ¿No tienes cuenta?{" "}
-            <Link href="/register" className="text-primary underline">
-              Regístrate
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Contraseña
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-11 bg-background"
+              required
+            />
+          </div>
+          <Button type="submit" className="h-11 w-full" disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
+          </Button>
+        </form>
+
+        <p className="text-center text-sm text-muted-foreground">
+          ¿No tienes cuenta?{" "}
+          <Link href="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
+            Regístrate
+          </Link>
+        </p>
+      </div>
+    </AuthShell>
   );
 }

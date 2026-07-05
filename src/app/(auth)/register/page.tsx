@@ -3,14 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { BRAND } from "@/lib/config/brand";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -78,47 +76,70 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex items-center gap-2 font-bold text-xl">
-            <Sun className="h-6 w-6 text-amber-500" />
-            {BRAND.name}
+    <AuthShell>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Crear cuenta</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Registra tu empresa instaladora</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {errorMsg && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive">
+              {errorMsg}
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="empresa" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Nombre de la empresa
+            </Label>
+            <Input
+              id="empresa"
+              value={nombreEmpresa}
+              onChange={(e) => setNombreEmpresa(e.target.value)}
+              className="h-11 bg-background"
+              required
+            />
           </div>
-          <CardTitle>Crear cuenta</CardTitle>
-          <CardDescription>Registra tu empresa instaladora</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {errorMsg && (
-              <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {errorMsg}
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="empresa">Nombre de la empresa</Label>
-              <Input id="empresa" value={nombreEmpresa} onChange={(e) => setNombreEmpresa(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creando..." : "Registrarse"}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            ¿Ya tienes cuenta?{" "}
-            <Link href="/login" className="text-primary underline">
-              Inicia sesión
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-11 bg-background"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Contraseña
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              minLength={6}
+              className="h-11 bg-background"
+              required
+            />
+          </div>
+          <Button type="submit" className="h-11 w-full" disabled={loading}>
+            {loading ? "Creando..." : "Registrarse"}
+          </Button>
+        </form>
+
+        <p className="text-center text-sm text-muted-foreground">
+          ¿Ya tienes cuenta?{" "}
+          <Link href="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+            Inicia sesión
+          </Link>
+        </p>
+      </div>
+    </AuthShell>
   );
 }
