@@ -2,7 +2,6 @@ import { desgloseFactura, kwhToGasto } from "./billing-es";
 import type { EmpresaSimuladorConfig, SimulacionInput, SimulacionResultado } from "./types";
 
 const FACTOR_COBERTURA = 1200;
-const CO2_KG_PER_KWH = 0.25;
 
 export function calcularSimulacion(input: SimulacionInput): SimulacionResultado {
   const { localidad, tipoInmueble, consumoKwhMensual, empresaConfig } = input;
@@ -29,7 +28,6 @@ export function calcularSimulacion(input: SimulacionInput): SimulacionResultado 
     produccion_anual_kwh: Math.round(produccionAnual),
     ahorro_anual_eur: Math.round(ahorroAnual),
     payback_anos: Math.round(payback * 10) / 10,
-    co2_evitado_kg: Math.round(produccionAnual * CO2_KG_PER_KWH),
     precio_efectivo_kwh: precioKwh,
     consumo_kwh_mensual: consumoKwhMensual,
     gasto_mensual_eur: kwhToGasto(consumoKwhMensual, localidad, tipoInmueble),

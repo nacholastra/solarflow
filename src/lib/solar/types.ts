@@ -63,7 +63,6 @@ export interface SimulacionResultado {
   produccion_anual_kwh: number;
   ahorro_anual_eur: number;
   payback_anos: number;
-  co2_evitado_kg: number;
   precio_efectivo_kwh: number;
   consumo_kwh_mensual: number;
   gasto_mensual_eur: number;

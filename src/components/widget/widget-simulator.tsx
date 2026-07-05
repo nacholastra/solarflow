@@ -11,7 +11,8 @@ import { BRAND } from "@/lib/config/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatNumber } from "@/lib/utils";
+import { calcularAhorroProyectado, INFLACION_ENERGIA_ANUAL } from "@/lib/solar/projection";
+import { formatCurrency, formatNumber } from "@/lib/utils";
 
 interface EmpresaWidget {
   id: string;
@@ -53,6 +54,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
   const [loading, setLoading] = useState(false);
   const [showDesglose, setShowDesglose] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [anosProyeccion, setAnosProyeccion] = useState(10);
   const [honeypot, setHoneypot] = useState("");
 
   const brandColor = empresa.color_marca;
@@ -109,6 +111,12 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
     if (isNaN(k)) return null;
     return desgloseFactura(k, localidadFull, tipo);
   }, [localidadFull, kwh, tipo]);
+
+  const proyeccion = useMemo(() => {
+    if (!resultado) return null;
+    const anos = Math.min(30, Math.max(1, anosProyeccion));
+    return calcularAhorroProyectado(resultado.ahorro_anual_eur, anos);
+  }, [resultado, anosProyeccion]);
 
   async function submitLead() {
     if (!localidadFull || !rgpd) return;
@@ -171,6 +179,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
     setRgpd(false);
     setResultado(null);
     setErrorMsg("");
+    setAnosProyeccion(10);
   }
 
   const steps = ["Tipo", "Ubicación", "Consumo", "Contacto", "Resultados"];
@@ -317,15 +326,52 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
           </>
         )}
 
-        {step === 4 && resultado && (
+        {step === 4 && resultado && proyeccion && (
           <div className="text-center space-y-4">
             <h2 className="text-2xl font-bold" style={{ color: brandColor }}>¡Tu estudio está listo!</h2>
             <div className="grid grid-cols-2 gap-3 text-left">
               <div className="rounded-xl bg-muted p-4"><p className="text-xs text-muted-foreground">Instalación</p><p className="text-xl font-bold">{formatNumber(resultado.kwp_estimado)} kWp</p></div>
-              <div className="rounded-xl bg-muted p-4"><p className="text-xs text-muted-foreground">Ahorro anual</p><p className="text-xl font-bold">{resultado.ahorro_anual_eur} €</p></div>
-              <div className="rounded-xl bg-muted p-4"><p className="text-xs text-muted-foreground">Payback</p><p className="text-xl font-bold">{formatNumber(resultado.payback_anos)} años</p></div>
-              <div className="rounded-xl bg-muted p-4"><p className="text-xs text-muted-foreground">CO₂ evitado</p><p className="text-xl font-bold">{resultado.co2_evitado_kg} kg/año</p></div>
+              <div className="rounded-xl bg-muted p-4"><p className="text-xs text-muted-foreground">Ahorro anual</p><p className="text-xl font-bold">{formatCurrency(resultado.ahorro_anual_eur)}</p></div>
+              <div className="rounded-xl bg-muted p-4 col-span-2"><p className="text-xs text-muted-foreground">Recuperación inversión</p><p className="text-xl font-bold">{formatNumber(resultado.payback_anos)} años</p></div>
             </div>
+
+            <div className="rounded-xl border bg-muted/40 p-4 text-left space-y-3">
+              <div>
+                <Label htmlFor="anos_proyeccion" className="text-sm font-medium">¿A cuántos años quieres proyectar el ahorro?</Label>
+                <div className="mt-2 flex flex-wrap gap-2 items-center">
+                  <Input
+                    id="anos_proyeccion"
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={anosProyeccion}
+                    onChange={(e) => setAnosProyeccion(Number(e.target.value) || 10)}
+                    className="w-24"
+                  />
+                  <span className="text-sm text-muted-foreground">años</span>
+                  {[10, 15, 20, 25].map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAnosProyeccion(a)}
+                      className={`rounded-md px-2.5 py-1 text-xs border transition-colors ${anosProyeccion === a ? "bg-background font-medium border-[var(--brand)]" : "text-muted-foreground hover:bg-background"}`}
+                    >
+                      {a}a
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg p-4 text-center" style={{ backgroundColor: `${brandColor}15` }}>
+                <p className="text-xs text-muted-foreground">Ahorro acumulado estimado a {proyeccion.anos} años</p>
+                <p className="text-3xl font-bold mt-1" style={{ color: brandColor }}>
+                  {formatCurrency(proyeccion.ahorro_total_eur)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Incluye inflación del {Math.round(INFLACION_ENERGIA_ANUAL * 100)}% anual en el precio de la electricidad
+                </p>
+              </div>
+            </div>
+
             <p className="text-xs text-muted-foreground">{BRAND.disclaimer}</p>
             <p className="text-sm">Te contactaremos pronto con tu estudio personalizado gratuito.</p>
             {preview && (
