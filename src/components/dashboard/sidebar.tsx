@@ -11,6 +11,7 @@ import {
   Users,
   CreditCard,
   Zap,
+  UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BRAND } from "@/lib/config/brand";
@@ -24,7 +25,8 @@ const nav = [
   { href: "/dashboard/contacts", label: "Base de Contactos", icon: Contact },
   { href: "/dashboard/simulator", label: "Simulador", icon: Zap },
   { href: "/dashboard/team", label: "Mi Equipo", icon: Users },
-  { href: "/dashboard/subscription", label: "Suscripción y Perfil", icon: CreditCard },
+  { href: "/dashboard/subscription", label: "Suscripción", icon: CreditCard },
+  { href: "/dashboard/profile", label: "Mi Perfil", icon: UserCircle },
 ];
 
 export function DashboardSidebar() {
