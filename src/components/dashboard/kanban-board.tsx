@@ -91,7 +91,7 @@ export function KanbanBoard({ empresaId }: { empresaId: string }) {
         onDragStart={(e: DragStartEvent) => setActiveId(e.active.id as string)}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="grid w-full min-w-0 grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
           {LEAD_ESTADOS.map((estado) => (
             <KanbanColumn
               key={estado}

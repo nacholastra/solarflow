@@ -15,7 +15,7 @@ export default async function CrmPage() {
   if (!equipo) return <p>No tienes empresa asignada.</p>;
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">CRM</h1>
         <p className="text-muted-foreground">Arrastra los leads entre columnas para actualizar su estado</p>
