@@ -12,6 +12,7 @@ import {
   CreditCard,
   Zap,
   UserCircle,
+  Plug,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BRAND } from "@/lib/config/brand";
@@ -24,6 +25,7 @@ const nav = [
   { href: "/dashboard/crm", label: "CRM", icon: Kanban },
   { href: "/dashboard/contacts", label: "Base de Contactos", icon: Contact },
   { href: "/dashboard/simulator", label: "Simulador", icon: Zap },
+  { href: "/dashboard/integrations", label: "Integraciones", icon: Plug },
   { href: "/dashboard/team", label: "Mi Equipo", icon: Users },
   { href: "/dashboard/subscription", label: "Suscripción", icon: CreditCard },
   { href: "/dashboard/profile", label: "Mi Perfil", icon: UserCircle },

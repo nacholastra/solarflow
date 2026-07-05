@@ -29,6 +29,7 @@ export type Database = {
           ratio_autoconsumo: number;
           kwp_max: number;
           gtm_id: string | null;
+          webhook_url: string | null;
           plan: "basic" | "pro" | null;
           moneda_facturacion: "EUR" | "USD";
           paypal_subscription_id: string | null;
@@ -53,6 +54,7 @@ export type Database = {
           ratio_autoconsumo?: number;
           kwp_max?: number;
           gtm_id?: string | null;
+          webhook_url?: string | null;
           plan?: "basic" | "pro" | null;
           moneda_facturacion?: "EUR" | "USD";
           paypal_subscription_id?: string | null;
@@ -77,6 +79,7 @@ export type Database = {
           ratio_autoconsumo?: number;
           kwp_max?: number;
           gtm_id?: string | null;
+          webhook_url?: string | null;
           plan?: "basic" | "pro" | null;
           moneda_facturacion?: "EUR" | "USD";
           paypal_subscription_id?: string | null;
