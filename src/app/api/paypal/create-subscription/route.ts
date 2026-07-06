@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getPayPalPlanId } from "@/lib/config/plans";
 import { getPayPalAccessToken, getPayPalApiBase } from "@/lib/paypal/client";
-import { getSiteUrl } from "@/lib/config/site";
 import { z } from "zod";
 
 const schema = z.object({
@@ -13,12 +12,19 @@ const schema = z.object({
 
 type PayPalApiError = {
   message?: string;
-  details?: Array<{ description?: string; issue?: string }>;
+  details?: Array<{ field?: string; description?: string; issue?: string }>;
 };
 
 function formatPayPalError(json: PayPalApiError): string {
-  const detail = json.details?.map((d) => d.description ?? d.issue).filter(Boolean).join(". ");
-  return detail || json.message || "Error de PayPal al crear la suscripción";
+  const parts = json.details?.map((d) => {
+    const field = d.field?.replace(/^\/body\//, "") ?? "";
+    const msg = d.description ?? d.issue ?? "";
+    return field ? `${field}: ${msg}` : msg;
+  }).filter(Boolean) ?? [];
+
+  const unique = [...new Set(parts)];
+  if (unique.length > 0) return unique.join(". ");
+  return json.message ?? "Error de PayPal al crear la suscripción";
 }
 
 export async function POST(request: Request) {
@@ -65,8 +71,8 @@ export async function POST(request: Request) {
     }
 
     const token = await getPayPalAccessToken();
-    const siteUrl = getSiteUrl();
 
+    // Con el JS SDK no enviamos return_url/cancel_url: el popup gestiona la aprobación.
     const res = await fetch(`${getPayPalApiBase()}/v1/billing/subscriptions`, {
       method: "POST",
       headers: {
@@ -77,19 +83,12 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         plan_id: planId,
         custom_id: body.empresaId,
-        application_context: {
-          brand_name: "SolarFlow",
-          locale: "es-ES",
-          shipping_preference: "NO_SHIPPING",
-          user_action: "SUBSCRIBE_NOW",
-          return_url: `${siteUrl}/dashboard/subscription?success=1`,
-          cancel_url: `${siteUrl}/dashboard/subscription?cancel=1`,
-        },
       }),
     });
 
     const json = (await res.json()) as { id?: string } & PayPalApiError;
     if (!res.ok || !json.id) {
+      console.error("PayPal create subscription failed:", JSON.stringify(json));
       return NextResponse.json({ error: formatPayPalError(json) }, { status: 502 });
     }
     return NextResponse.json({ id: json.id });
