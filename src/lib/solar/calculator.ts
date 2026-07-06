@@ -1,7 +1,8 @@
-import { desgloseFactura, kwhToGasto } from "./billing-es";
-import type { EmpresaSimuladorConfig, SimulacionInput, SimulacionResultado } from "./types";
+import { desgloseFactura } from "./billing-es";
+import type { SimulacionInput, SimulacionResultado } from "./types";
 
-const FACTOR_COBERTURA = 1200;
+/** Precio estimado de compensación de excedentes (simplificado, ~50% del precio de compra). */
+const PRECIO_VERTIDO_FACTOR = 0.5;
 
 export function calcularSimulacion(input: SimulacionInput): SimulacionResultado {
   const { localidad, tipoInmueble, consumoKwhMensual, empresaConfig } = input;
@@ -11,15 +12,23 @@ export function calcularSimulacion(input: SimulacionInput): SimulacionResultado 
     empresaConfig.tarifa_kwh_override ?? desglose.precio_efectivo_kwh;
 
   const consumoAnual = consumoKwhMensual * 12;
-  const kwpBruto = consumoAnual / FACTOR_COBERTURA;
+  // Dimensionar para que la producción anual ≈ consumo anual en esa localidad
+  const kwpBruto = consumoAnual / localidad.produccion_kwh_kwp_anual;
   const kwpEstimado = Math.min(
     Math.round(kwpBruto * 10) / 10,
     empresaConfig.kwp_max,
   );
 
   const produccionAnual = kwpEstimado * localidad.produccion_kwh_kwp_anual;
+  // Autoconsumo físico: no puede superar el consumo anual del cliente
+  const autoconsumoKwh = Math.min(
+    produccionAnual * empresaConfig.ratio_autoconsumo,
+    consumoAnual,
+  );
+  const excedenteKwh = Math.max(0, produccionAnual - autoconsumoKwh);
+  const precioVertido = precioKwh * PRECIO_VERTIDO_FACTOR;
   const ahorroAnual =
-    produccionAnual * precioKwh * empresaConfig.ratio_autoconsumo;
+    autoconsumoKwh * precioKwh + excedenteKwh * precioVertido;
   const inversion = kwpEstimado * empresaConfig.precio_eur_kwp;
   const payback = ahorroAnual > 0 ? inversion / ahorroAnual : 0;
 
@@ -30,13 +39,7 @@ export function calcularSimulacion(input: SimulacionInput): SimulacionResultado 
     payback_anos: Math.round(payback * 10) / 10,
     precio_efectivo_kwh: precioKwh,
     consumo_kwh_mensual: consumoKwhMensual,
-    gasto_mensual_eur: kwhToGasto(consumoKwhMensual, localidad, tipoInmueble),
+    gasto_mensual_eur: desglose.total,
     desglose_factura: desglose,
   };
 }
-
-export const DEFAULT_EMPRESA_CONFIG: EmpresaSimuladorConfig = {
-  precio_eur_kwp: 1200,
-  ratio_autoconsumo: 0.7,
-  kwp_max: 10,
-};

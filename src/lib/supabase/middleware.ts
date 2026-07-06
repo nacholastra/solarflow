@@ -14,13 +14,6 @@ export async function updateSession(request: NextRequest) {
     !pathname.startsWith("/api/leads") &&
     !pathname.startsWith("/api/localidades") &&
     !pathname.startsWith("/api/paypal/webhook");
-  const isPublic =
-    pathname.startsWith("/widget") ||
-    pathname.startsWith("/api/auth/register") ||
-    pathname.startsWith("/api/leads") ||
-    pathname.startsWith("/api/localidades") ||
-    pathname.startsWith("/api/paypal/webhook") ||
-    pathname === "/";
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
