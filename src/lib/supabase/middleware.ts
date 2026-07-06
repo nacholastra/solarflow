@@ -54,13 +54,9 @@ export async function updateSession(request: NextRequest) {
     });
 
     const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-
-    if (error) {
-      console.error("Supabase auth.getUser error:", error.message);
-    }
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
 
     if (!user && isDashboard) {
       const url = request.nextUrl.clone();

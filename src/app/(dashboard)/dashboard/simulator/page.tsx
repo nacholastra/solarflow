@@ -1,43 +1,53 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Empresa } from "@/types/database";
-import { WidgetSimulator } from "@/components/widget/widget-simulator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { useDashboardContext } from "@/components/dashboard/dashboard-provider";
 import { BRAND } from "@/lib/config/brand";
 
+const WidgetSimulator = dynamic(
+  () => import("@/components/widget/widget-simulator").then((m) => m.WidgetSimulator),
+  {
+    loading: () => <div className="h-[680px] w-full max-w-md animate-pulse rounded-xl bg-muted" />,
+    ssr: false,
+  },
+);
+
 export default function SimulatorPage() {
+  const { empresaId } = useDashboardContext();
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [embedCode, setEmbedCode] = useState("");
   const [activating, setActivating] = useState(false);
+  const [loading, setLoading] = useState(true);
   const supabase = createClient();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   const load = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data: equipo } = await supabase.from("equipo").select("empresa_id").eq("usuario_id", user.id).single();
-    if (!equipo) return;
     const { data } = await supabase
       .from("empresas")
       .select(
         "id, slug, nombre_empresa, color_marca, logo_url, privacy_url, precio_eur_kwp, tarifa_kwh_override, ratio_autoconsumo, kwp_max, gtm_id, estado_suscripcion, leads_usados_mes, leads_limite_mes, plan, updated_at",
       )
-      .eq("id", equipo.empresa_id)
+      .eq("id", empresaId)
       .single();
     if (data) {
       setEmpresa(data as Empresa);
-      setEmbedCode(`<iframe src="${appUrl}/widget/${data.slug}" width="100%" height="680" frameborder="0" style="border:none;border-radius:12px;"></iframe>`);
+      setEmbedCode(
+        `<iframe src="${appUrl}/widget/${data.slug}" width="100%" height="680" frameborder="0" style="border:none;border-radius:12px;"></iframe>`,
+      );
     }
-  }, [appUrl, supabase]);
+    setLoading(false);
+  }, [appUrl, empresaId, supabase]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -73,7 +83,8 @@ export default function SimulatorPage() {
     void load();
   }
 
-  if (!empresa) return <p>Cargando...</p>;
+  if (loading) return <div className="h-64 animate-pulse rounded-xl bg-muted" />;
+  if (!empresa) return <p className="text-muted-foreground">No se encontró la empresa.</p>;
 
   const isActive = empresa.estado_suscripcion === "active";
 

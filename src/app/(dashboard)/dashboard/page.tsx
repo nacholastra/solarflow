@@ -20,51 +20,29 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { formatNumber } from "@/lib/utils";
+import { requireDashboardContext } from "@/lib/dashboard/session";
 
-async function getEmpresaAndStats() {
+export default async function DashboardPage() {
+  const { empresaId } = await requireDashboardContext();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
 
-  const { data: equipo } = await supabase
-    .from("equipo")
-    .select("empresa_id")
-    .eq("usuario_id", user.id)
-    .single();
+  const [{ data: empresa }, { data: leads }] = await Promise.all([
+    supabase
+      .from("empresas")
+      .select("nombre_empresa, plan, leads_limite_mes, leads_usados_mes, estado_suscripcion")
+      .eq("id", empresaId)
+      .single(),
+    supabase.from("leads").select("estado").eq("empresa_id", empresaId),
+  ]);
 
-  if (!equipo) return null;
-
-  const { data: empresa } = await supabase
-    .from("empresas")
-    .select("nombre_empresa, plan, leads_limite_mes, leads_usados_mes, estado_suscripcion")
-    .eq("id", equipo.empresa_id)
-    .single();
-
-  if (!empresa) return null;
-
-  const { data: leads } = await supabase
-    .from("leads")
-    .select("estado")
-    .eq("empresa_id", equipo.empresa_id);
+  if (!empresa) {
+    return <p className="text-muted-foreground">No se encontró tu empresa. Contacta soporte.</p>;
+  }
 
   const total = leads?.length ?? 0;
   const nuevos = leads?.filter((l) => l.estado === "Nuevo").length ?? 0;
   const cerrados = leads?.filter((l) => l.estado === "Cerrado").length ?? 0;
   const conversion = total > 0 ? (cerrados / total) * 100 : 0;
-
-  return { empresa, total, nuevos, conversion };
-}
-
-export default async function DashboardPage() {
-  const stats = await getEmpresaAndStats();
-
-  if (!stats) {
-    return <p className="text-muted-foreground">No se encontró tu empresa. Contacta soporte.</p>;
-  }
-
-  const { empresa, total, nuevos, conversion } = stats;
   const usagePct =
     empresa.leads_limite_mes > 0 ? (empresa.leads_usados_mes / empresa.leads_limite_mes) * 100 : 0;
   const remaining = Math.max(empresa.leads_limite_mes - empresa.leads_usados_mes, 0);

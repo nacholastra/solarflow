@@ -11,32 +11,32 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { useDashboardContext } from "@/components/dashboard/dashboard-provider";
 
 export default function SubscriptionPage() {
+  const { empresaId } = useDashboardContext();
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [plan, setPlan] = useState<PlanId>("basic");
   const [currency, setCurrency] = useState<Currency>("EUR");
   const [upgrading, setUpgrading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
   const load = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data: equipo } = await supabase.from("equipo").select("empresa_id").eq("usuario_id", user.id).single();
-    if (!equipo) return;
     const { data } = await supabase
       .from("empresas")
       .select(
         "id, plan, moneda_facturacion, estado_suscripcion, leads_limite_mes, leads_usados_mes, paypal_subscription_id",
       )
-      .eq("id", equipo.empresa_id)
+      .eq("id", empresaId)
       .single();
     if (data) {
       setEmpresa(data as Empresa);
       setCurrency((data.moneda_facturacion as Currency) ?? "EUR");
       if (data.plan === "pro") setUpgrading(false);
     }
-  }, [supabase]);
+    setLoading(false);
+  }, [empresaId, supabase]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -84,7 +84,8 @@ export default function SubscriptionPage() {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "";
   const paypalReady = clientId.length > 0 && !clientId.startsWith("your-");
 
-  if (!empresa) return <p>Cargando...</p>;
+  if (loading) return <div className="h-64 animate-pulse rounded-xl bg-muted" />;
+  if (!empresa) return <p className="text-muted-foreground">No se encontró la empresa.</p>;
 
   const isActive = empresa.estado_suscripcion === "active";
   const isBasic = empresa.plan === "basic";
