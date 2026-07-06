@@ -43,3 +43,4 @@ supabase/.temp/
 
 # v0 reference extract (local only)
 _v0-design/
+.env*
