@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { PLANS, type Currency, type PlanId } from "@/lib/config/plans";
+import { PRO_ONLY_EMPRESA_FIELDS } from "@/lib/config/plan-features";
 import { getPayPalSubscription, subscriptionMatchesPlan } from "@/lib/paypal/client";
 import { z } from "zod";
 
@@ -49,18 +50,19 @@ export async function POST(request: Request) {
     }
 
     const service = await createServiceClient();
-    const { error } = await service
-      .from("empresas")
-      .update({
-        paypal_subscription_id: body.subscriptionId,
-        plan: body.plan as PlanId,
-        moneda_facturacion: body.currency as Currency,
-        estado_suscripcion: "active",
-        leads_limite_mes: PLANS[body.plan].leadsLimit,
-        leads_usados_mes: 0,
-        periodo_reset: new Date().toISOString().slice(0, 10),
-      })
-      .eq("id", body.empresaId);
+    const updatePayload: Record<string, unknown> = {
+      paypal_subscription_id: body.subscriptionId,
+      plan: body.plan as PlanId,
+      moneda_facturacion: body.currency as Currency,
+      estado_suscripcion: "active",
+      leads_limite_mes: PLANS[body.plan].leadsLimit,
+      leads_usados_mes: 0,
+      periodo_reset: new Date().toISOString().slice(0, 10),
+    };
+    if (body.plan === "basic") {
+      Object.assign(updatePayload, PRO_ONLY_EMPRESA_FIELDS);
+    }
+    const { error } = await service.from("empresas").update(updatePayload).eq("id", body.empresaId);
 
     if (error) {
       return NextResponse.json({ error: "No se pudo activar el plan" }, { status: 500 });

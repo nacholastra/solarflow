@@ -1,17 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { PlanUpgradeCard } from "@/components/dashboard/plan-upgrade-card";
 import { Webhook } from "lucide-react";
+import { canUseWebhooks } from "@/lib/config/plan-features";
 
 interface IntegrationsData {
   webhook_url: string;
   rol: string;
+  plan: string | null;
 }
 
 export default function IntegrationsPage() {
@@ -100,6 +104,7 @@ export default function IntegrationsPage() {
   if (!data) return <p>Cargando...</p>;
 
   const isAdmin = data.rol === "admin";
+  const webhooksEnabled = canUseWebhooks(data.plan);
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -108,7 +113,14 @@ export default function IntegrationsPage() {
         description="Conecta SolarFlow con Zapier, Make u otras herramientas vía webhooks"
       />
 
-      <Card>
+      {!webhooksEnabled && (
+        <PlanUpgradeCard
+          title="Automatización B2B (Plan Pro)"
+          description="Envía automáticamente cada lead (evento lead.created) a Zapier, Make, HubSpot, Salesforce u otras herramientas."
+        />
+      )}
+
+      <Card className={!webhooksEnabled ? "opacity-60" : undefined}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Webhook className="h-5 w-5" />
@@ -120,51 +132,58 @@ export default function IntegrationsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSave} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="webhook_url">URL de Zapier o Make</Label>
-              <Input
-                id="webhook_url"
-                type="url"
-                placeholder="https://hooks.zapier.com/hooks/catch/..."
-                value={webhookUrl}
-                onChange={(e) => setWebhookUrl(e.target.value)}
-                disabled={!isAdmin}
-              />
-              <p className="text-xs text-muted-foreground">
-                Deja el campo vacío para desactivar el webhook. Solo se aceptan URLs HTTPS.
-              </p>
-            </div>
-
-            {isAdmin ? (
-              <div className="flex flex-wrap gap-2">
-                <Button type="submit" disabled={saving || testing}>
-                  {saving ? "Guardando..." : "Guardar integración"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={saving || testing || !webhookUrl.trim()}
-                  onClick={() => void handleTest()}
-                >
-                  {testing ? "Enviando prueba..." : "Probar webhook"}
-                </Button>
+          {webhooksEnabled ? (
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="webhook_url">URL de Zapier o Make</Label>
+                <Input
+                  id="webhook_url"
+                  type="url"
+                  placeholder="https://hooks.zapier.com/hooks/catch/..."
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                  disabled={!isAdmin}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Deja el campo vacío para desactivar el webhook. Solo se aceptan URLs HTTPS.
+                </p>
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Solo el administrador de la cuenta puede modificar esta configuración.
-              </p>
-            )}
-          </form>
+
+              {isAdmin ? (
+                <div className="flex flex-wrap gap-2">
+                  <Button type="submit" disabled={saving || testing}>
+                    {saving ? "Guardando..." : "Guardar integración"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={saving || testing || !webhookUrl.trim()}
+                    onClick={() => void handleTest()}
+                  >
+                    {testing ? "Enviando prueba..." : "Probar webhook"}
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Solo el administrador de la cuenta puede modificar esta configuración.
+                </p>
+              )}
+            </form>
+          ) : (
+            <Button asChild>
+              <Link href="/dashboard/subscription?upgrade=pro">Mejorar a Pro para activar webhooks</Link>
+            </Button>
+          )}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Formato del payload</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <pre className="rounded-lg bg-muted p-4 text-xs overflow-x-auto">
+      {webhooksEnabled && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Formato del payload</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="rounded-lg bg-muted p-4 text-xs overflow-x-auto">
 {`{
   "event": "lead.created",
   "test": true,
@@ -179,9 +198,10 @@ export default function IntegrationsPage() {
     ...
   }
 }`}
-          </pre>
-        </CardContent>
-      </Card>
+            </pre>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

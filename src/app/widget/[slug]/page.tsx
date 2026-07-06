@@ -8,16 +8,21 @@ export default async function WidgetPage({ params }: { params: Promise<{ slug: s
 
   const { data: empresa } = await supabase
     .from("empresas")
-    .select("id, slug, nombre_empresa, color_marca, logo_url, privacy_url, precio_eur_kwp, tarifa_kwh_override, ratio_autoconsumo, kwp_max, gtm_id, estado_suscripcion")
+    .select("id, slug, nombre_empresa, color_marca, logo_url, privacy_url, precio_eur_kwp, tarifa_kwh_override, ratio_autoconsumo, kwp_max, gtm_id, estado_suscripcion, plan")
     .eq("slug", slug)
     .eq("estado_suscripcion", "active")
     .single();
 
   if (!empresa) notFound();
 
+  const widgetEmpresa = {
+    ...empresa,
+    gtm_id: empresa.plan === "pro" ? empresa.gtm_id : null,
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <WidgetSimulator empresa={empresa} />
+      <WidgetSimulator empresa={widgetEmpresa} />
     </div>
   );
 }

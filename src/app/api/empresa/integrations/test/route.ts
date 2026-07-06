@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isAllowedWebhookUrl, webhookUrlErrorMessage } from "@/lib/security/webhook-url";
+import { canUseWebhooks } from "@/lib/config/plan-features";
 import { z } from "zod";
 
 const urlSchema = z
@@ -84,12 +85,19 @@ export async function POST(request: Request) {
 
     const { data: empresa } = await supabase
       .from("empresas")
-      .select("id, webhook_url")
+      .select("id, webhook_url, plan")
       .eq("id", equipo.empresa_id)
       .single();
 
     if (!empresa) {
       return NextResponse.json({ error: "Empresa no encontrada" }, { status: 404 });
+    }
+
+    if (!canUseWebhooks(empresa.plan)) {
+      return NextResponse.json(
+        { error: "Las integraciones webhook requieren el plan Pro" },
+        { status: 403 },
+      );
     }
 
     const targetUrl = parsed.data.webhook_url?.trim() || empresa.webhook_url?.trim();

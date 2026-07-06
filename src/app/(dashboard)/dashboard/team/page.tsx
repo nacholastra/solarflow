@@ -9,29 +9,40 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { useDashboardContext } from "@/components/dashboard/dashboard-provider";
-import { PLANS } from "@/lib/config/plans";
+import { getTeamLimit } from "@/lib/config/plan-features";
 
 export default function TeamPage() {
-  const { empresaId, rol } = useDashboardContext();
+  const { empresaId, rol, plan } = useDashboardContext();
   const [email, setEmail] = useState("");
   const [invitaciones, setInvitaciones] = useState<{ email: string; expira_at: string }[]>([]);
+  const [miembros, setMiembros] = useState(0);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
   const isAdmin = rol === "admin";
+  const teamLimit = getTeamLimit(plan);
+  const slotsUsed = miembros + invitaciones.length;
 
   const load = useCallback(async () => {
     if (!isAdmin) {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase
-      .from("invitaciones_equipo")
-      .select("email, expira_at")
-      .eq("empresa_id", empresaId)
-      .is("aceptada_at", null);
+    const [{ data, error }, { count: equipoCount }] = await Promise.all([
+      supabase
+        .from("invitaciones_equipo")
+        .select("email, expira_at")
+        .eq("empresa_id", empresaId)
+        .is("aceptada_at", null)
+        .gt("expira_at", new Date().toISOString()),
+      supabase
+        .from("equipo")
+        .select("*", { count: "exact", head: true })
+        .eq("empresa_id", empresaId),
+    ]);
 
     if (error) toast({ variant: "destructive", title: "Error", description: error.message });
     else setInvitaciones(data ?? []);
+    setMiembros(equipoCount ?? 0);
     setLoading(false);
   }, [empresaId, isAdmin, supabase]);
 
@@ -41,6 +52,14 @@ export default function TeamPage() {
 
   async function invite(e: React.FormEvent) {
     e.preventDefault();
+    if (slotsUsed >= teamLimit) {
+      toast({
+        variant: "destructive",
+        title: "Límite de equipo alcanzado",
+        description: `Tu plan permite hasta ${teamLimit} usuarios (incluyendo invitaciones pendientes).`,
+      });
+      return;
+    }
     const token = crypto.randomUUID();
     const expira = new Date();
     expira.setDate(expira.getDate() + 7);
@@ -69,7 +88,7 @@ export default function TeamPage() {
     <div className="max-w-xl space-y-8">
       <PageHeader
         title="Equipo"
-        description={`Invita comerciales (máx. ${PLANS.pro.teamLimit} en Pro)`}
+        description={`${slotsUsed} / ${teamLimit} usuarios · máx. ${teamLimit} en plan ${plan ?? "Basic"}`}
       />
 
       <Card>
@@ -89,10 +108,19 @@ export default function TeamPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="comercial@empresa.com"
                 required
+                disabled={slotsUsed >= teamLimit}
               />
             </div>
-            <Button type="submit">Invitar</Button>
+            <Button type="submit" disabled={slotsUsed >= teamLimit}>
+              Invitar
+            </Button>
           </form>
+          {slotsUsed >= teamLimit && (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Has alcanzado el límite de tu plan.{" "}
+              {plan === "basic" && "Mejora a Pro para invitar hasta 5 usuarios."}
+            </p>
+          )}
         </CardContent>
       </Card>
 

@@ -13,7 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { useDashboardContext } from "@/components/dashboard/dashboard-provider";
+import { PlanUpgradeCard } from "@/components/dashboard/plan-upgrade-card";
 import { BRAND } from "@/lib/config/brand";
+import { canUseGtm } from "@/lib/config/plan-features";
 
 const WidgetSimulator = dynamic(
   () => import("@/components/widget/widget-simulator").then((m) => m.WidgetSimulator),
@@ -55,15 +57,18 @@ export default function SimulatorPage() {
     e.preventDefault();
     if (!empresa) return;
     const fd = new FormData(e.currentTarget);
-    const { error } = await supabase.from("empresas").update({
+    const payload: Record<string, unknown> = {
       color_marca: fd.get("color_marca") as string,
       logo_url: (fd.get("logo_url") as string) || null,
       privacy_url: (fd.get("privacy_url") as string) || null,
       precio_eur_kwp: Number(fd.get("precio_eur_kwp")),
       ratio_autoconsumo: Number(fd.get("ratio_autoconsumo")) / 100,
       kwp_max: Number(fd.get("kwp_max")),
-      gtm_id: (fd.get("gtm_id") as string) || null,
-    }).eq("id", empresa.id);
+    };
+    if (canUseGtm(empresa.plan)) {
+      payload.gtm_id = (fd.get("gtm_id") as string) || null;
+    }
+    const { error } = await supabase.from("empresas").update(payload).eq("id", empresa.id);
 
     if (error) toast({ variant: "destructive", title: "Error", description: error.message });
     else toast({ title: "Configuración guardada", description: "La vista previa se actualiza al guardar" });
@@ -152,10 +157,20 @@ export default function SimulatorPage() {
                   <Label htmlFor="privacy_url">URL política de privacidad (RGPD)</Label>
                   <Input id="privacy_url" name="privacy_url" defaultValue={empresa.privacy_url ?? ""} key={`privacy-${empresa.id}`} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="gtm_id">Google Tag Manager ID</Label>
-                  <Input id="gtm_id" name="gtm_id" defaultValue={empresa.gtm_id ?? ""} placeholder="GTM-XXXXXXX" key={`gtm-${empresa.id}`} />
-                </div>
+                {canUseGtm(empresa.plan) ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="gtm_id">Google Tag Manager ID</Label>
+                    <Input id="gtm_id" name="gtm_id" defaultValue={empresa.gtm_id ?? ""} placeholder="GTM-XXXXXXX" key={`gtm-${empresa.id}`} />
+                    <p className="text-xs text-muted-foreground">
+                      Mide conversiones de campañas (Google Ads, Meta Ads) en tu widget público.
+                    </p>
+                  </div>
+                ) : (
+                  <PlanUpgradeCard
+                    title="Google Tag Manager (Plan Pro)"
+                    description="Integra GTM en tu widget para medir conversiones de tus campañas de marketing."
+                  />
+                )}
                 <hr />
                 <p className="text-sm font-medium">Parámetros ROI</p>
                 <div className="grid grid-cols-2 gap-4">
@@ -203,7 +218,10 @@ export default function SimulatorPage() {
           <div className="flex justify-center rounded-xl bg-muted/30 p-4">
             <WidgetSimulator
               key={empresa.updated_at ?? empresa.id}
-              empresa={empresa}
+              empresa={{
+                ...empresa,
+                gtm_id: canUseGtm(empresa.plan) ? empresa.gtm_id : null,
+              }}
               preview
             />
           </div>

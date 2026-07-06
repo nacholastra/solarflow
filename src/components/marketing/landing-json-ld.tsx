@@ -45,14 +45,14 @@ export function LandingJsonLd() {
         name: `Plan ${PLANS.basic.name}`,
         price: PLANS.basic.price,
         priceCurrency: "USD",
-        description: `${PLANS.basic.leadsLimit} leads al mes, simulador y CRM`,
+        description: `${PLANS.basic.leadsLimit} leads/mes, simulador, CRM y hasta ${PLANS.basic.teamLimit} usuarios`,
       },
       {
         "@type": "Offer",
         name: `Plan ${PLANS.pro.name}`,
         price: PLANS.pro.price,
         priceCurrency: "USD",
-        description: `${PLANS.pro.leadsLimit} leads al mes, integraciones webhook`,
+        description: `${PLANS.pro.leadsLimit} leads/mes, marca blanca, GTM, CSV y webhooks`,
       },
     ],
     featureList: [

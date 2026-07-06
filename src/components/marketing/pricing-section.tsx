@@ -16,29 +16,37 @@ import { cn } from "@/lib/utils";
 const planFeatures = {
   basic: [
     `${PLANS.basic.leadsLimit} leads al mes`,
-    "Simulador embebible personalizable",
-    "CRM Kanban + contactos",
-    `${PLANS.basic.teamLimit} usuarios en equipo`,
-    "Exportación CSV",
+    `${PLANS.basic.teamLimit} usuarios (1 Admin + 1 Comercial)`,
+    "Simulador embebible con vista previa e iframe",
+    "Personalización: color y logo",
+    'Marca "Powered by SolarFlow" en el widget',
+    "Motor ROI (€/kWp, autoconsumo, kWp máx.)",
+    "CRM Kanban con 6 estados y notas",
+    "Listado de contactos con buscador",
+    "Panel con KPIs y uso del plan",
     "Soporte por email",
   ],
   pro: [
     `${PLANS.pro.leadsLimit} leads al mes`,
-    "Todo lo del plan Basic",
     `${PLANS.pro.teamLimit} usuarios en equipo`,
-    "Integraciones webhook (Zapier/Make)",
-    "Prioridad en soporte",
-    "Ideal para equipos comerciales",
+    "Todo lo del plan Basic",
+    "Marca blanca (sin watermark SolarFlow)",
+    "Google Tag Manager en el widget",
+    "Exportación CSV de contactos",
+    "Webhooks automáticos (Zapier, Make, CRM)",
+    "Prueba de webhooks desde el panel",
+    "Upgrade automático desde Basic",
+    "Soporte comercial prioritario",
   ],
 };
 
 const planMeta = {
   basic: {
-    description: "Para instaladoras que empiezan a captar leads online.",
+    description: "Valida el retorno de inversión captando y gestionando tus primeros leads.",
     featured: false,
   },
   pro: {
-    description: "Para equipos comerciales con mayor volumen de captación.",
+    description: "Escala tu captación con marca blanca, analítica y automatizaciones B2B.",
     featured: true,
   },
 } as const;

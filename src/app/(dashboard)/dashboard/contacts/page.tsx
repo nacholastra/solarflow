@@ -1,19 +1,23 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { Download, Search } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { PlanUpgradeCard } from "@/components/dashboard/plan-upgrade-card";
 import { useDashboardContext } from "@/components/dashboard/dashboard-provider";
 import { useLeads } from "@/hooks/use-leads";
+import { canExportCsv } from "@/lib/config/plan-features";
 import { exportToCsv } from "@/lib/utils";
 
 export default function ContactsPage() {
-  const { empresaId } = useDashboardContext();
+  const { empresaId, plan } = useDashboardContext();
   const { data: leads = [], isLoading } = useLeads(empresaId);
   const [filter, setFilter] = useState("");
+  const exportEnabled = canExportCsv(plan);
 
   const filtered = useMemo(() => {
     const q = filter.toLowerCase();
@@ -27,6 +31,7 @@ export default function ContactsPage() {
   }, [filter, leads]);
 
   function handleExport() {
+    if (!exportEnabled) return;
     exportToCsv(
       ["Nombre", "Email", "Teléfono", "Ciudad", "Estado", "kWp", "Ahorro anual", "Fecha"],
       filtered.map((l) => [
@@ -47,11 +52,27 @@ export default function ContactsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Contactos" description={`${filtered.length} contactos`}>
-        <Button onClick={handleExport} variant="outline">
-          <Download className="size-4" />
-          Exportar CSV
-        </Button>
+        {exportEnabled ? (
+          <Button onClick={handleExport} variant="outline">
+            <Download className="size-4" />
+            Exportar CSV
+          </Button>
+        ) : (
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/subscription?upgrade=pro">
+              <Download className="size-4" />
+              Exportar CSV (Pro)
+            </Link>
+          </Button>
+        )}
       </PageHeader>
+
+      {!exportEnabled && (
+        <PlanUpgradeCard
+          title="Exportación CSV (Plan Pro)"
+          description="Descarga todos tus contactos y leads en formato CSV para usar en Excel, CRM externo o herramientas de marketing."
+        />
+      )}
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

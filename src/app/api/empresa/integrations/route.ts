@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isAllowedWebhookUrl, webhookUrlErrorMessage } from "@/lib/security/webhook-url";
+import { canUseWebhooks } from "@/lib/config/plan-features";
 import { z } from "zod";
 
 const schema = z.object({
@@ -37,7 +38,7 @@ export async function GET() {
 
     const { data: empresa } = await supabase
       .from("empresas")
-      .select("id, webhook_url")
+      .select("id, webhook_url, plan")
       .eq("id", equipo.empresa_id)
       .single();
 
@@ -45,7 +46,11 @@ export async function GET() {
       return NextResponse.json({ error: "Empresa no encontrada" }, { status: 404 });
     }
 
-    return NextResponse.json({ webhook_url: empresa.webhook_url ?? "", rol: equipo.rol });
+    return NextResponse.json({
+      webhook_url: empresa.webhook_url ?? "",
+      rol: equipo.rol,
+      plan: empresa.plan,
+    });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Error interno" },
@@ -79,9 +84,25 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const webhookUrl = body.webhook_url === "" ? null : body.webhook_url;
     const service = await createServiceClient();
+    const { data: empresaRow } = await service
+      .from("empresas")
+      .select("id, plan")
+      .eq("id", equipo.empresa_id)
+      .single();
 
+    if (!empresaRow) {
+      return NextResponse.json({ error: "Empresa no encontrada" }, { status: 404 });
+    }
+
+    if (!canUseWebhooks(empresaRow.plan)) {
+      return NextResponse.json(
+        { error: "Las integraciones webhook requieren el plan Pro" },
+        { status: 403 },
+      );
+    }
+
+    const webhookUrl = body.webhook_url === "" ? null : body.webhook_url;
     const { data: empresa, error } = await service
       .from("empresas")
       .update({ webhook_url: webhookUrl })

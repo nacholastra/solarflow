@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { PLANS } from "@/lib/config/plans";
+import { PRO_ONLY_EMPRESA_FIELDS } from "@/lib/config/plan-features";
 
 export async function POST() {
   if (process.env.NODE_ENV === "production" && process.env.ALLOW_TEST_PLAN !== "true") {
@@ -36,6 +37,7 @@ export async function POST() {
         leads_limite_mes: PLANS.basic.leadsLimit,
         leads_usados_mes: 0,
         periodo_reset: new Date().toISOString().slice(0, 10),
+        ...PRO_ONLY_EMPRESA_FIELDS,
       })
       .eq("id", equipo.empresa_id);
 

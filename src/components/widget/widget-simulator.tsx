@@ -8,6 +8,8 @@ import { gastoToKwh, kwhToGasto, desgloseFactura } from "@/lib/solar/billing-es"
 import type { Localidad, SimulacionResultado, TipoInmueble } from "@/lib/solar/types";
 import { CCAA_LIST } from "@/lib/solar/types";
 import { BRAND } from "@/lib/config/brand";
+import { getSiteUrl } from "@/lib/config/site";
+import { canUseGtm, showWidgetWatermark } from "@/lib/config/plan-features";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +28,7 @@ interface EmpresaWidget {
   ratio_autoconsumo: number;
   kwp_max: number;
   gtm_id: string | null;
+  plan?: "basic" | "pro" | null;
 }
 
 interface LocalidadOption {
@@ -152,7 +155,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
       }
       setResultado(json.resultado ?? null);
       setStep(4);
-      if (typeof window !== "undefined" && empresa.gtm_id) {
+      if (typeof window !== "undefined" && canUseGtm(empresa.plan) && empresa.gtm_id) {
         (window as Window & { dataLayer?: Record<string, unknown>[] }).dataLayer?.push({
           event: "generate_lead",
           lead_source: preview ? "solarflow_preview" : "solarflow_widget",
@@ -183,6 +186,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
   }
 
   const steps = ["Tipo", "Ubicación", "Consumo", "Contacto", "Resultados"];
+  const watermark = showWidgetWatermark(empresa.plan);
 
   return (
     <div className="mx-auto max-w-lg rounded-2xl border bg-white shadow-xl overflow-hidden" style={{ "--brand": brandColor } as React.CSSProperties}>
@@ -414,6 +418,19 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
           </div>
         )}
       </div>
+
+      {watermark && (
+        <div className="border-t border-gray-100 bg-gray-50 px-4 py-2 text-center">
+          <a
+            href={getSiteUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-gray-400 transition-colors hover:text-gray-600"
+          >
+            Powered by {BRAND.name}
+          </a>
+        </div>
+      )}
     </div>
   );
 }
