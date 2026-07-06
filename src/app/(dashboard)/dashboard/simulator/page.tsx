@@ -53,6 +53,23 @@ export default function SimulatorPage() {
 
   useEffect(() => { void load(); }, [load]);
 
+  useEffect(() => {
+    const main = document.querySelector("main");
+    if (!main) return;
+
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const apply = () => {
+      main.style.overflowY = mq.matches ? "hidden" : "";
+    };
+
+    apply();
+    mq.addEventListener("change", apply);
+    return () => {
+      main.style.overflowY = "";
+      mq.removeEventListener("change", apply);
+    };
+  }, []);
+
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!empresa) return;
@@ -94,7 +111,7 @@ export default function SimulatorPage() {
   const isActive = empresa.estado_suscripcion === "active";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 lg:-my-6 lg:h-[calc(100dvh-3rem)] lg:max-h-[calc(100dvh-3rem)] lg:overflow-hidden md:lg:-my-8 md:lg:h-[calc(100dvh-4rem)] md:lg:max-h-[calc(100dvh-4rem)]">
       <div className="shrink-0 space-y-6">
         <PageHeader
           title="Simulador"
@@ -138,8 +155,8 @@ export default function SimulatorPage() {
         )}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)] lg:items-start lg:gap-8">
-        <aside className="order-2 min-w-0 space-y-6 lg:order-1">
+      <div className="flex min-h-0 flex-1 flex-col gap-6 lg:flex-row lg:gap-8">
+        <aside className="order-2 min-h-0 min-w-0 space-y-6 lg:order-1 lg:flex-1 lg:overflow-y-auto lg:overscroll-y-contain lg:pr-1">
           <Card>
             <CardHeader>
               <CardTitle>Configuración</CardTitle>
@@ -210,15 +227,15 @@ export default function SimulatorPage() {
           <p className="text-xs text-muted-foreground">{BRAND.disclaimer}</p>
         </aside>
 
-        <div className="order-1 lg:sticky lg:top-0 lg:z-10 lg:max-h-[calc(100dvh-3rem)] lg:self-start">
-          <div className="sticky top-0 z-10 -mx-4 border-b border-border/60 bg-background/95 px-4 pb-4 backdrop-blur-sm md:-mx-8 md:px-8 lg:static lg:mx-0 lg:flex lg:max-h-[calc(100dvh-3rem)] lg:flex-col lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+        <div className="order-1 flex min-h-0 shrink-0 flex-col lg:order-2 lg:w-[min(100%,420px)]">
+          <div className="sticky top-0 z-10 -mx-4 shrink-0 border-b border-border/60 bg-background/95 px-4 pb-4 backdrop-blur-sm md:-mx-8 md:px-8 lg:mx-0 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:border-0 lg:bg-transparent lg:px-0 lg:pb-0 lg:backdrop-blur-none">
             <div className="mb-3 shrink-0 lg:mb-4">
               <h2 className="text-lg font-semibold">Vista previa</h2>
               <p className="text-sm text-muted-foreground">
                 Completa el formulario como un cliente. {!isActive && "Modo prueba — no requiere suscripción."}
               </p>
             </div>
-            <div className="flex max-h-[min(58dvh,680px)] justify-center overflow-y-auto overscroll-contain rounded-xl bg-muted/30 p-3 sm:max-h-[min(62dvh,680px)] sm:p-4 lg:min-h-0 lg:max-h-none lg:flex-1">
+            <div className="flex max-h-[min(58dvh,680px)] justify-center overflow-y-auto overscroll-contain rounded-xl bg-muted/30 p-3 sm:max-h-[min(62dvh,680px)] sm:p-4 lg:min-h-0 lg:max-h-full lg:flex-1">
               <WidgetSimulator
                 key={empresa.updated_at ?? empresa.id}
                 empresa={{
