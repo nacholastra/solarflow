@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plug, Webhook } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { Webhook } from "lucide-react";
 
 interface IntegrationsData {
   webhook_url: string;
@@ -101,16 +102,11 @@ export default function IntegrationsPage() {
   const isAdmin = data.rol === "admin";
 
   return (
-    <div className="space-y-8 max-w-2xl">
-      <div>
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Plug className="h-8 w-8 text-amber-500" />
-          Integraciones
-        </h1>
-        <p className="text-muted-foreground">
-          Conecta SolarFlow con Zapier, Make u otras herramientas vía webhooks
-        </p>
-      </div>
+    <div className="max-w-2xl space-y-8">
+      <PageHeader
+        title="Integraciones"
+        description="Conecta SolarFlow con Zapier, Make u otras herramientas vía webhooks"
+      />
 
       <Card>
         <CardHeader>

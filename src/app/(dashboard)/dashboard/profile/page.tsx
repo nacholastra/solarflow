@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 interface ProfileData {
   empresa: {
@@ -72,10 +73,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8 max-w-2xl">
-      <div>
-        <h1 className="text-3xl font-bold">Mi Perfil</h1>
-        <p className="text-muted-foreground">Datos de tu empresa y cuenta</p>
-      </div>
+      <PageHeader title="Mi perfil" description="Datos de tu empresa y cuenta" />
 
       <Card>
         <CardHeader>

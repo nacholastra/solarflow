@@ -1,47 +1,47 @@
 const steps = [
   {
-    step: "01",
-    title: "Registra tu instaladora",
-    description: "Crea tu cuenta, elige plan Basic o Pro y accede al panel de configuración.",
+    number: "01",
+    title: "Configura tu simulador",
+    body: "Ajusta colores, logo, precio por kWp y parámetros de autoconsumo desde el panel.",
   },
   {
-    step: "02",
-    title: "Personaliza el simulador",
-    description: "Sube tu logo, define colores, precio por kWp y parámetros de autoconsumo.",
+    number: "02",
+    title: "Embébelo en tu web",
+    body: "Copia el código iframe y pégalo en tu página. Sin conocimientos técnicos.",
   },
   {
-    step: "03",
-    title: "Embebe en tu web",
-    description: "Copia el código iframe o comparte la URL del widget. Empieza a captar leads hoy.",
+    number: "03",
+    title: "Capta leads cualificados",
+    body: "Los visitantes calculan su ahorro y dejan sus datos con consentimiento RGPD.",
   },
   {
-    step: "04",
-    title: "Cierra más ventas",
-    description: "Gestiona el pipeline en el CRM, exporta datos o conéctalo a tus herramientas.",
+    number: "04",
+    title: "Gestiona y cierra",
+    body: "Organiza cada lead en el CRM Kanban y llévalo hasta la instalación.",
   },
 ];
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="border-b border-border/60 bg-muted/20 py-24">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Cómo funciona
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-            Operativo en menos de 30 minutos
+    <section id="como-funciona" className="scroll-mt-16 border-b border-border bg-card">
+      <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
+        <div className="max-w-2xl">
+          <span className="text-sm font-semibold text-solar">Cómo funciona</span>
+          <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+            En marcha en cuatro pasos
           </h2>
         </div>
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map(({ step, title, description }) => (
-            <div key={step} className="relative rounded-xl border border-border/60 bg-card p-6">
-              <span className="text-4xl font-semibold tracking-tighter text-border">{step}</span>
-              <h3 className="mt-4 font-semibold tracking-tight">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
-            </div>
+
+        <ol className="mt-12 grid gap-8 md:grid-cols-4">
+          {steps.map((step) => (
+            <li key={step.number} className="flex flex-col gap-3">
+              <span className="font-mono text-sm font-semibold text-solar">{step.number}</span>
+              <span className="h-px w-full bg-border" />
+              <h3 className="text-base font-semibold text-foreground">{step.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">{step.body}</p>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

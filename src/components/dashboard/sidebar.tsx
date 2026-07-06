@@ -3,36 +3,82 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  BarChart3,
   Contact,
-  Kanban,
-  LogOut,
-  Users,
   CreditCard,
-  Zap,
-  UserCircle,
-  Plug,
+  KanbanSquare,
+  LayoutDashboard,
+  LogOut,
+  MonitorSmartphone,
+  User,
+  Users,
+  Webhook,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/logo";
-import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 const nav = [
-  { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
-  { href: "/dashboard/crm", label: "CRM", icon: Kanban },
-  { href: "/dashboard/contacts", label: "Contactos", icon: Contact },
-  { href: "/dashboard/simulator", label: "Simulador", icon: Zap },
-  { href: "/dashboard/integrations", label: "Integraciones", icon: Plug },
-  { href: "/dashboard/team", label: "Equipo", icon: Users },
-  { href: "/dashboard/subscription", label: "Suscripción", icon: CreditCard },
-  { href: "/dashboard/profile", label: "Perfil", icon: UserCircle },
+  { label: "Panel", href: "/dashboard", icon: LayoutDashboard },
+  { label: "CRM", href: "/dashboard/crm", icon: KanbanSquare },
+  { label: "Simulador", href: "/dashboard/simulator", icon: MonitorSmartphone },
+  { label: "Contactos", href: "/dashboard/contacts", icon: Contact },
+  { label: "Integraciones", href: "/dashboard/integrations", icon: Webhook },
+  { label: "Equipo", href: "/dashboard/team", icon: Users },
 ];
 
-export function DashboardSidebar() {
+const account = [
+  { label: "Suscripción", href: "/dashboard/subscription", icon: CreditCard },
+  { label: "Mi perfil", href: "/dashboard/profile", icon: User },
+];
+
+function NavItem({
+  href,
+  label,
+  icon: Icon,
+  active,
+}: {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+        active
+          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
+      )}
+    >
+      <Icon className="size-4 shrink-0" />
+      {label}
+    </Link>
+  );
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "SF";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return `${parts[0]![0]}${parts[1]![0]}`.toUpperCase();
+}
+
+export function DashboardSidebar({
+  empresaNombre,
+  plan,
+}: {
+  empresaNombre: string;
+  plan: string | null;
+}) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const isActive = (href: string) =>
+    href === "/dashboard" ? pathname === href : pathname.startsWith(href);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -43,45 +89,54 @@ export function DashboardSidebar() {
   }
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-      <div className="border-b border-sidebar-border px-5 py-5">
+    <aside className="hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
+      <div className="flex h-16 items-center border-b border-sidebar-border px-5">
         <Logo href="/dashboard" inverted />
       </div>
 
-      <nav className="flex-1 space-y-0.5 p-3">
-        <p className="px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-sidebar-muted">
-          Menú
-        </p>
-        {nav.map((item) => {
-          const Icon = item.icon;
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors",
-                active
-                  ? "bg-sidebar-accent text-white"
-                  : "text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
-              )}
-            >
-              <Icon className="h-4 w-4 shrink-0" strokeWidth={active ? 2.25 : 2} />
-              {item.label}
-            </Link>
-          );
-        })}
+      <nav
+        aria-label="Navegación del panel"
+        className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-5"
+      >
+        <div className="flex flex-col gap-1">
+          <p className="px-3 pb-1 text-xs font-medium uppercase tracking-wider text-sidebar-foreground/40">
+            General
+          </p>
+          {nav.map((item) => (
+            <NavItem key={item.href} {...item} active={isActive(item.href)} />
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <p className="px-3 pb-1 text-xs font-medium uppercase tracking-wider text-sidebar-foreground/40">
+            Cuenta
+          </p>
+          {account.map((item) => (
+            <NavItem key={item.href} {...item} active={isActive(item.href)} />
+          ))}
+        </div>
       </nav>
 
       <div className="border-t border-sidebar-border p-3">
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-[13px] text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-4 w-4" />
-          Cerrar sesión
-        </Button>
+        <div className="flex items-center gap-3 rounded-md px-3 py-2">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-xs font-medium text-sidebar-accent-foreground">
+            {getInitials(empresaNombre)}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-sidebar-foreground">{empresaNombre}</p>
+            <p className="truncate text-xs capitalize text-sidebar-foreground/50">
+              Plan {plan ?? "sin activar"}
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Cerrar sesión"
+            onClick={handleLogout}
+            className="rounded-md p-1.5 text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          >
+            <LogOut className="size-4" />
+          </button>
+        </div>
       </div>
     </aside>
   );

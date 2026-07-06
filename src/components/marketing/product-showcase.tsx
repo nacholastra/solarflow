@@ -1,109 +1,95 @@
-import { Check } from "lucide-react";
+import { Sun, TrendingUp, Calendar } from "lucide-react";
 
 export function ProductShowcase() {
   return (
-    <section id="producto" className="border-b border-border/60 bg-muted/20 py-24">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="producto" className="scroll-mt-16 border-b border-border bg-card">
+      <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            El producto
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-            Así ve tu cliente y así lo gestionas tú
+          <span className="text-sm font-semibold text-solar">El producto</span>
+          <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+            Un simulador que tus clientes entienden al instante
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            Un simulador profesional en tu web y un panel privado para tu equipo comercial.
-          </p>
         </div>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-2">
-          {/* Widget mockup */}
-          <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xl">
-            <div className="border-b border-border/60 bg-muted/50 px-4 py-2.5">
-              <p className="text-xs font-medium text-muted-foreground">Vista del visitante · Widget embebido</p>
-            </div>
-            <div className="p-6">
-              <div className="mx-auto max-w-sm rounded-xl border border-border bg-background p-5 shadow-sm">
-                <div className="mb-4 flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-amber-500/20" />
-                  <span className="text-sm font-semibold">Tu Instaladora Solar</span>
-                </div>
-                <div className="space-y-3">
-                  <div className="h-2 w-full rounded-full bg-muted" />
-                  <div className="h-2 w-4/5 rounded-full bg-muted" />
-                  <div className="rounded-lg bg-emerald-50 p-4 text-center ring-1 ring-emerald-100">
-                    <p className="text-xs text-muted-foreground">Ahorro anual estimado</p>
-                    <p className="text-2xl font-bold text-emerald-700">892 €</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Instalación ~4,2 kWp · Madrid</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-center text-xs">
-                    <div className="rounded-lg bg-muted/60 p-2">
-                      <p className="text-muted-foreground">Payback</p>
-                      <p className="font-semibold">6,2 años</p>
-                    </div>
-                    <div className="rounded-lg bg-muted/60 p-2">
-                      <p className="text-muted-foreground">20 años</p>
-                      <p className="font-semibold">18.400 €</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <ul className="mt-6 space-y-2">
-                {["Multi-step con datos de consumo", "Proyección con inflación", "Captura de lead con RGPD"].map((t) => (
-                  <li key={t} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="h-4 w-4 text-emerald-600" />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <div className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-xl border border-border bg-background shadow-md">
+          <div className="flex items-center gap-2 border-b border-border bg-muted px-4 py-3">
+            <span className="size-3 rounded-full bg-border" />
+            <span className="size-3 rounded-full bg-border" />
+            <span className="size-3 rounded-full bg-border" />
+            <span className="ml-3 rounded-md bg-background px-3 py-1 text-xs text-muted-foreground">
+              tuinstaladora.es/simulador
+            </span>
           </div>
 
-          {/* Dashboard mockup */}
-          <div className="overflow-hidden rounded-2xl border border-border/80 bg-[oklch(0.16_0.02_260)] shadow-xl">
-            <div className="border-b border-white/10 px-4 py-2.5">
-              <p className="text-xs font-medium text-white/50">Vista del instalador · Panel privado</p>
-            </div>
-            <div className="flex min-h-[340px]">
-              <div className="w-14 shrink-0 border-r border-white/10 p-2">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className={`mb-2 h-6 rounded ${i === 2 ? "bg-white/15" : "bg-white/5"}`} />
-                ))}
+          <div className="grid gap-6 p-6 md:grid-cols-3 md:p-8">
+            <div className="md:col-span-2">
+              <h3 className="text-lg font-semibold text-foreground">Resultado de tu simulación</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Vivienda unifamiliar · Sevilla · Consumo 180 €/mes
+              </p>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                <ResultStat icon={TrendingUp} label="Ahorro anual" value="1.480 €" accent />
+                <ResultStat icon={Sun} label="Potencia" value="4,2 kWp" />
+                <ResultStat icon={Calendar} label="Amortización" value="6,2 años" />
               </div>
-              <div className="flex-1 p-4">
-                <div className="mb-4 grid grid-cols-3 gap-2">
-                  {["12 leads", "5 nuevos", "22% conv."].map((s) => (
-                    <div key={s} className="rounded-lg bg-white/5 p-2 text-center">
-                      <p className="text-[10px] text-white/40">Métrica</p>
-                      <p className="text-xs font-semibold text-white/90">{s}</p>
+
+              <div className="mt-6 rounded-lg border border-border bg-muted p-4">
+                <div className="flex items-end justify-between gap-2">
+                  {[35, 50, 62, 74, 85, 100].map((h, i) => (
+                    <div key={i} className="flex flex-1 flex-col items-center gap-2">
+                      <div className="w-full rounded-t bg-solar" style={{ height: `${h}px` }} />
+                      <span className="text-[10px] text-muted-foreground">A{i + 1}</span>
                     </div>
                   ))}
                 </div>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {["Nuevo", "Contactado", "Visita", "Presupuesto", "Cerrado", "Descartado"].map((col, i) => (
-                    <div key={col} className="rounded-lg bg-white/5 p-2">
-                      <p className="mb-1.5 text-[9px] font-medium text-white/50">{col}</p>
-                      {i < 3 && (
-                        <div className="rounded bg-white/10 p-1.5">
-                          <p className="text-[8px] font-medium text-white/80">Lead #{i + 1}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <p className="mt-3 text-center text-xs text-muted-foreground">
+                  Ahorro acumulado proyectado a 6 años
+                </p>
               </div>
             </div>
-            <ul className="border-t border-white/10 p-4 space-y-2">
-              {["CRM Kanban drag & drop", "Equipo multiusuario", "Webhook a Zapier/Make"].map((t) => (
-                <li key={t} className="flex items-center gap-2 text-sm text-white/60">
-                  <Check className="h-4 w-4 text-amber-400" />
-                  {t}
-                </li>
-              ))}
-            </ul>
+
+            <div className="rounded-lg border border-border bg-primary p-5 text-primary-foreground">
+              <p className="text-sm font-medium">Solicita tu estudio gratuito</p>
+              <div className="mt-4 flex flex-col gap-2.5">
+                <div className="h-9 rounded-md bg-primary-foreground/10" />
+                <div className="h-9 rounded-md bg-primary-foreground/10" />
+                <div className="h-9 rounded-md bg-primary-foreground/10" />
+                <div className="mt-1 h-9 rounded-md bg-solar" />
+              </div>
+              <p className="mt-3 text-xs text-primary-foreground/60">
+                Datos protegidos según el RGPD
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function ResultStat({
+  icon: Icon,
+  label,
+  value,
+  accent = false,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <Icon className={accent ? "size-4 text-positive" : "size-4 text-muted-foreground"} />
+      <p className="mt-2 text-xs text-muted-foreground">{label}</p>
+      <p
+        className={
+          accent ? "text-xl font-semibold text-positive" : "text-xl font-semibold text-foreground"
+        }
+      >
+        {value}
+      </p>
+    </div>
   );
 }

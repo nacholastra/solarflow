@@ -48,8 +48,10 @@ export default function LoginPage() {
     <AuthShell>
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Iniciar sesión</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Accede a tu panel de instaladora</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Accede a tu panel</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Introduce tus credenciales para gestionar tus leads.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -84,8 +86,8 @@ export default function LoginPage() {
               required
             />
           </div>
-          <Button type="submit" className="h-11 w-full" disabled={loading}>
-            {loading ? "Entrando..." : "Entrar"}
+          <Button type="submit" className="h-10 w-full" disabled={loading}>
+            {loading ? "Accediendo…" : "Acceder"}
           </Button>
         </form>
 

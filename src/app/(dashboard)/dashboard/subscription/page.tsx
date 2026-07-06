@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 export default function SubscriptionPage() {
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
@@ -91,18 +92,14 @@ export default function SubscriptionPage() {
 
   return (
     <div className="space-y-8 max-w-3xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Suscripción</h1>
-          <p className="text-muted-foreground">
-            Estado: <strong>{empresa.estado_suscripcion}</strong>
-            {empresa.plan && ` — Plan ${empresa.plan.toUpperCase()}`}
-          </p>
-        </div>
+      <PageHeader
+        title="Suscripción"
+        description={`Estado: ${empresa.estado_suscripcion}${empresa.plan ? ` — Plan ${empresa.plan.toUpperCase()}` : ""}`}
+      >
         <Button variant="outline" asChild>
           <Link href="/dashboard/profile">Mi perfil</Link>
         </Button>
-      </div>
+      </PageHeader>
 
       {isActive && (
         <Card>

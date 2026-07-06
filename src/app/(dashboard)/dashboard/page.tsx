@@ -1,14 +1,31 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { ArrowUpRight, TrendingUp, UserPlus, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ArrowRight,
+  KanbanSquare,
+  MonitorSmartphone,
+  Percent,
+  Sparkles,
+  Users,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { StatCard } from "@/components/dashboard/stat-card";
 import { formatNumber } from "@/lib/utils";
 
 async function getEmpresaAndStats() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   const { data: equipo } = await supabase
@@ -21,7 +38,7 @@ async function getEmpresaAndStats() {
 
   const { data: empresa } = await supabase
     .from("empresas")
-    .select("*")
+    .select("nombre_empresa, plan, leads_limite_mes, leads_usados_mes, estado_suscripcion")
     .eq("id", equipo.empresa_id)
     .single();
 
@@ -30,7 +47,7 @@ async function getEmpresaAndStats() {
   const { data: leads } = await supabase
     .from("leads")
     .select("estado")
-    .eq("empresa_id", empresa.id);
+    .eq("empresa_id", equipo.empresa_id);
 
   const total = leads?.length ?? 0;
   const nuevos = leads?.filter((l) => l.estado === "Nuevo").length ?? 0;
@@ -40,12 +57,6 @@ async function getEmpresaAndStats() {
   return { empresa, total, nuevos, conversion };
 }
 
-const statCards = [
-  { key: "total" as const, label: "Total leads", icon: Users },
-  { key: "nuevos" as const, label: "Leads nuevos", icon: UserPlus },
-  { key: "conversion" as const, label: "Conversión", icon: TrendingUp },
-];
-
 export default async function DashboardPage() {
   const stats = await getEmpresaAndStats();
 
@@ -54,85 +65,99 @@ export default async function DashboardPage() {
   }
 
   const { empresa, total, nuevos, conversion } = stats;
-  const usagePct = empresa.leads_limite_mes > 0
-    ? (empresa.leads_usados_mes / empresa.leads_limite_mes) * 100
-    : 0;
-
-  const values = { total, nuevos, conversion: formatNumber(conversion, 1) };
+  const usagePct =
+    empresa.leads_limite_mes > 0 ? (empresa.leads_usados_mes / empresa.leads_limite_mes) * 100 : 0;
+  const remaining = Math.max(empresa.leads_limite_mes - empresa.leads_usados_mes, 0);
 
   return (
-    <div className="space-y-10">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
-            Panel de control
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{empresa.nombre_empresa}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/crm">Ver CRM</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link href="/dashboard/simulator">
-              Simulador
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
-          </Button>
-        </div>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        title="Panel"
+        description={`Resumen de la actividad de ${empresa.nombre_empresa}.`}
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard label="Total de leads" value={String(total)} icon={Users} hint="Acumulado" />
+        <StatCard
+          label="Leads nuevos"
+          value={String(nuevos)}
+          icon={Sparkles}
+          hint="Sin contactar"
+          hintTone="positive"
+        />
+        <StatCard
+          label="Conversión"
+          value={`${formatNumber(conversion, 1)}%`}
+          icon={Percent}
+          hint="Leads cerrados"
+          hintTone="positive"
+        />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {statCards.map(({ key, label, icon: Icon }) => (
-          <Card key={key} className="border-border/60 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {label}
-              </CardTitle>
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                <Icon className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-semibold tracking-tight">
-                {values[key]}
-                {key === "conversion" ? "%" : ""}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Card className="border-border/60 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">
-            Uso del plan
-            <span className="ml-2 font-normal capitalize text-muted-foreground">
-              ({empresa.plan ?? "sin plan"})
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">
-              {empresa.leads_usados_mes} de {empresa.leads_limite_mes} leads este mes
-            </span>
-            <span className="font-medium">{formatNumber(usagePct, 0)}%</span>
-          </div>
-          <Progress value={usagePct} className="h-1.5" />
-          {empresa.estado_suscripcion !== "active" && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200/60 bg-amber-50/50 px-4 py-3">
-              <p className="text-sm text-amber-900/80">
-                Suscripción inactiva. Activa un plan para recibir leads en el widget.
-              </p>
-              <Button size="sm" variant="outline" asChild>
-                <Link href="/dashboard/subscription">Activar plan</Link>
-              </Button>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Uso de tu plan</CardTitle>
+            <CardDescription>Leads capturados en el periodo de facturación actual.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4 pt-0">
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-semibold text-foreground">
+                {empresa.leads_usados_mes}{" "}
+                <span className="text-base font-normal text-muted-foreground">
+                  / {empresa.leads_limite_mes} leads
+                </span>
+              </span>
+              <span className="text-sm font-medium capitalize text-muted-foreground">
+                Plan {empresa.plan ?? "sin activar"}
+              </span>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <Progress value={usagePct} />
+            {empresa.estado_suscripcion !== "active" ? (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200/60 bg-amber-50/50 px-4 py-3">
+                <p className="text-sm text-amber-900/80">
+                  Suscripción inactiva. Activa un plan para recibir leads en el widget.
+                </p>
+                <Button size="sm" variant="outline" asChild>
+                  <Link href="/dashboard/subscription">Activar plan</Link>
+                </Button>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Te quedan {remaining} leads este mes.
+                {empresa.plan === "basic" && " Actualiza a Pro para ampliar tu límite a 250 leads."}
+              </p>
+            )}
+            <Button variant="outline" className="w-fit" asChild>
+              <Link href="/dashboard/subscription">
+                Ver planes
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Accesos rápidos</CardTitle>
+            <CardDescription>Salta a las tareas frecuentes.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3 pt-0">
+            <Button variant="outline" size="lg" className="justify-start" asChild>
+              <Link href="/dashboard/crm">
+                <KanbanSquare className="size-4" />
+                Ver CRM
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" className="justify-start" asChild>
+              <Link href="/dashboard/simulator">
+                <MonitorSmartphone className="size-4" />
+                Configurar simulador
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -41,6 +41,5 @@ next-env.d.ts
 # supabase cli cache
 supabase/.temp/
 
-# agent skills (local)
-.agents/
-skills-lock.json
+# v0 reference extract (local only)
+_v0-design/

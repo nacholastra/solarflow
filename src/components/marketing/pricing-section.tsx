@@ -1,7 +1,16 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { PLANS } from "@/lib/config/plans";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const planFeatures = {
@@ -23,79 +32,82 @@ const planFeatures = {
   ],
 };
 
+const planMeta = {
+  basic: {
+    description: "Para instaladoras que empiezan a captar leads online.",
+    featured: false,
+  },
+  pro: {
+    description: "Para equipos comerciales con mayor volumen de captación.",
+    featured: true,
+  },
+} as const;
+
 export function PricingSection() {
   return (
-    <section id="precios" className="border-b border-border/60 py-24">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="precios" className="scroll-mt-16 border-b border-border">
+      <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Precios
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-            Planes claros, sin sorpresas
+          <span className="text-sm font-semibold text-solar">Precios</span>
+          <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+            Un plan para cada volumen de leads
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            Paga solo por los leads que capturas con el simulador. Sin permanencia ni costes ocultos.
+          <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
+            Sin permanencia. Cancela cuando quieras. Precios por empresa, no por usuario.
+            Facturación en EUR o USD.
           </p>
         </div>
 
-        <div className="mx-auto mt-16 grid max-w-4xl gap-8 md:grid-cols-2">
+        <div className="mx-auto mt-12 grid max-w-3xl gap-6 md:grid-cols-2">
           {(["basic", "pro"] as const).map((id) => {
             const plan = PLANS[id];
-            const isPro = id === "pro";
+            const meta = planMeta[id];
             return (
-              <div
+              <Card
                 key={id}
-                className={cn(
-                  "relative flex flex-col rounded-2xl border p-8",
-                  isPro
-                    ? "border-primary bg-primary text-primary-foreground shadow-xl shadow-primary/10"
-                    : "border-border/60 bg-card",
-                )}
+                className={cn("relative flex flex-col", meta.featured && "border-primary shadow-md")}
               >
-                {isPro && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-400 px-3 py-0.5 text-xs font-semibold text-primary">
-                    Más popular
-                  </span>
+                {meta.featured && (
+                  <Badge variant="solar" className="absolute -top-3 left-6">
+                    Recomendado
+                  </Badge>
                 )}
-                <div>
-                  <h3 className="text-lg font-semibold">{plan.name}</h3>
+                <CardHeader>
+                  <CardTitle className="text-lg">{plan.name}</CardTitle>
+                  <CardDescription>{meta.description}</CardDescription>
                   <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-semibold tracking-tight">{plan.price}</span>
-                    <span className={cn("text-sm", isPro ? "text-primary-foreground/70" : "text-muted-foreground")}>
-                      USD / mes
+                    <span className="text-4xl font-semibold tracking-tight text-foreground">
+                      {plan.price}
                     </span>
+                    <span className="text-sm text-muted-foreground">USD / mes</span>
                   </div>
-                  <p className={cn("mt-2 text-sm", isPro ? "text-primary-foreground/70" : "text-muted-foreground")}>
-                    Facturación en EUR o USD disponible
-                  </p>
-                </div>
-                <ul className="mt-8 flex-1 space-y-3">
-                  {planFeatures[id].map((feature) => (
-                    <li key={feature} className="flex items-start gap-2.5 text-sm">
-                      <Check
-                        className={cn("mt-0.5 h-4 w-4 shrink-0", isPro ? "text-amber-400" : "text-emerald-600")}
-                        strokeWidth={2.5}
-                      />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  className={cn("mt-8 h-11 w-full", isPro && "bg-white text-primary hover:bg-white/90")}
-                  variant={isPro ? "secondary" : "default"}
-                  asChild
-                >
-                  <Link href="/register">Empezar con {plan.name}</Link>
-                </Button>
-              </div>
+                </CardHeader>
+                <CardContent className="flex-1 pt-0">
+                  <ul className="flex flex-col gap-3">
+                    {planFeatures[id].map((feature) => (
+                      <li key={feature} className="flex items-start gap-2.5 text-sm text-foreground">
+                        <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-positive/10 text-positive">
+                          <Check className="size-2.5" />
+                        </span>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    variant={meta.featured ? "default" : "outline"}
+                    size="lg"
+                    className="w-full"
+                    asChild
+                  >
+                    <Link href="/register">Empezar con {plan.name}</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
             );
           })}
         </div>
-
-        <p className="mx-auto mt-8 max-w-lg text-center text-xs text-muted-foreground">
-          ¿Necesitas más de 250 leads al mes? Contacta con nosotros para un plan a medida.
-        </p>
       </div>
     </section>
   );

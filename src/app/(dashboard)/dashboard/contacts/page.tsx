@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import type { Lead } from "@/types/database";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { exportToCsv } from "@/lib/utils";
 
 export default function ContactsPage() {
@@ -45,16 +46,12 @@ export default function ContactsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Base de Contactos</h1>
-          <p className="text-muted-foreground">{filtered.length} contactos</p>
-        </div>
+      <PageHeader title="Contactos" description={`${filtered.length} contactos`}>
         <Button onClick={handleExport} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
+          <Download className="size-4" />
           Exportar CSV
         </Button>
-      </div>
+      </PageHeader>
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

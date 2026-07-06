@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { KanbanBoard } from "@/components/dashboard/kanban-board";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 export default async function CrmPage() {
   const supabase = await createClient();
@@ -16,10 +17,10 @@ export default async function CrmPage() {
 
   return (
     <div className="min-w-0 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">CRM</h1>
-        <p className="text-muted-foreground">Arrastra los leads entre columnas para actualizar su estado</p>
-      </div>
+      <PageHeader
+        title="CRM"
+        description="Arrastra los leads entre columnas para actualizar su estado"
+      />
       <KanbanBoard empresaId={equipo.empresa_id} />
     </div>
   );

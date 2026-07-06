@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { BRAND } from "@/lib/config/brand";
 
 export default function SimulatorPage() {
@@ -78,13 +79,10 @@ export default function SimulatorPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Simulador</h1>
-          <p className="text-muted-foreground">
-            Configura el widget y pruébalo en vivo. Los leads de prueba se guardan en tu CRM.
-          </p>
-        </div>
+      <PageHeader
+        title="Simulador"
+        description="Configura el widget y pruébalo en vivo. Los leads de prueba se guardan en tu CRM."
+      >
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" asChild>
             <Link href="/dashboard/crm">Ver CRM</Link>
@@ -92,13 +90,13 @@ export default function SimulatorPage() {
           {isActive && (
             <Button variant="outline" asChild>
               <a href={`${appUrl}/widget/${empresa.slug}`} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ExternalLink className="size-4" />
                 Widget público
               </a>
             </Button>
           )}
         </div>
-      </div>
+      </PageHeader>
 
       {!isActive && process.env.NODE_ENV !== "production" && (
         <Card className="border-amber-200 bg-amber-50">

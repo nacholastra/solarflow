@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { PLANS } from "@/lib/config/plans";
 
 export default function TeamPage() {
@@ -50,10 +51,10 @@ export default function TeamPage() {
 
   return (
     <div className="space-y-8 max-w-xl">
-      <div>
-        <h1 className="text-3xl font-bold">Mi Equipo</h1>
-        <p className="text-muted-foreground">Invita comerciales (máx. {PLANS.pro.teamLimit} en Pro)</p>
-      </div>
+      <PageHeader
+        title="Equipo"
+        description={`Invita comerciales (máx. ${PLANS.pro.teamLimit} en Pro)`}
+      />
 
       <Card>
         <CardHeader><CardTitle>Invitar comercial</CardTitle></CardHeader>

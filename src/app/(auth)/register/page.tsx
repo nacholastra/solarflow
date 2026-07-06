@@ -79,7 +79,7 @@ export default function RegisterPage() {
     <AuthShell>
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Crear cuenta</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Crea tu cuenta</h1>
           <p className="mt-2 text-sm text-muted-foreground">Registra tu empresa instaladora</p>
         </div>
 
