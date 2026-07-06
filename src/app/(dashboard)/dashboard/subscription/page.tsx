@@ -1,17 +1,36 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { PLANS, type Currency, type PlanId } from "@/lib/config/plans";
+import { PLANS, getPlanPrice, type Currency, type PlanId } from "@/lib/config/plans";
 import type { Empresa } from "@/types/database";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
-import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { useDashboardContext } from "@/components/dashboard/dashboard-provider";
+import { PayPalSubscribeButtons } from "@/components/dashboard/paypal-subscribe-buttons";
+
+function CurrencyToggle({
+  currency,
+  onChange,
+}: {
+  currency: Currency;
+  onChange: (c: Currency) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-sm text-muted-foreground">Moneda de facturación:</span>
+      {(["EUR", "USD"] as Currency[]).map((c) => (
+        <Button key={c} type="button" variant={currency === c ? "default" : "outline"} size="sm" onClick={() => onChange(c)}>
+          {c === "EUR" ? "Euros (€)" : "Dólares ($)"}
+        </Button>
+      ))}
+    </div>
+  );
+}
 
 export default function SubscriptionPage() {
   const { empresaId } = useDashboardContext();
@@ -46,14 +65,14 @@ export default function SubscriptionPage() {
     }
   }, []);
 
-  async function onApprove(data: { subscriptionID?: string | null }, targetPlan: PlanId, isUpgrade = false) {
-    if (!empresa || !data.subscriptionID) return;
+  async function onApprove(subscriptionId: string, targetPlan: PlanId, isUpgrade = false) {
+    if (!empresa) return;
 
     const endpoint = isUpgrade ? "/api/paypal/upgrade-subscription" : "/api/paypal/activate-subscription";
     const payload = isUpgrade
-      ? { empresaId: empresa.id, subscriptionId: data.subscriptionID }
+      ? { empresaId: empresa.id, subscriptionId }
       : {
-          subscriptionId: data.subscriptionID,
+          subscriptionId,
           plan: targetPlan,
           currency,
           empresaId: empresa.id,
@@ -107,7 +126,8 @@ export default function SubscriptionPage() {
           <CardHeader>
             <CardTitle>Plan activo: {empresa.plan?.toUpperCase() ?? "—"}</CardTitle>
             <CardDescription>
-              {empresa.leads_usados_mes} / {empresa.leads_limite_mes} leads este mes · {empresa.moneda_facturacion}
+              {empresa.leads_usados_mes} / {empresa.leads_limite_mes} leads este mes · facturación en{" "}
+              {empresa.moneda_facturacion}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
@@ -129,15 +149,17 @@ export default function SubscriptionPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <CurrencyToggle currency={currency} onChange={setCurrency} />
+
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="rounded-lg bg-muted p-3">
                 <p className="text-muted-foreground">Basic (actual)</p>
-                <p className="font-semibold">{formatCurrency(PLANS.basic.price, currency)}/mes</p>
+                <p className="font-semibold">{formatCurrency(getPlanPrice("basic", currency), currency)}/mes</p>
                 <p>{PLANS.basic.leadsLimit} leads</p>
               </div>
               <div className="rounded-lg border-2 border-primary p-3">
                 <p className="text-muted-foreground">Pro</p>
-                <p className="font-semibold">{formatCurrency(PLANS.pro.price, currency)}/mes</p>
+                <p className="font-semibold">{formatCurrency(getPlanPrice("pro", currency), currency)}/mes</p>
                 <p>{PLANS.pro.leadsLimit} leads</p>
               </div>
             </div>
@@ -145,23 +167,14 @@ export default function SubscriptionPage() {
             {!upgrading ? (
               <Button onClick={() => setUpgrading(true)}>Mejorar a Pro</Button>
             ) : paypalReady ? (
-              <PayPalScriptProvider options={{ clientId, vault: true, intent: "subscription", currency }}>
-                <PayPalButtons
-                  style={{ layout: "vertical", shape: "rect" }}
-                  createSubscription={async () => {
-                    const res = await fetch("/api/paypal/create-subscription", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ plan: "pro", currency, empresaId: empresa.id }),
-                    });
-                    const json = (await res.json()) as { id?: string; error?: string };
-                    if (!json.id) throw new Error(json.error ?? "Error al crear suscripción Pro");
-                    return json.id;
-                  }}
-                  onApprove={async (data) => { await onApprove(data, "pro", true); }}
-                  onError={(err) => toast({ variant: "destructive", title: "Error PayPal", description: String(err) })}
-                />
-              </PayPalScriptProvider>
+              <PayPalSubscribeButtons
+                clientId={clientId}
+                plan="pro"
+                currency={currency}
+                empresaId={empresa.id}
+                onApprove={(id) => onApprove(id, "pro", true)}
+                onError={(msg) => toast({ variant: "destructive", title: "Error PayPal", description: msg })}
+              />
             ) : (
               <p className="text-sm text-amber-700">PayPal no configurado</p>
             )}
@@ -179,13 +192,10 @@ export default function SubscriptionPage() {
 
       {!isActive && (
         <>
-          <div className="flex gap-2">
-            {(["EUR", "USD"] as Currency[]).map((c) => (
-              <Button key={c} variant={currency === c ? "default" : "outline"} onClick={() => setCurrency(c)}>
-                {c}
-              </Button>
-            ))}
-          </div>
+          <CurrencyToggle currency={currency} onChange={setCurrency} />
+          <p className="text-sm text-muted-foreground">
+            Precios base en euros. El importe en dólares se calcula al tipo de cambio actual.
+          </p>
 
           <div className="grid gap-4 md:grid-cols-2">
             {(["basic", "pro"] as PlanId[]).map((p) => (
@@ -196,7 +206,14 @@ export default function SubscriptionPage() {
               >
                 <CardHeader>
                   <CardTitle>{PLANS[p].name}</CardTitle>
-                  <CardDescription>{formatCurrency(PLANS[p].price, currency)}/mes</CardDescription>
+                  <CardDescription>
+                    {formatCurrency(getPlanPrice(p, currency), currency)}/mes
+                    {currency === "USD" && (
+                      <span className="block text-xs">
+                        ≈ {PLANS[p].priceEur} € al cambio actual
+                      </span>
+                    )}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm space-y-1">
                   <p>{PLANS[p].leadsLimit} leads/mes</p>
@@ -213,23 +230,14 @@ export default function SubscriptionPage() {
               </CardContent>
             </Card>
           ) : (
-            <PayPalScriptProvider options={{ clientId, vault: true, intent: "subscription", currency }}>
-              <PayPalButtons
-                style={{ layout: "vertical", shape: "rect" }}
-                createSubscription={async () => {
-                  const res = await fetch("/api/paypal/create-subscription", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ plan, currency, empresaId: empresa.id }),
-                  });
-                  const json = (await res.json()) as { id?: string; error?: string };
-                  if (!json.id) throw new Error(json.error ?? "Error al crear suscripción");
-                  return json.id;
-                }}
-                onApprove={async (data) => { await onApprove(data, plan, false); }}
-                onError={(err) => toast({ variant: "destructive", title: "Error PayPal", description: String(err) })}
-              />
-            </PayPalScriptProvider>
+            <PayPalSubscribeButtons
+              clientId={clientId}
+              plan={plan}
+              currency={currency}
+              empresaId={empresa.id}
+              onApprove={(id) => onApprove(id, plan, false)}
+              onError={(msg) => toast({ variant: "destructive", title: "Error PayPal", description: msg })}
+            />
           )}
         </>
       )}

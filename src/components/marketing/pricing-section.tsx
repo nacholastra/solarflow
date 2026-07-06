@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
-import { PLANS } from "@/lib/config/plans";
+import { PLANS, getPlanPrice, getEurToUsdRate } from "@/lib/config/plans";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,8 +61,8 @@ export function PricingSection() {
             Un plan para cada volumen de leads
           </h2>
           <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
-            Sin permanencia. Cancela cuando quieras. Precios por empresa, no por usuario.
-            Facturación en EUR o USD.
+            Sin permanencia. Cancela cuando quieras. Precios base en euros; el dólar se calcula al tipo{" "}
+            {getEurToUsdRate().toFixed(2)}.
           </p>
         </div>
 
@@ -85,10 +85,13 @@ export function PricingSection() {
                   <CardDescription>{meta.description}</CardDescription>
                   <div className="mt-4 flex items-baseline gap-1">
                     <span className="text-4xl font-semibold tracking-tight text-foreground">
-                      {plan.price}
+                      {plan.priceEur}
                     </span>
-                    <span className="text-sm text-muted-foreground">USD / mes</span>
+                    <span className="text-sm text-muted-foreground">€ / mes</span>
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    ≈ {getPlanPrice(id, "USD")} $ / mes
+                  </p>
                 </CardHeader>
                 <CardContent className="flex-1 pt-0">
                   <ul className="flex flex-col gap-3">
