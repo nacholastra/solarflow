@@ -7,6 +7,7 @@ import { HowItWorksSection } from "@/components/marketing/how-it-works-section";
 import { PricingSection } from "@/components/marketing/pricing-section";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { LandingJsonLd } from "@/components/marketing/landing-json-ld";
+import { GoogleTagManager } from "@/components/analytics/google-tag-manager";
 import { buildLandingMetadata } from "@/lib/config/seo";
 
 export const metadata = buildLandingMetadata();
@@ -14,6 +15,7 @@ export const metadata = buildLandingMetadata();
 export default function HomePage() {
   return (
     <>
+      <GoogleTagManager />
       <LandingJsonLd />
       <div className="flex min-h-dvh flex-col">
         <SiteHeader />
