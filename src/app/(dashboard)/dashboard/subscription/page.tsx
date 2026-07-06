@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { PLANS, getPlanPrice, type Currency, type PlanId } from "@/lib/config/plans";
@@ -12,6 +13,8 @@ import { formatCurrency } from "@/lib/utils";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { useDashboardContext } from "@/components/dashboard/dashboard-provider";
 import { PayPalSubscribeButtons } from "@/components/dashboard/paypal-subscribe-buttons";
+
+type PlanChangeMode = "activate" | "upgrade" | "downgrade";
 
 function CurrencyToggle({
   currency,
@@ -33,11 +36,13 @@ function CurrencyToggle({
 }
 
 export default function SubscriptionPage() {
-  const { empresaId } = useDashboardContext();
+  const { empresaId, refreshPlan } = useDashboardContext();
+  const router = useRouter();
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [plan, setPlan] = useState<PlanId>("basic");
   const [currency, setCurrency] = useState<Currency>("EUR");
   const [upgrading, setUpgrading] = useState(false);
+  const [downgrading, setDowngrading] = useState(false);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
@@ -52,7 +57,11 @@ export default function SubscriptionPage() {
     if (data) {
       setEmpresa(data as Empresa);
       setCurrency((data.moneda_facturacion as Currency) ?? "EUR");
-      if (data.plan === "pro") setUpgrading(false);
+      if (data.plan === "pro") {
+        setUpgrading(false);
+        setDowngrading(false);
+      }
+      if (data.plan === "basic") setDowngrading(false);
     }
     setLoading(false);
   }, [empresaId, supabase]);
@@ -60,25 +69,32 @@ export default function SubscriptionPage() {
   useEffect(() => { void load(); }, [load]);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("upgrade") === "pro") {
-      setUpgrading(true);
-    }
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upgrade") === "pro") setUpgrading(true);
+    if (params.get("downgrade") === "basic") setDowngrading(true);
   }, []);
 
-  async function onApprove(subscriptionId: string, targetPlan: PlanId, isUpgrade = false) {
+  async function onApprove(subscriptionId: string, targetPlan: PlanId, mode: PlanChangeMode) {
     if (!empresa) return;
 
-    const endpoint = isUpgrade ? "/api/paypal/upgrade-subscription" : "/api/paypal/activate-subscription";
-    const payload = isUpgrade
-      ? { empresaId: empresa.id, subscriptionId }
-      : {
-          subscriptionId,
-          plan: targetPlan,
-          currency,
-          empresaId: empresa.id,
-        };
+    const endpoints: Record<PlanChangeMode, string> = {
+      activate: "/api/paypal/activate-subscription",
+      upgrade: "/api/paypal/upgrade-subscription",
+      downgrade: "/api/paypal/downgrade-subscription",
+    };
 
-    const res = await fetch(endpoint, {
+    const payload =
+      mode === "activate"
+        ? {
+            subscriptionId,
+            plan: targetPlan,
+            currency,
+            empresaId: empresa.id,
+          }
+        : { empresaId: empresa.id, subscriptionId };
+
+    const res = await fetch(endpoints[mode], {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -86,18 +102,31 @@ export default function SubscriptionPage() {
 
     const json = (await res.json()) as { error?: string };
     if (!res.ok) {
-      toast({ variant: "destructive", title: "Error", description: json.error ?? "No se pudo activar el plan" });
+      toast({ variant: "destructive", title: "Error", description: json.error ?? "No se pudo actualizar el plan" });
       return;
     }
 
-    toast({
-      title: isUpgrade ? "¡Plan Pro activado!" : "¡Suscripción activa!",
-      description: isUpgrade
-        ? "Ahora tienes 250 leads/mes"
-        : `Plan ${PLANS[targetPlan].name} activado`,
-    });
+    const toastMessages: Record<PlanChangeMode, { title: string; description: string }> = {
+      activate: {
+        title: "¡Suscripción activa!",
+        description: `Plan ${PLANS[targetPlan].name} activado`,
+      },
+      upgrade: {
+        title: "¡Plan Pro activado!",
+        description: `Ahora tienes ${PLANS.pro.leadsLimit} leads/mes`,
+      },
+      downgrade: {
+        title: "Plan Basic activado",
+        description: `Tu límite pasa a ${PLANS.basic.leadsLimit} leads/mes. Las funciones Pro se han desactivado.`,
+      },
+    };
+
+    toast(toastMessages[mode]);
     setUpgrading(false);
+    setDowngrading(false);
     void load();
+    await refreshPlan();
+    router.refresh();
   }
 
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "";
@@ -172,7 +201,7 @@ export default function SubscriptionPage() {
                 plan="pro"
                 currency={currency}
                 empresaId={empresa.id}
-                onApprove={(id) => onApprove(id, "pro", true)}
+                onApprove={(id) => onApprove(id, "pro", "upgrade")}
                 onError={(msg) => toast({ variant: "destructive", title: "Error PayPal", description: msg })}
               />
             ) : (
@@ -183,9 +212,46 @@ export default function SubscriptionPage() {
       )}
 
       {isActive && isPro && (
-        <Card>
-          <CardContent className="pt-6 text-sm text-muted-foreground">
-            Tienes el plan Pro con {PLANS.pro.leadsLimit} leads/mes. Gestiona tu suscripción en PayPal si necesitas cambios.
+        <Card className="border-amber-200">
+          <CardHeader>
+            <CardTitle>Cambiar a Basic</CardTitle>
+            <CardDescription>
+              Pasa de {PLANS.pro.leadsLimit} a {PLANS.basic.leadsLimit} leads/mes y {PLANS.basic.teamLimit} usuarios.
+              Se desactivarán CSV, webhooks, GTM y marca blanca.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <CurrencyToggle currency={currency} onChange={setCurrency} />
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="rounded-lg border-2 border-primary p-3">
+                <p className="text-muted-foreground">Pro (actual)</p>
+                <p className="font-semibold">{formatCurrency(getPlanPrice("pro", currency), currency)}/mes</p>
+                <p>{PLANS.pro.leadsLimit} leads</p>
+              </div>
+              <div className="rounded-lg bg-muted p-3">
+                <p className="text-muted-foreground">Basic</p>
+                <p className="font-semibold">{formatCurrency(getPlanPrice("basic", currency), currency)}/mes</p>
+                <p>{PLANS.basic.leadsLimit} leads</p>
+              </div>
+            </div>
+
+            {!downgrading ? (
+              <Button variant="outline" onClick={() => setDowngrading(true)}>
+                Cambiar a Basic
+              </Button>
+            ) : paypalReady ? (
+              <PayPalSubscribeButtons
+                clientId={clientId}
+                plan="basic"
+                currency={currency}
+                empresaId={empresa.id}
+                onApprove={(id) => onApprove(id, "basic", "downgrade")}
+                onError={(msg) => toast({ variant: "destructive", title: "Error PayPal", description: msg })}
+              />
+            ) : (
+              <p className="text-sm text-amber-700">PayPal no configurado</p>
+            )}
           </CardContent>
         </Card>
       )}
@@ -235,7 +301,7 @@ export default function SubscriptionPage() {
               plan={plan}
               currency={currency}
               empresaId={empresa.id}
-              onApprove={(id) => onApprove(id, plan, false)}
+              onApprove={(id) => onApprove(id, plan, "activate")}
               onError={(msg) => toast({ variant: "destructive", title: "Error PayPal", description: msg })}
             />
           )}
