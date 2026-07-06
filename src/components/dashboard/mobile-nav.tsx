@@ -50,7 +50,7 @@ export function MobileNav() {
   }
 
   return (
-    <div className="lg:hidden">
+    <div className="shrink-0 lg:hidden">
       <div className="flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar px-4">
         <Logo href="/dashboard" inverted />
         <Button

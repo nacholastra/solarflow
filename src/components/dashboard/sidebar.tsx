@@ -89,7 +89,7 @@ export function DashboardSidebar({
   }
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
+    <aside className="hidden h-dvh w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
       <div className="flex h-16 items-center border-b border-sidebar-border px-5">
         <Logo href="/dashboard" inverted />
       </div>

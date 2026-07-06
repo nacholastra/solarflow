@@ -94,50 +94,52 @@ export default function SimulatorPage() {
   const isActive = empresa.estado_suscripcion === "active";
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Simulador"
-        description="Configura el widget y pruébalo en vivo. Los leads de prueba se guardan en tu CRM."
-      >
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/dashboard/crm">Ver CRM</Link>
-          </Button>
-          {isActive && (
+    <div className="flex flex-col gap-6">
+      <div className="shrink-0 space-y-6">
+        <PageHeader
+          title="Simulador"
+          description="Configura el widget y pruébalo en vivo. Los leads de prueba se guardan en tu CRM."
+        >
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>
-              <a href={`${appUrl}/widget/${empresa.slug}`} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="size-4" />
-                Widget público
-              </a>
+              <Link href="/dashboard/crm">Ver CRM</Link>
             </Button>
-          )}
-        </div>
-      </PageHeader>
+            {isActive && (
+              <Button variant="outline" asChild>
+                <a href={`${appUrl}/widget/${empresa.slug}`} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="size-4" />
+                  Widget público
+                </a>
+              </Button>
+            )}
+          </div>
+        </PageHeader>
 
-      {!isActive && process.env.NODE_ENV !== "production" && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base text-amber-900">Activar para pruebas</CardTitle>
-            <CardDescription className="text-amber-800">
-              Puedes probar el simulador aquí mismo sin plan, o activar el Basic de prueba (25 leads/mes).
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={handleActivateTest} disabled={activating} size="sm">
-              {activating ? "Activando..." : "Activar plan Basic de prueba"}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+        {!isActive && process.env.NODE_ENV !== "production" && (
+          <Card className="border-amber-200 bg-amber-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-amber-900">Activar para pruebas</CardTitle>
+              <CardDescription className="text-amber-800">
+                Puedes probar el simulador aquí mismo sin plan, o activar el Basic de prueba (25 leads/mes).
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={handleActivateTest} disabled={activating} size="sm">
+                {activating ? "Activando..." : "Activar plan Basic de prueba"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
-      {isActive && (
-        <p className="text-sm text-muted-foreground">
-          Plan activo · {empresa.leads_usados_mes} / {empresa.leads_limite_mes} leads este mes
-        </p>
-      )}
+        {isActive && (
+          <p className="text-sm text-muted-foreground">
+            Plan activo · {empresa.leads_usados_mes} / {empresa.leads_limite_mes} leads este mes
+          </p>
+        )}
+      </div>
 
-      <div className="grid gap-8 xl:grid-cols-2">
-        <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)] lg:items-start lg:gap-8">
+        <aside className="order-2 min-w-0 space-y-6 lg:order-1">
           <Card>
             <CardHeader>
               <CardTitle>Configuración</CardTitle>
@@ -206,24 +208,26 @@ export default function SimulatorPage() {
           </Card>
 
           <p className="text-xs text-muted-foreground">{BRAND.disclaimer}</p>
-        </div>
+        </aside>
 
-        <div className="space-y-3 xl:sticky xl:top-6 xl:self-start">
-          <div>
-            <h2 className="text-lg font-semibold">Vista previa</h2>
-            <p className="text-sm text-muted-foreground">
-              Completa el formulario como un cliente. {!isActive && "Modo prueba — no requiere suscripción."}
-            </p>
-          </div>
-          <div className="flex justify-center rounded-xl bg-muted/30 p-4">
-            <WidgetSimulator
-              key={empresa.updated_at ?? empresa.id}
-              empresa={{
-                ...empresa,
-                gtm_id: canUseGtm(empresa.plan) ? empresa.gtm_id : null,
-              }}
-              preview
-            />
+        <div className="order-1 lg:sticky lg:top-0 lg:z-10 lg:max-h-[calc(100dvh-3rem)] lg:self-start">
+          <div className="sticky top-0 z-10 -mx-4 border-b border-border/60 bg-background/95 px-4 pb-4 backdrop-blur-sm md:-mx-8 md:px-8 lg:static lg:mx-0 lg:flex lg:max-h-[calc(100dvh-3rem)] lg:flex-col lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+            <div className="mb-3 shrink-0 lg:mb-4">
+              <h2 className="text-lg font-semibold">Vista previa</h2>
+              <p className="text-sm text-muted-foreground">
+                Completa el formulario como un cliente. {!isActive && "Modo prueba — no requiere suscripción."}
+              </p>
+            </div>
+            <div className="flex max-h-[min(58dvh,680px)] justify-center overflow-y-auto overscroll-contain rounded-xl bg-muted/30 p-3 sm:max-h-[min(62dvh,680px)] sm:p-4 lg:min-h-0 lg:max-h-none lg:flex-1">
+              <WidgetSimulator
+                key={empresa.updated_at ?? empresa.id}
+                empresa={{
+                  ...empresa,
+                  gtm_id: canUseGtm(empresa.plan) ? empresa.gtm_id : null,
+                }}
+                preview
+              />
+            </div>
           </div>
         </div>
       </div>

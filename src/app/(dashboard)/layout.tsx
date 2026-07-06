@@ -14,11 +14,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <DashboardProvider value={context}>
-      <div className="flex min-h-dvh bg-background">
+      <div className="flex h-dvh overflow-hidden bg-background">
         <DashboardSidebar empresaNombre={context.empresaNombre} plan={context.plan} />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <MobileNav />
-          <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
+          <main className="flex-1 overflow-y-auto overscroll-y-contain px-4 py-6 md:px-8 md:py-8">
             <div className="mx-auto max-w-6xl">{children}</div>
           </main>
         </div>
