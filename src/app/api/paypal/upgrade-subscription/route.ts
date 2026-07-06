@@ -1,37 +1,27 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getPayPalPlanId, PLANS, type PlanId } from "@/lib/config/plans";
+import {
+  getPayPalApiBase,
+  getPayPalAccessToken,
+  getPayPalSubscription,
+  subscriptionMatchesPlan,
+} from "@/lib/paypal/client";
+import { z } from "zod";
 
-async function getPayPalAccessToken(): Promise<string> {
-  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET!;
-  const base =
-    process.env.PAYPAL_MODE === "live"
-      ? "https://api-m.paypal.com"
-      : "https://api-m.sandbox.paypal.com";
-
-  const res = await fetch(`${base}/v1/oauth2/token`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: "grant_type=client_credentials",
-  });
-  const json = (await res.json()) as { access_token?: string };
-  if (!json.access_token) throw new Error("PayPal auth failed");
-  return json.access_token;
-}
+const schema = z.object({
+  empresaId: z.string().uuid(),
+  subscriptionId: z.string().min(1).optional(),
+});
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as {
-      empresaId: string;
-      subscriptionId?: string;
-    };
+    const body = schema.parse(await request.json());
 
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -51,7 +41,7 @@ export async function POST(request: Request) {
     const service = await createServiceClient();
     const { data: empresa } = await service
       .from("empresas")
-      .select("*")
+      .select("id, plan, estado_suscripcion, moneda_facturacion, paypal_subscription_id")
       .eq("id", body.empresaId)
       .single();
 
@@ -76,38 +66,48 @@ export async function POST(request: Request) {
 
     let subscriptionId = body.subscriptionId ?? empresa.paypal_subscription_id;
 
-    if (subscriptionId && proPlanId) {
-      const token = await getPayPalAccessToken();
-      const base =
-        process.env.PAYPAL_MODE === "live"
-          ? "https://api-m.paypal.com"
-          : "https://api-m.sandbox.paypal.com";
-
-      const reviseRes = await fetch(`${base}/v1/billing/subscriptions/${subscriptionId}/revise`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ plan_id: proPlanId }),
-      });
-
-      const reviseJson = (await reviseRes.json()) as {
-        id?: string;
-        message?: string;
-        links?: { href: string; rel: string }[];
-      };
-
-      if (reviseRes.ok && reviseJson.id) {
-        subscriptionId = reviseJson.id;
-      } else if (!body.subscriptionId) {
-        // Si revise falla y no hay nueva suscripción, actualizamos igual en modo prueba
-        console.warn("PayPal revise failed:", reviseJson.message);
-      }
+    if (!subscriptionId) {
+      return NextResponse.json({ error: "Sin suscripción PayPal activa" }, { status: 400 });
     }
 
-    if (body.subscriptionId) {
-      subscriptionId = body.subscriptionId;
+    if (!body.subscriptionId && subscriptionId) {
+      const token = await getPayPalAccessToken();
+      const reviseRes = await fetch(
+        `${getPayPalApiBase()}/v1/billing/subscriptions/${subscriptionId}/revise`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ plan_id: proPlanId }),
+        },
+      );
+
+      const reviseJson = (await reviseRes.json()) as { id?: string; message?: string };
+
+      if (!reviseRes.ok || !reviseJson.id) {
+        return NextResponse.json(
+          { error: reviseJson.message ?? "No se pudo actualizar la suscripción en PayPal" },
+          { status: 502 },
+        );
+      }
+
+      subscriptionId = reviseJson.id;
+    }
+
+    const subscription = await getPayPalSubscription(subscriptionId);
+
+    if (subscription.custom_id !== body.empresaId) {
+      return NextResponse.json({ error: "La suscripción no pertenece a esta empresa" }, { status: 403 });
+    }
+
+    if (!["ACTIVE", "APPROVED"].includes(subscription.status)) {
+      return NextResponse.json({ error: "La suscripción PayPal no está activa" }, { status: 400 });
+    }
+
+    if (!subscriptionMatchesPlan(subscription, "pro", currency)) {
+      return NextResponse.json({ error: "El plan de PayPal no es Pro" }, { status: 400 });
     }
 
     const { error } = await service
@@ -115,17 +115,20 @@ export async function POST(request: Request) {
       .update({
         plan: "pro" as PlanId,
         leads_limite_mes: PLANS.pro.leadsLimit,
-        paypal_subscription_id: subscriptionId ?? empresa.paypal_subscription_id,
+        paypal_subscription_id: subscriptionId,
         estado_suscripcion: "active",
       })
       .eq("id", body.empresaId);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "No se pudo actualizar el plan" }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true, plan: "pro" });
   } catch (e) {
+    if (e instanceof z.ZodError) {
+      return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
+    }
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Error interno" },
       { status: 500 },

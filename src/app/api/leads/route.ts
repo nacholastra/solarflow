@@ -3,44 +3,57 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { gastoToKwh } from "@/lib/solar/billing-es";
 import { calcularSimulacion } from "@/lib/solar/calculator";
 import type { Localidad, TipoInmueble } from "@/lib/solar/types";
+import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { z } from "zod";
 
 const leadSchema = z.object({
-  empresa_slug: z.string(),
+  empresa_slug: z.string().min(1).max(120),
   localidad_id: z.string().uuid(),
   tipo_inmueble: z.enum(["residencial", "comercial"]),
-  nombre: z.string().min(2),
-  email: z.string().email(),
-  telefono: z.string().min(9),
-  gasto_mensual_eur: z.number().optional(),
-  consumo_kwh_mensual: z.number().optional(),
+  nombre: z.string().min(2).max(120),
+  email: z.string().email().max(254),
+  telefono: z.string().min(9).max(20),
+  gasto_mensual_eur: z.number().positive().optional(),
+  consumo_kwh_mensual: z.number().positive().optional(),
   campo_origen_consumo: z.enum(["gasto", "kwh"]),
   consentimiento_rgpd: z.literal(true),
-  honeypot: z.string().max(0).optional(),
-  utm_source: z.string().optional(),
-  utm_medium: z.string().optional(),
-  utm_campaign: z.string().optional(),
+  website: z.string().optional(),
+  utm_source: z.string().max(100).optional(),
+  utm_medium: z.string().max(100).optional(),
+  utm_campaign: z.string().max(100).optional(),
   preview: z.boolean().optional(),
 });
 
 export async function POST(request: Request) {
   try {
-    const json = await request.json();
-    const parsed = leadSchema.safeParse(json);
-    if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    const ip = getClientIp(request);
+    const rate = checkRateLimit(`leads:${ip}`, 20, 60_000);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Demasiadas solicitudes. Inténtalo más tarde." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSec ?? 60) } },
+      );
     }
 
-    const data = parsed.data;
-    if (data.honeypot) {
+    const json = await request.json();
+
+    if (typeof json.website === "string" && json.website.trim() !== "") {
       return NextResponse.json({ ok: true });
     }
 
+    const parsed = leadSchema.safeParse(json);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
+    }
+
+    const data = parsed.data;
     const supabase = await createServiceClient();
 
     const { data: empresa } = await supabase
       .from("empresas")
-      .select("*")
+      .select(
+        "id, slug, estado_suscripcion, leads_usados_mes, leads_limite_mes, precio_eur_kwp, tarifa_kwh_override, ratio_autoconsumo, kwp_max",
+      )
       .eq("slug", data.empresa_slug)
       .single();
 
@@ -52,7 +65,9 @@ export async function POST(request: Request) {
 
     if (isPreview) {
       const authClient = await createClient();
-      const { data: { user } } = await authClient.auth.getUser();
+      const {
+        data: { user },
+      } = await authClient.auth.getUser();
       if (!user) {
         return NextResponse.json({ error: "No autorizado" }, { status: 401 });
       }
@@ -113,7 +128,9 @@ export async function POST(request: Request) {
       consumoKwhMensual: kwhMensual,
       empresaConfig: {
         precio_eur_kwp: Number(empresa.precio_eur_kwp),
-        tarifa_kwh_override: empresa.tarifa_kwh_override ? Number(empresa.tarifa_kwh_override) : undefined,
+        tarifa_kwh_override: empresa.tarifa_kwh_override
+          ? Number(empresa.tarifa_kwh_override)
+          : undefined,
         ratio_autoconsumo: Number(empresa.ratio_autoconsumo),
         kwp_max: Number(empresa.kwp_max),
       },
@@ -144,14 +161,14 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error.message.includes("Límite de leads")) {
+        return NextResponse.json({ error: "Límite de leads alcanzado" }, { status: 402 });
+      }
+      return NextResponse.json({ error: "No se pudo guardar el lead" }, { status: 500 });
     }
 
     return NextResponse.json({ resultado });
-  } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Error interno" },
-      { status: 500 },
-    );
+  } catch {
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

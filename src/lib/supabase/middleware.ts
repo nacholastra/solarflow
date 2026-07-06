@@ -4,9 +4,34 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const pathname = request.nextUrl.pathname;
+
+  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
+  const isDashboard = pathname.startsWith("/dashboard");
+  const isProtectedApi =
+    pathname.startsWith("/api/") &&
+    !pathname.startsWith("/api/auth/register") &&
+    !pathname.startsWith("/api/leads") &&
+    !pathname.startsWith("/api/localidades") &&
+    !pathname.startsWith("/api/paypal/webhook");
+  const isPublic =
+    pathname.startsWith("/widget") ||
+    pathname.startsWith("/api/auth/register") ||
+    pathname.startsWith("/api/leads") ||
+    pathname.startsWith("/api/localidades") ||
+    pathname.startsWith("/api/paypal/webhook") ||
+    pathname === "/";
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    if (isDashboard || isProtectedApi) {
+      if (isProtectedApi) {
+        return NextResponse.json({ error: "Servicio no disponible" }, { status: 503 });
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
     return NextResponse.next({ request });
   }
 
@@ -37,17 +62,6 @@ export async function updateSession(request: NextRequest) {
       console.error("Supabase auth.getUser error:", error.message);
     }
 
-    const pathname = request.nextUrl.pathname;
-    const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
-    const isDashboard = pathname.startsWith("/dashboard");
-    const isPublic =
-      pathname.startsWith("/widget") ||
-      pathname.startsWith("/api/auth/register") ||
-      pathname.startsWith("/api/leads") ||
-      pathname.startsWith("/api/localidades") ||
-      pathname.startsWith("/api/paypal/webhook") ||
-      pathname === "/";
-
     if (!user && isDashboard) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -60,13 +74,21 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (!isPublic && !user && !isAuthPage && pathname.startsWith("/api/")) {
+    if (!user && isProtectedApi) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
     return supabaseResponse;
   } catch (e) {
     console.error("Middleware error:", e);
+    if (isDashboard || isProtectedApi) {
+      if (isProtectedApi) {
+        return NextResponse.json({ error: "Servicio no disponible" }, { status: 503 });
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
     return NextResponse.next({ request });
   }
 }

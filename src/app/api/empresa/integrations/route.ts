@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { isAllowedWebhookUrl, webhookUrlErrorMessage } from "@/lib/security/webhook-url";
 import { z } from "zod";
 
 const schema = z.object({
@@ -8,8 +9,8 @@ const schema = z.object({
     .trim()
     .max(2048)
     .refine(
-      (val) => val === "" || /^https:\/\/.+/i.test(val),
-      "La URL debe ser HTTPS (requerido por Zapier y Make)",
+      (val) => val === "" || isAllowedWebhookUrl(val),
+      webhookUrlErrorMessage(),
     ),
 });
 

@@ -138,7 +138,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
           consumo_kwh_mensual: kwhNum,
           campo_origen_consumo: modoConsumo,
           consentimiento_rgpd: true,
-          honeypot,
+          website: honeypot,
           preview,
         }),
       });

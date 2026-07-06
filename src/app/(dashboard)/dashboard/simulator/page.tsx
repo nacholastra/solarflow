@@ -25,9 +25,15 @@ export default function SimulatorPage() {
     if (!user) return;
     const { data: equipo } = await supabase.from("equipo").select("empresa_id").eq("usuario_id", user.id).single();
     if (!equipo) return;
-    const { data } = await supabase.from("empresas").select("*").eq("id", equipo.empresa_id).single();
+    const { data } = await supabase
+      .from("empresas")
+      .select(
+        "id, slug, nombre_empresa, color_marca, logo_url, privacy_url, precio_eur_kwp, tarifa_kwh_override, ratio_autoconsumo, kwp_max, gtm_id, estado_suscripcion, leads_usados_mes, leads_limite_mes, plan, updated_at",
+      )
+      .eq("id", equipo.empresa_id)
+      .single();
     if (data) {
-      setEmpresa(data);
+      setEmpresa(data as Empresa);
       setEmbedCode(`<iframe src="${appUrl}/widget/${data.slug}" width="100%" height="680" frameborder="0" style="border:none;border-radius:12px;"></iframe>`);
     }
   }, [appUrl, supabase]);
@@ -94,7 +100,7 @@ export default function SimulatorPage() {
         </div>
       </div>
 
-      {!isActive && (
+      {!isActive && process.env.NODE_ENV !== "production" && (
         <Card className="border-amber-200 bg-amber-50">
           <CardHeader className="pb-3">
             <CardTitle className="text-base text-amber-900">Activar para pruebas</CardTitle>

@@ -23,9 +23,15 @@ export default function SubscriptionPage() {
     if (!user) return;
     const { data: equipo } = await supabase.from("equipo").select("empresa_id").eq("usuario_id", user.id).single();
     if (!equipo) return;
-    const { data } = await supabase.from("empresas").select("*").eq("id", equipo.empresa_id).single();
+    const { data } = await supabase
+      .from("empresas")
+      .select(
+        "id, plan, moneda_facturacion, estado_suscripcion, leads_limite_mes, leads_usados_mes, paypal_subscription_id",
+      )
+      .eq("id", equipo.empresa_id)
+      .single();
     if (data) {
-      setEmpresa(data);
+      setEmpresa(data as Empresa);
       setCurrency((data.moneda_facturacion as Currency) ?? "EUR");
       if (data.plan === "pro") setUpgrading(false);
     }

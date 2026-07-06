@@ -123,7 +123,7 @@ export default function RegisterPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              minLength={6}
+              minLength={8}
               className="h-11 bg-background"
               required
             />

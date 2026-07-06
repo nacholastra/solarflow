@@ -3,9 +3,15 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { PLANS } from "@/lib/config/plans";
 
 export async function POST() {
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_TEST_PLAN !== "true") {
+    return NextResponse.json({ error: "No disponible en producción" }, { status: 403 });
+  }
+
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -34,7 +40,7 @@ export async function POST() {
       .eq("id", equipo.empresa_id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "No se pudo activar el plan de prueba" }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });

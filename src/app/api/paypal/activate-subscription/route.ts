@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { PLANS, type Currency, type PlanId } from "@/lib/config/plans";
+import { getPayPalSubscription, subscriptionMatchesPlan } from "@/lib/paypal/client";
 import { z } from "zod";
 
 const schema = z.object({
@@ -14,7 +15,9 @@ export async function POST(request: Request) {
   try {
     const body = schema.parse(await request.json());
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -29,6 +32,20 @@ export async function POST(request: Request) {
 
     if (!equipo || equipo.rol !== "admin") {
       return NextResponse.json({ error: "Sin permisos para activar el plan" }, { status: 403 });
+    }
+
+    const subscription = await getPayPalSubscription(body.subscriptionId);
+
+    if (subscription.custom_id !== body.empresaId) {
+      return NextResponse.json({ error: "La suscripción no pertenece a esta empresa" }, { status: 403 });
+    }
+
+    if (!["ACTIVE", "APPROVED"].includes(subscription.status)) {
+      return NextResponse.json({ error: "La suscripción PayPal no está activa" }, { status: 400 });
+    }
+
+    if (!subscriptionMatchesPlan(subscription, body.plan, body.currency)) {
+      return NextResponse.json({ error: "El plan de PayPal no coincide" }, { status: 400 });
     }
 
     const service = await createServiceClient();
@@ -46,7 +63,7 @@ export async function POST(request: Request) {
       .eq("id", body.empresaId);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "No se pudo activar el plan" }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });

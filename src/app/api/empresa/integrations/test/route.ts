@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isAllowedWebhookUrl, webhookUrlErrorMessage } from "@/lib/security/webhook-url";
 import { z } from "zod";
 
 const urlSchema = z
   .string()
   .trim()
   .max(2048)
-  .refine(
-    (val) => /^https:\/\/.+/i.test(val),
-    "La URL debe ser HTTPS (requerido por Zapier y Make)",
-  );
+  .refine((val) => isAllowedWebhookUrl(val), webhookUrlErrorMessage());
 
 const bodySchema = z.object({
   webhook_url: urlSchema.optional(),
@@ -100,6 +98,10 @@ export async function POST(request: Request) {
         { error: "Configura una URL de webhook antes de probar" },
         { status: 400 },
       );
+    }
+
+    if (!isAllowedWebhookUrl(targetUrl)) {
+      return NextResponse.json({ error: webhookUrlErrorMessage() }, { status: 400 });
     }
 
     const payload = {

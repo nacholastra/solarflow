@@ -1,16 +1,26 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
+import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { z } from "zod";
 
 const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  nombre_empresa: z.string().min(2),
+  email: z.string().email().max(254),
+  password: z.string().min(8).max(128),
+  nombre_empresa: z.string().min(2).max(120),
 });
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rate = checkRateLimit(`register:${ip}`, 5, 3_600_000);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Demasiados intentos de registro. Inténtalo más tarde." },
+        { status: 429 },
+      );
+    }
+
     const body = schema.parse(await request.json());
     const supabase = await createServiceClient();
     const slug = slugify(body.nombre_empresa);
@@ -35,10 +45,7 @@ export async function POST(request: Request) {
     });
 
     if (authError || !authData.user) {
-      return NextResponse.json(
-        { error: authError?.message ?? "No se pudo crear el usuario" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "No se pudo crear la cuenta" }, { status: 400 });
     }
 
     const { data: empresa, error: empresaError } = await supabase
@@ -54,10 +61,7 @@ export async function POST(request: Request) {
 
     if (empresaError || !empresa) {
       await supabase.auth.admin.deleteUser(authData.user.id);
-      return NextResponse.json(
-        { error: empresaError?.message ?? "No se pudo crear la empresa" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "No se pudo crear la empresa" }, { status: 500 });
     }
 
     const { error: equipoError } = await supabase.from("equipo").insert({
@@ -69,7 +73,7 @@ export async function POST(request: Request) {
     if (equipoError) {
       await supabase.from("empresas").delete().eq("id", empresa.id);
       await supabase.auth.admin.deleteUser(authData.user.id);
-      return NextResponse.json({ error: equipoError.message }, { status: 500 });
+      return NextResponse.json({ error: "No se pudo configurar el equipo" }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });
@@ -77,9 +81,6 @@ export async function POST(request: Request) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
     }
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Error interno" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }
