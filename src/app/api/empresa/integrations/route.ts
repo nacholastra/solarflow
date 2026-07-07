@@ -52,10 +52,8 @@ export async function GET() {
       plan: empresa.plan,
     });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Error interno" },
-      { status: 500 },
-    );
+    console.error("integrations GET error:", e);
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }
 
@@ -111,10 +109,7 @@ export async function PATCH(request: Request) {
       .single();
 
     if (error || !empresa) {
-      return NextResponse.json(
-        { error: error?.message ?? "No se pudo guardar la integración" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "No se pudo guardar la integración" }, { status: 500 });
     }
 
     return NextResponse.json({ webhook_url: empresa.webhook_url ?? "" });
@@ -126,7 +121,7 @@ export async function PATCH(request: Request) {
       );
     }
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Error interno" },
+      { error: "Error interno" },
       { status: 500 },
     );
   }

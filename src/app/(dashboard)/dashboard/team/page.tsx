@@ -60,22 +60,25 @@ export default function TeamPage() {
       });
       return;
     }
-    const token = crypto.randomUUID();
-    const expira = new Date();
-    expira.setDate(expira.getDate() + 7);
-    const { error } = await supabase.from("invitaciones_equipo").insert({
-      empresa_id: empresaId,
-      email,
-      rol: "comercial",
-      token,
-      expira_at: expira.toISOString(),
+
+    const res = await fetch("/api/empresa/team/invite", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
     });
-    if (error) toast({ variant: "destructive", title: "Error", description: error.message });
-    else {
-      toast({ title: "Invitación creada", description: `Enlace: /invite/${token}` });
-      setEmail("");
-      void load();
+    const json = (await res.json()) as { error?: string; invitePath?: string };
+
+    if (!res.ok) {
+      toast({ variant: "destructive", title: "Error", description: json.error ?? "No se pudo invitar" });
+      return;
     }
+
+    toast({
+      title: "Invitación creada",
+      description: json.invitePath ? `Enlace: ${json.invitePath}` : undefined,
+    });
+    setEmail("");
+    void load();
   }
 
   if (!isAdmin) {

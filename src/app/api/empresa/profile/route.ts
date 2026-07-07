@@ -55,7 +55,7 @@ export async function PATCH(request: Request) {
       .single();
 
     if (error || !empresa) {
-      return NextResponse.json({ error: error?.message ?? "No se pudo actualizar" }, { status: 500 });
+      return NextResponse.json({ error: "No se pudo actualizar" }, { status: 500 });
     }
 
     return NextResponse.json({ empresa, email: user.email });
@@ -63,10 +63,7 @@ export async function PATCH(request: Request) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: "Nombre de empresa inválido" }, { status: 400 });
     }
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Error interno" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }
 
@@ -105,9 +102,7 @@ export async function GET() {
       rol: equipo.rol,
     });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Error interno" },
-      { status: 500 },
-    );
+    console.error("profile GET error:", e);
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

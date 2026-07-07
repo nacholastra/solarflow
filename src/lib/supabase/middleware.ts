@@ -1,5 +1,8 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isSameOrigin } from "@/lib/security/api-origin";
+
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -47,9 +50,8 @@ export async function updateSession(request: NextRequest) {
     });
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const user = session?.user;
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user && isDashboard) {
       const url = request.nextUrl.clone();
@@ -65,6 +67,10 @@ export async function updateSession(request: NextRequest) {
 
     if (!user && isProtectedApi) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    if (user && isProtectedApi && MUTATING_METHODS.has(request.method) && !isSameOrigin(request)) {
+      return NextResponse.json({ error: "Origen no permitido" }, { status: 403 });
     }
 
     return supabaseResponse;
