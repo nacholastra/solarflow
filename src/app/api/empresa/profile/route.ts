@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
+import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 import { z } from "zod";
 
 const schema = z.object({
@@ -9,6 +10,9 @@ const schema = z.object({
 
 export async function PATCH(request: Request) {
   try {
+    const limited = rateLimitResponse(request, "empresa-profile", 30, 60_000);
+    if (limited) return limited;
+
     const body = schema.parse(await request.json());
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

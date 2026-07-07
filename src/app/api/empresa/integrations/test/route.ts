@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isAllowedWebhookUrl, webhookUrlErrorMessage } from "@/lib/security/webhook-url";
 import { canUseWebhooks } from "@/lib/config/plan-features";
+import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 import { z } from "zod";
 
 const urlSchema = z
@@ -53,6 +54,9 @@ function buildSampleLead(empresaId: string) {
 
 export async function POST(request: Request) {
   try {
+    const limited = rateLimitResponse(request, "empresa-integrations-test", 10, 60_000);
+    if (limited) return limited;
+
     const parsed = bodySchema.safeParse(await request.json().catch(() => ({})));
     if (!parsed.success) {
       return NextResponse.json(

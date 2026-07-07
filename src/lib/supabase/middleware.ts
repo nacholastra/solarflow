@@ -9,11 +9,17 @@ export async function updateSession(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const pathname = request.nextUrl.pathname;
 
-  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
+  const isAuthPage =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/invite") ||
+    pathname.startsWith("/verify-email");
   const isDashboard = pathname.startsWith("/dashboard");
   const isProtectedApi =
     pathname.startsWith("/api/") &&
     !pathname.startsWith("/api/auth/register") &&
+    !pathname.startsWith("/api/auth/resend-confirmation") &&
+    !pathname.startsWith("/api/invite/") &&
     !pathname.startsWith("/api/leads") &&
     !pathname.startsWith("/api/localidades") &&
     !pathname.startsWith("/api/paypal/webhook");
@@ -59,7 +65,14 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (user && isAuthPage) {
+    if (user && !user.email_confirmed_at && isDashboard) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/verify-email";
+      url.searchParams.set("email", user.email ?? "");
+      return NextResponse.redirect(url);
+    }
+
+    if (user && isAuthPage && !pathname.startsWith("/invite") && !pathname.startsWith("/verify-email")) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getPayPalPlanId } from "@/lib/config/plans";
 import { getPayPalAccessToken, getPayPalApiBase } from "@/lib/paypal/client";
+import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 import { z } from "zod";
 
 const schema = z.object({
@@ -29,6 +30,9 @@ function formatPayPalError(json: PayPalApiError): string {
 
 export async function POST(request: Request) {
   try {
+    const limited = rateLimitResponse(request, "paypal-create", 15, 60_000);
+    if (limited) return limited;
+
     const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "";
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET ?? "";
     if (!clientId || clientId.startsWith("your-") || !clientSecret || clientSecret.startsWith("your-")) {

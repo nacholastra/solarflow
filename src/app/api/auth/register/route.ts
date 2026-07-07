@@ -2,16 +2,23 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
+import { rateLimitResponse } from "@/lib/security/api-rate-limit";
+import { createAnonAuthClient, fetchInviteByToken, getInviteStatus } from "@/lib/team/invite";
+import { getSiteUrl } from "@/lib/config/site";
 import { z } from "zod";
 
 const schema = z.object({
   email: z.string().email().max(254),
   password: z.string().min(8).max(128),
-  nombre_empresa: z.string().min(2).max(120),
+  nombre_empresa: z.string().min(2).max(120).optional(),
+  invite_token: z.string().uuid().optional(),
 });
 
 export async function POST(request: Request) {
   try {
+    const limited = rateLimitResponse(request, "auth-register", 5, 3_600_000);
+    if (limited) return limited;
+
     const ip = getClientIp(request);
     const rate = checkRateLimit(`register:${ip}`, 5, 3_600_000);
     if (!rate.allowed) {
@@ -22,10 +29,65 @@ export async function POST(request: Request) {
     }
 
     const body = schema.parse(await request.json());
-    const supabase = await createServiceClient();
+    const service = await createServiceClient();
+    const anon = createAnonAuthClient();
+    const redirectTo = `${getSiteUrl()}/auth/callback?next=/dashboard/subscription`;
+
+    if (body.invite_token) {
+      const invite = await fetchInviteByToken(service, body.invite_token);
+      const status = getInviteStatus(invite);
+
+      if (status !== "valid") {
+        return NextResponse.json({ error: "Invitación no válida o expirada" }, { status: 400 });
+      }
+
+      if (body.email.toLowerCase() !== invite!.email.toLowerCase()) {
+        return NextResponse.json(
+          { error: "Debes registrarte con el email de la invitación" },
+          { status: 400 },
+        );
+      }
+
+      const { data: authData, error: authError } = await anon.auth.signUp({
+        email: body.email,
+        password: body.password,
+        options: { emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/invite/${body.invite_token}` },
+      });
+
+      if (authError || !authData.user) {
+        return NextResponse.json({ error: "No se pudo crear la cuenta" }, { status: 400 });
+      }
+
+      const { error: equipoError } = await service.from("equipo").insert({
+        empresa_id: invite!.empresa_id,
+        usuario_id: authData.user.id,
+        rol: invite!.rol,
+      });
+
+      if (equipoError) {
+        await service.auth.admin.deleteUser(authData.user.id);
+        return NextResponse.json({ error: "No se pudo unir al equipo" }, { status: 500 });
+      }
+
+      await service
+        .from("invitaciones_equipo")
+        .update({ aceptada_at: new Date().toISOString() })
+        .eq("id", invite!.id);
+
+      return NextResponse.json({
+        ok: true,
+        requiresEmailConfirmation: !authData.session,
+        invitePath: `/invite/${body.invite_token}`,
+      });
+    }
+
+    if (!body.nombre_empresa) {
+      return NextResponse.json({ error: "Nombre de empresa requerido" }, { status: 400 });
+    }
+
     const slug = slugify(body.nombre_empresa);
 
-    const { data: existingSlug } = await supabase
+    const { data: existingSlug } = await service
       .from("empresas")
       .select("id")
       .eq("slug", slug)
@@ -38,17 +100,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    const { data: authData, error: authError } = await anon.auth.signUp({
       email: body.email,
       password: body.password,
-      email_confirm: true,
+      options: { emailRedirectTo: redirectTo },
     });
 
     if (authError || !authData.user) {
       return NextResponse.json({ error: "No se pudo crear la cuenta" }, { status: 400 });
     }
 
-    const { data: empresa, error: empresaError } = await supabase
+    const { data: empresa, error: empresaError } = await service
       .from("empresas")
       .insert({
         owner_id: authData.user.id,
@@ -60,27 +122,31 @@ export async function POST(request: Request) {
       .single();
 
     if (empresaError || !empresa) {
-      await supabase.auth.admin.deleteUser(authData.user.id);
+      await service.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json({ error: "No se pudo crear la empresa" }, { status: 500 });
     }
 
-    const { error: equipoError } = await supabase.from("equipo").insert({
+    const { error: equipoError } = await service.from("equipo").insert({
       empresa_id: empresa.id,
       usuario_id: authData.user.id,
       rol: "admin",
     });
 
     if (equipoError) {
-      await supabase.from("empresas").delete().eq("id", empresa.id);
-      await supabase.auth.admin.deleteUser(authData.user.id);
+      await service.from("empresas").delete().eq("id", empresa.id);
+      await service.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json({ error: "No se pudo configurar el equipo" }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({
+      ok: true,
+      requiresEmailConfirmation: !authData.session,
+    });
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
     }
+    console.error("register error:", e);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

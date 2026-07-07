@@ -7,6 +7,7 @@
 - **Campos de facturación** (`plan`, `estado_suscripcion`, límites, PayPal) solo modificables con service role.
 - **Widget público** carga datos de empresa solo en el servidor (service role), sin exponer filas completas al anon key.
 - **Límite de equipo** aplicado en API y en base de datos (trigger).
+- **Invitaciones** gestionadas por API; aceptación verifica email y sesión.
 
 ## Migraciones de seguridad
 
@@ -21,11 +22,24 @@ Ejecutar en Supabase SQL Editor, en orden:
 
 > Si el proyecto se creó con `003_repair_partial_schema.sql`, omitir 001 y usar 003 en su lugar.
 
+## Autenticación
+
+- Registro con **confirmación de email** (`signUp` + enlace de verificación).
+- Callback: `/auth/callback` — configurar en Supabase Auth redirect URLs.
+- Middleware usa `getUser()` y bloquea el dashboard sin email confirmado.
+- Página `/verify-email` con reenvío de confirmación.
+
+## Invitaciones de equipo
+
+- Crear: `POST /api/empresa/team/invite` (admin, rate limit).
+- Aceptar: `/invite/[token]` + `POST /api/invite/[token]/accept`.
+- Registro con invitación: `/register?invite=[token]`.
+
 ## PayPal
 
 - Webhooks verificados con `PAYPAL_WEBHOOK_ID` y firma PayPal (rechazo fail-secure si falta configuración).
 - Activación/upgrade/downgrade verifica la suscripción en la API de PayPal antes de actualizar la BD.
-- `custom_id` de la suscripción debe coincidir con `empresaId`.
+- Rate limit: 15 req/min por IP en rutas PayPal.
 
 ## Webhooks salientes (Zapier/Make)
 
@@ -35,25 +49,30 @@ Ejecutar en Supabase SQL Editor, en orden:
 
 ## Rate limiting
 
-- `/api/leads`: 20 req/min por IP.
-- `/api/auth/register`: 5 req/hora por IP.
-- `/api/empresa/team/invite`: 20 req/hora por usuario.
+| Ruta | Límite |
+|------|--------|
+| `/api/leads` | 20/min por IP |
+| `/api/auth/register` | 5/hora por IP |
+| `/api/auth/resend-confirmation` | 3/hora por IP |
+| `/api/empresa/team/invite` | 20/hora por usuario |
+| `/api/empresa/*` (mutaciones) | 10–30/min por IP |
+| `/api/paypal/*` (excepto webhook) | 15/min por IP |
+| `/api/invite/*` | 10–30/min por IP/token |
 
 Para producción a escala, usar **Vercel Firewall** o **Upstash Redis**.
 
-## Autenticación y CSRF
+## CSRF
 
-- Middleware usa `getUser()` (validación con el servidor de auth).
-- Rutas API protegidas exigen sesión válida.
-- Mutaciones verifican `Origin`/`Referer` contra `NEXT_PUBLIC_APP_URL`.
+- Mutaciones API verifican `Origin`/`Referer` contra `NEXT_PUBLIC_APP_URL`.
+- Cookies Supabase con SameSite=Lax.
 
 ## Variables sensibles
 
-Nunca commitear `.env.local`. Obligatorias en producción:
+Copiar `.env.example` a `.env.local`. Obligatorias en producción:
 
 - `SUPABASE_SERVICE_ROLE_KEY` — solo servidor
 - `PAYPAL_CLIENT_SECRET`, `PAYPAL_WEBHOOK_ID`
-- `NEXT_PUBLIC_APP_URL` — URL canónica (HTTPS en producción)
+- `NEXT_PUBLIC_APP_URL` — URL canónica HTTPS
 
 ## Plan de prueba
 
@@ -62,14 +81,14 @@ Nunca commitear `.env.local`. Obligatorias en producción:
 ## Checklist de despliegue
 
 - [ ] Migraciones 005, 006 y 007 aplicadas en Supabase
+- [ ] Supabase Auth: confirmación de email activada
+- [ ] Redirect URL `https://tu-dominio/auth/callback` en Supabase
 - [ ] `PAYPAL_WEBHOOK_ID` configurado en Vercel
-- [ ] `NEXT_PUBLIC_APP_URL` apunta a la URL de producción (no localhost)
+- [ ] `NEXT_PUBLIC_APP_URL` apunta a producción (no localhost)
 - [ ] `ALLOW_TEST_PLAN` no activo en producción
 
 ## Pendiente recomendado
 
-- [ ] Verificación de email en registro (Supabase Auth)
-- [ ] Rate limiting distribuido (Upstash) en rutas PayPal
+- [ ] Rate limiting distribuido (Upstash)
 - [ ] Auditoría de logs de acceso a leads (RGPD)
 - [ ] Rotación periódica de claves API
-- [ ] Flujo de aceptación de invitaciones (`/invite/[token]`)

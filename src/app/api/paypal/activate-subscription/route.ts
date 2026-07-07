@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { PLANS, type Currency, type PlanId } from "@/lib/config/plans";
 import { PRO_ONLY_EMPRESA_FIELDS } from "@/lib/config/plan-features";
 import { getPayPalSubscription, subscriptionMatchesPlan } from "@/lib/paypal/client";
+import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 import { z } from "zod";
 
 const schema = z.object({
@@ -14,6 +15,9 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const limited = rateLimitResponse(request, "paypal-activate", 15, 60_000);
+    if (limited) return limited;
+
     const body = schema.parse(await request.json());
     const supabase = await createClient();
     const {

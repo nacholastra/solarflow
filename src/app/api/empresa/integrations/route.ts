@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isAllowedWebhookUrl, webhookUrlErrorMessage } from "@/lib/security/webhook-url";
 import { canUseWebhooks } from "@/lib/config/plan-features";
+import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 import { z } from "zod";
 
 const schema = z.object({
@@ -59,6 +60,9 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
+    const limited = rateLimitResponse(request, "empresa-integrations", 30, 60_000);
+    if (limited) return limited;
+
     const body = schema.parse(await request.json());
     const supabase = await createClient();
     const {

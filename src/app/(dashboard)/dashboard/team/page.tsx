@@ -11,10 +11,12 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { useDashboardContext } from "@/components/dashboard/dashboard-provider";
 import { getTeamLimit } from "@/lib/config/plan-features";
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://solarflow-kappa.vercel.app";
+
 export default function TeamPage() {
   const { empresaId, rol, plan } = useDashboardContext();
   const [email, setEmail] = useState("");
-  const [invitaciones, setInvitaciones] = useState<{ email: string; expira_at: string }[]>([]);
+  const [invitaciones, setInvitaciones] = useState<{ email: string; expira_at: string; token: string }[]>([]);
   const [miembros, setMiembros] = useState(0);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
@@ -30,7 +32,7 @@ export default function TeamPage() {
     const [{ data, error }, { count: equipoCount }] = await Promise.all([
       supabase
         .from("invitaciones_equipo")
-        .select("email, expira_at")
+        .select("email, expira_at, token")
         .eq("empresa_id", empresaId)
         .is("aceptada_at", null)
         .gt("expira_at", new Date().toISOString()),
@@ -75,7 +77,7 @@ export default function TeamPage() {
 
     toast({
       title: "Invitación creada",
-      description: json.invitePath ? `Enlace: ${json.invitePath}` : undefined,
+      description: json.invitePath ? `Enlace: ${appUrl.replace(/\/$/, "")}${json.invitePath}` : undefined,
     });
     setEmail("");
     void load();
@@ -137,9 +139,14 @@ export default function TeamPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               {invitaciones.map((inv) => (
-                <p key={inv.email} className="text-sm">
-                  {inv.email} — expira {new Date(inv.expira_at).toLocaleDateString("es-ES")}
-                </p>
+                <div key={inv.email} className="space-y-1 text-sm">
+                  <p>
+                    {inv.email} — expira {new Date(inv.expira_at).toLocaleDateString("es-ES")}
+                  </p>
+                  <p className="break-all text-xs text-muted-foreground">
+                    {appUrl.replace(/\/$/, "")}/invite/{inv.token}
+                  </p>
+                </div>
               ))}
             </CardContent>
           </Card>

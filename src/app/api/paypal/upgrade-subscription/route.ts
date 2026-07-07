@@ -7,6 +7,7 @@ import {
   getPayPalSubscription,
   subscriptionMatchesPlan,
 } from "@/lib/paypal/client";
+import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 import { z } from "zod";
 
 const schema = z.object({
@@ -16,6 +17,9 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const limited = rateLimitResponse(request, "paypal-upgrade", 15, 60_000);
+    if (limited) return limited;
+
     const body = schema.parse(await request.json());
 
     const supabase = await createClient();

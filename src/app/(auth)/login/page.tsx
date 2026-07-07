@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +10,12 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams.get("invite");
+  const presetEmail = searchParams.get("email") ?? "";
+  const [email, setEmail] = useState(presetEmail);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -24,16 +27,30 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
+        const isUnconfirmed =
+          error.message.toLowerCase().includes("email not confirmed") ||
+          error.message.toLowerCase().includes("correo no confirmado");
+        if (isUnconfirmed) {
+          setErrorMsg("Confirma tu email antes de iniciar sesión.");
+          router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+          return;
+        }
         setErrorMsg(error.message);
         toast({ variant: "destructive", title: "Error al iniciar sesión", description: error.message });
         return;
       }
 
+      if (data.user && !data.user.email_confirmed_at) {
+        await supabase.auth.signOut();
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
       toast({ title: "Sesión iniciada" });
-      router.push("/dashboard");
+      router.push(inviteToken ? `/invite/${inviteToken}` : "/dashboard");
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error de conexión";
@@ -93,11 +110,22 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-muted-foreground">
           ¿No tienes cuenta?{" "}
-          <Link href="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
+          <Link
+            href={inviteToken ? `/register?invite=${inviteToken}` : "/register"}
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
             Regístrate
           </Link>
         </p>
       </div>
     </AuthShell>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-muted" />}>
+      <LoginForm />
+    </Suspense>
   );
 }
