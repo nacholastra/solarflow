@@ -52,6 +52,22 @@ export function subscriptionMatchesPlan(sub: PayPalSubscription, plan: PlanId, c
   return sub.plan_id === expectedPlanId;
 }
 
+export async function cancelPayPalSubscription(subscriptionId: string): Promise<void> {
+  try {
+    const token = await getPayPalAccessToken();
+    await fetch(`${getPayPalApiBase()}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ reason: "Cuenta eliminada" }),
+    });
+  } catch (e) {
+    console.error("PayPal cancel subscription failed:", e);
+  }
+}
+
 export async function verifyPayPalWebhook(request: Request, body: string): Promise<boolean> {
   const webhookId = process.env.PAYPAL_WEBHOOK_ID;
   if (!webhookId) {

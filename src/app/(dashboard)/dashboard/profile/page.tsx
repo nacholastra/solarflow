@@ -24,12 +24,15 @@ interface ProfileData {
   };
   email: string | undefined;
   rol: string;
+  is_super_admin?: boolean;
 }
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [nombreEmpresa, setNombreEmpresa] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState("");
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   const load = useCallback(async () => {
@@ -63,6 +66,39 @@ export default function ProfilePage() {
 
     toast({ title: "Perfil actualizado" });
     void load();
+  }
+
+  async function handleDeleteAccount() {
+    if (!profile || confirmDelete.trim() !== profile.empresa.nombre_empresa.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Confirmación incorrecta",
+        description: "Escribe el nombre exacto de tu empresa",
+      });
+      return;
+    }
+
+    const ok = window.confirm(
+      "Se cancelará la suscripción PayPal, se borrarán todos los leads y usuarios del equipo. ¿Continuar?",
+    );
+    if (!ok) return;
+
+    setDeleting(true);
+    const res = await fetch("/api/empresa/account", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmacion: confirmDelete }),
+    });
+    const json = (await res.json()) as { error?: string };
+    setDeleting(false);
+
+    if (!res.ok) {
+      toast({ variant: "destructive", title: "Error", description: json.error ?? "No se pudo eliminar" });
+      return;
+    }
+
+    toast({ title: "Cuenta eliminada" });
+    window.location.href = "/";
   }
 
   if (!profile) return <p>Cargando...</p>;
@@ -143,6 +179,52 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      {profile.is_super_admin && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Administración SolarFlow</CardTitle>
+            <CardDescription>Gestiona todas las empresas del servicio</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" asChild>
+              <Link href="/admin">Abrir panel de administración</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {isAdmin && (
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="text-destructive">Zona peligrosa</CardTitle>
+            <CardDescription>
+              Elimina permanentemente tu empresa, todos los leads, el equipo y la suscripción PayPal.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="confirm_delete">
+                Escribe <span className="font-semibold">{empresa.nombre_empresa}</span> para confirmar
+              </Label>
+              <Input
+                id="confirm_delete"
+                value={confirmDelete}
+                onChange={(e) => setConfirmDelete(e.target.value)}
+                placeholder={empresa.nombre_empresa}
+              />
+            </div>
+            <Button
+              variant="outline"
+              className="border-destructive text-destructive hover:bg-destructive/10"
+              disabled={deleting || confirmDelete.trim() !== empresa.nombre_empresa.trim()}
+              onClick={handleDeleteAccount}
+            >
+              {deleting ? "Eliminando..." : "Eliminar cuenta y todos los datos"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

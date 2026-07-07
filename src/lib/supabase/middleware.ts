@@ -15,6 +15,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/invite") ||
     pathname.startsWith("/verify-email");
   const isDashboard = pathname.startsWith("/dashboard");
+  const isAdminArea = pathname.startsWith("/admin");
   const isProtectedApi =
     pathname.startsWith("/api/") &&
     !pathname.startsWith("/api/auth/register") &&
@@ -26,7 +27,7 @@ export async function updateSession(request: NextRequest) {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
-    if (isDashboard || isProtectedApi) {
+    if (isDashboard || isAdminArea || isProtectedApi) {
       if (isProtectedApi) {
         return NextResponse.json({ error: "Servicio no disponible" }, { status: 503 });
       }
@@ -59,13 +60,14 @@ export async function updateSession(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user && isDashboard) {
+    if (!user && (isDashboard || isAdminArea)) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
+      if (isAdminArea) url.searchParams.set("next", "/admin");
       return NextResponse.redirect(url);
     }
 
-    if (user && !user.email_confirmed_at && isDashboard) {
+    if (user && !user.email_confirmed_at && (isDashboard || isAdminArea)) {
       const url = request.nextUrl.clone();
       url.pathname = "/verify-email";
       url.searchParams.set("email", user.email ?? "");
@@ -89,7 +91,7 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   } catch (e) {
     console.error("Middleware error:", e);
-    if (isDashboard || isProtectedApi) {
+    if (isDashboard || isAdminArea || isProtectedApi) {
       if (isProtectedApi) {
         return NextResponse.json({ error: "Servicio no disponible" }, { status: 503 });
       }

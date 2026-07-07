@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
+import { isSuperAdminEmail } from "@/lib/admin/super-admin";
 import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 import { z } from "zod";
 
@@ -104,6 +105,7 @@ export async function GET() {
       empresa,
       email: user.email,
       rol: equipo.rol,
+      is_super_admin: isSuperAdminEmail(user.email),
     });
   } catch (e) {
     console.error("profile GET error:", e);

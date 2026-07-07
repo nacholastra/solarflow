@@ -50,7 +50,12 @@ function LoginForm() {
       }
 
       toast({ title: "Sesión iniciada" });
-      router.push(inviteToken ? `/invite/${inviteToken}` : "/dashboard");
+      if (inviteToken) {
+        router.push(`/invite/${inviteToken}`);
+      } else {
+        const next = searchParams.get("next");
+        router.push(next && next.startsWith("/") ? next : "/dashboard");
+      }
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error de conexión";
