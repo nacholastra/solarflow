@@ -1,41 +1,33 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { isSuperAdminEmail } from "@/lib/admin/super-admin";
+import { isAdminAuthenticated } from "@/lib/admin/guard";
 import { PRIVATE_PAGE_ROBOTS } from "@/lib/config/seo";
+import { AdminLogoutButton } from "./logout-button";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Admin SolarFlow",
+  title: "Administración",
   robots: PRIVATE_PAGE_ROBOTS,
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const authed = await isAdminAuthenticated();
 
-  if (!user) {
-    redirect("/login?next=/admin");
-  }
-
-  if (!isSuperAdminEmail(user.email)) {
-    redirect("/dashboard");
+  // La página de login se renderiza sin marco. El acceso a las demás rutas
+  // /admin lo garantiza el middleware (redirige a /admin/login si no hay sesión).
+  if (!authed) {
+    return <>{children}</>;
   }
 
   return (
-    <div className="min-h-dvh bg-background">
-      <header className="border-b bg-card px-4 py-4 md:px-8">
+    <div className="min-h-dvh bg-neutral-950 text-neutral-100">
+      <header className="border-b border-neutral-800 px-4 py-4 md:px-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              SolarFlow
+            <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+              Administración
             </p>
-            <h1 className="text-lg font-semibold">Panel de administración</h1>
+            <h1 className="text-lg font-semibold">Panel de control</h1>
           </div>
-          <a href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-            Volver al panel
-          </a>
+          <AdminLogoutButton />
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">{children}</main>

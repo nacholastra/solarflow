@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isSuperAdminEmail } from "@/lib/admin/super-admin";
+import { createServiceClient } from "@/lib/supabase/server";
+import { isAdminAuthenticated } from "@/lib/admin/guard";
 import { deleteEmpresaCompletely } from "@/lib/empresa/delete-empresa";
 import { PLANS, type PlanId } from "@/lib/config/plans";
 import { isSameOrigin } from "@/lib/security/api-origin";
@@ -14,25 +14,15 @@ const patchSchema = z.object({
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-async function requireSuperAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user || !isSuperAdminEmail(user.email)) {
-    return null;
-  }
-  return user;
-}
-
 export async function PATCH(request: Request, context: RouteContext) {
   try {
     if (!isSameOrigin(request)) {
       return NextResponse.json({ error: "Origen no permitido" }, { status: 403 });
     }
 
-    const user = await requireSuperAdmin();
-    if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
     const limited = rateLimitResponse(request, "admin-empresa-patch", 30, 60_000);
     if (limited) return limited;
@@ -84,8 +74,9 @@ export async function DELETE(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Origen no permitido" }, { status: 403 });
     }
 
-    const user = await requireSuperAdmin();
-    if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
     const limited = rateLimitResponse(request, "admin-empresa-delete", 10, 3_600_000);
     if (limited) return limited;

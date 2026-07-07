@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isSuperAdminEmail } from "@/lib/admin/super-admin";
+import { createServiceClient } from "@/lib/supabase/server";
+import { isAdminAuthenticated } from "@/lib/admin/guard";
 
 export async function GET() {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user || !isSuperAdminEmail(user.email)) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
     const service = await createServiceClient();

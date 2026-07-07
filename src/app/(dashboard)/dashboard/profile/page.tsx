@@ -24,7 +24,6 @@ interface ProfileData {
   };
   email: string | undefined;
   rol: string;
-  is_super_admin?: boolean;
 }
 
 export default function ProfilePage() {
@@ -179,20 +178,6 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
-
-      {profile.is_super_admin && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Administración SolarFlow</CardTitle>
-            <CardDescription>Gestiona todas las empresas del servicio</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" asChild>
-              <Link href="/admin">Abrir panel de administración</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
 
       {isAdmin && (
         <Card className="border-destructive/30">

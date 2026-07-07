@@ -119,7 +119,7 @@ export default function AdminPage() {
     [empresas],
   );
 
-  if (loading) return <div className="h-64 animate-pulse rounded-xl bg-muted" />;
+  if (loading) return <div className="h-64 animate-pulse rounded-xl bg-neutral-900" />;
 
   return (
     <div className="space-y-6">
@@ -130,19 +130,19 @@ export default function AdminPage() {
           { label: "Plan Pro", value: stats.pro },
           { label: "Plan Basic", value: stats.basic },
         ].map((s) => (
-          <Card key={s.label}>
+          <Card key={s.label} className="border-neutral-800 bg-neutral-900 text-neutral-100">
             <CardHeader className="pb-2">
-              <CardDescription>{s.label}</CardDescription>
+              <CardDescription className="text-neutral-400">{s.label}</CardDescription>
               <CardTitle className="text-3xl">{s.value}</CardTitle>
             </CardHeader>
           </Card>
         ))}
       </div>
 
-      <Card>
+      <Card className="border-neutral-800 bg-neutral-900 text-neutral-100">
         <CardHeader>
           <CardTitle>Empresas registradas</CardTitle>
-          <CardDescription>Gestiona planes, estado y eliminación de cuentas</CardDescription>
+          <CardDescription className="text-neutral-400">Gestiona planes, estado y eliminación de cuentas</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -150,10 +150,10 @@ export default function AdminPage() {
               placeholder="Buscar por nombre, slug o email..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="max-w-sm"
+              className="max-w-sm border-neutral-800 bg-neutral-950 text-neutral-100"
             />
             <select
-              className="h-10 rounded-md border bg-background px-3 text-sm"
+              className="h-10 rounded-md border border-neutral-800 bg-neutral-950 px-3 text-sm text-neutral-100"
               value={planFilter}
               onChange={(e) => setPlanFilter(e.target.value as typeof planFilter)}
             >
@@ -163,7 +163,7 @@ export default function AdminPage() {
               <option value="none">Sin plan</option>
             </select>
             <select
-              className="h-10 rounded-md border bg-background px-3 text-sm"
+              className="h-10 rounded-md border border-neutral-800 bg-neutral-950 px-3 text-sm text-neutral-100"
               value={estadoFilter}
               onChange={(e) => setEstadoFilter(e.target.value as typeof estadoFilter)}
             >
@@ -176,9 +176,9 @@ export default function AdminPage() {
             </select>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border">
+          <div className="overflow-x-auto rounded-xl border border-neutral-800">
             <table className="w-full min-w-[900px] text-sm">
-              <thead className="bg-muted/50">
+              <thead className="bg-neutral-900">
                 <tr>
                   {["Empresa", "Plan", "Estado", "Leads", "Equipo", "Admin", "Alta", "Acciones"].map(
                     (h) => (
@@ -191,14 +191,14 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {filtered.map((e) => (
-                  <tr key={e.id} className="border-t">
+                  <tr key={e.id} className="border-t border-neutral-800">
                     <td className="px-3 py-3">
                       <p className="font-medium">{e.nombre_empresa}</p>
-                      <p className="text-xs text-muted-foreground">{e.slug}</p>
+                      <p className="text-xs text-neutral-500">{e.slug}</p>
                     </td>
                     <td className="px-3 py-3 capitalize">
                       <select
-                        className="rounded-md border bg-background px-2 py-1 text-xs capitalize"
+                        className="rounded-md border border-neutral-700 bg-neutral-950 px-2 py-1 text-xs capitalize text-neutral-100"
                         value={e.plan ?? "none"}
                         onChange={(ev) => updatePlan(e.id, ev.target.value)}
                       >
@@ -209,7 +209,7 @@ export default function AdminPage() {
                     </td>
                     <td className="px-3 py-3">
                       <select
-                        className="rounded-md border bg-background px-2 py-1 text-xs capitalize"
+                        className="rounded-md border border-neutral-700 bg-neutral-950 px-2 py-1 text-xs capitalize text-neutral-100"
                         value={e.estado_suscripcion}
                         onChange={(ev) => updateEstado(e.id, ev.target.value)}
                       >
@@ -245,12 +245,12 @@ export default function AdminPage() {
           </div>
 
           {filtered.length === 0 && (
-            <p className="text-center text-sm text-muted-foreground">No hay empresas con esos filtros</p>
+            <p className="text-center text-sm text-neutral-500">No hay empresas con esos filtros</p>
           )}
 
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline">{filtered.length} mostradas</Badge>
-            <Badge variant="outline">{empresas.length} total</Badge>
+          <div className="flex flex-wrap gap-2 text-xs text-neutral-500">
+            <Badge variant="outline" className="border-neutral-700 text-neutral-400">{filtered.length} mostradas</Badge>
+            <Badge variant="outline" className="border-neutral-700 text-neutral-400">{empresas.length} total</Badge>
           </div>
         </CardContent>
       </Card>
