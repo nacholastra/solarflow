@@ -16,6 +16,26 @@ const schema = z.object({
   invite_token: z.string().uuid().optional(),
 });
 
+function mapSignUpError(message: string | undefined): string {
+  const msg = (message ?? "").toLowerCase();
+  if (msg.includes("already registered") || msg.includes("already been registered")) {
+    return "Ya existe una cuenta con ese email. Inicia sesión.";
+  }
+  if (msg.includes("rate limit") || msg.includes("too many") || msg.includes("email rate")) {
+    return "Se alcanzó el límite de envío de emails. Espera unos minutos e inténtalo de nuevo.";
+  }
+  if (msg.includes("sending") && msg.includes("email")) {
+    return "No se pudo enviar el email de confirmación. Revisa la configuración de correo (SMTP) en Supabase.";
+  }
+  if (msg.includes("password")) {
+    return "La contraseña no cumple los requisitos mínimos.";
+  }
+  if (msg.includes("signup") && msg.includes("disabled")) {
+    return "El registro está deshabilitado en este momento.";
+  }
+  return "No se pudo crear la cuenta. Inténtalo de nuevo.";
+}
+
 export async function POST(request: Request) {
   try {
     const limited = rateLimitResponse(request, "auth-register", 5, 3_600_000);
@@ -57,7 +77,15 @@ export async function POST(request: Request) {
       });
 
       if (authError || !authData.user) {
-        return NextResponse.json({ error: "No se pudo crear la cuenta" }, { status: 400 });
+        console.error("register signUp error (invite):", authError?.message);
+        return NextResponse.json({ error: mapSignUpError(authError?.message) }, { status: 400 });
+      }
+
+      if (authData.user.identities && authData.user.identities.length === 0) {
+        return NextResponse.json(
+          { error: "Ya existe una cuenta con ese email. Inicia sesión." },
+          { status: 409 },
+        );
       }
 
       const { error: equipoError } = await service.from("equipo").insert({
@@ -113,7 +141,15 @@ export async function POST(request: Request) {
     });
 
     if (authError || !authData.user) {
-      return NextResponse.json({ error: "No se pudo crear la cuenta" }, { status: 400 });
+      console.error("register signUp error:", authError?.message);
+      return NextResponse.json({ error: mapSignUpError(authError?.message) }, { status: 400 });
+    }
+
+    if (authData.user.identities && authData.user.identities.length === 0) {
+      return NextResponse.json(
+        { error: "Ya existe una cuenta con ese email. Inicia sesión." },
+        { status: 409 },
+      );
     }
 
     const { data: empresa, error: empresaError } = await service
