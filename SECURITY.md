@@ -39,6 +39,10 @@ Ejecutar en Supabase SQL Editor, en orden:
 
 - Webhooks verificados con `PAYPAL_WEBHOOK_ID` y firma PayPal (rechazo fail-secure si falta configuración).
 - Activación/upgrade/downgrade verifica la suscripción en la API de PayPal antes de actualizar la BD.
+- Cobro mensual: planes PayPal configurados con ciclo `MONTH` / 1.
+- Eventos webhook obligatorios: `BILLING.SUBSCRIPTION.ACTIVATED`, `CANCELLED`, `SUSPENDED`, `EXPIRED`, `PAYMENT.FAILED`, `PAYMENT.SALE.COMPLETED`, `PAYMENT.SALE.DENIED`.
+- `PAYMENT.SALE.COMPLETED` reactiva la cuenta y reinicia `leads_usados_mes` cada mes.
+- Verificar con: `node scripts/verify-paypal-billing.mjs`
 - Rate limit: 15 req/min por IP en rutas PayPal.
 
 ## Webhooks salientes (Zapier/Make)
