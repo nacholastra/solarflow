@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isAllowedWebhookUrl, webhookUrlErrorMessage } from "@/lib/security/webhook-url";
 import { canUseWebhooks } from "@/lib/config/plan-features";
 import { rateLimitResponse } from "@/lib/security/api-rate-limit";
+import { READONLY_ERROR } from "@/lib/empresa/subscription-guard";
 import { z } from "zod";
 
 const schema = z.object({
@@ -89,12 +90,16 @@ export async function PATCH(request: Request) {
     const service = await createServiceClient();
     const { data: empresaRow } = await service
       .from("empresas")
-      .select("id, plan")
+      .select("id, plan, estado_suscripcion")
       .eq("id", equipo.empresa_id)
       .single();
 
     if (!empresaRow) {
       return NextResponse.json({ error: "Empresa no encontrada" }, { status: 404 });
+    }
+
+    if (empresaRow.estado_suscripcion !== "active") {
+      return NextResponse.json({ error: READONLY_ERROR }, { status: 403 });
     }
 
     if (!canUseWebhooks(empresaRow.plan)) {

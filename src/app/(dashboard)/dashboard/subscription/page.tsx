@@ -9,6 +9,14 @@ import { PLANS, getPlanPrice, type Currency, type PlanId } from "@/lib/config/pl
 import type { Empresa } from "@/types/database";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { formatCurrency } from "@/lib/utils";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { useDashboardContext } from "@/components/dashboard/dashboard-provider";
@@ -44,6 +52,9 @@ export default function SubscriptionPage() {
   const [upgrading, setUpgrading] = useState(false);
   const [downgrading, setDowngrading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [proximoCobro, setProximoCobro] = useState<string | null>(null);
   const supabase = createClient();
 
   const load = useCallback(async () => {
@@ -63,6 +74,13 @@ export default function SubscriptionPage() {
       }
       if (data.plan === "basic") setDowngrading(false);
     }
+    // Consulta separada y tolerante: la columna puede no existir aún (migración 008).
+    const { data: cobro } = await supabase
+      .from("empresas")
+      .select("proximo_cobro")
+      .eq("id", empresaId)
+      .single();
+    setProximoCobro((cobro as { proximo_cobro?: string | null } | null)?.proximo_cobro ?? null);
     setLoading(false);
   }, [empresaId, supabase]);
 
@@ -129,6 +147,25 @@ export default function SubscriptionPage() {
     router.refresh();
   }
 
+  async function handleCancel() {
+    setCancelling(true);
+    const res = await fetch("/api/paypal/cancel-subscription", { method: "POST" });
+    const json = (await res.json()) as { error?: string };
+    setCancelling(false);
+    if (!res.ok) {
+      toast({ variant: "destructive", title: "Error", description: json.error ?? "No se pudo cancelar" });
+      return;
+    }
+    setCancelOpen(false);
+    toast({
+      title: "Suscripción cancelada",
+      description: "Tu cuenta queda en solo lectura. Puedes reactivar un plan cuando quieras.",
+    });
+    void load();
+    await refreshPlan();
+    router.refresh();
+  }
+
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "";
   const paypalReady = clientId.length > 0 && !clientId.startsWith("your-");
 
@@ -159,15 +196,67 @@ export default function SubscriptionPage() {
               {empresa.moneda_facturacion}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Button variant="outline" asChild>
-              <a href="https://www.paypal.com/myaccount/autopay/" target="_blank" rel="noopener noreferrer">
-                Gestionar en PayPal
-              </a>
-            </Button>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border bg-muted/40 px-4 py-3 text-sm">
+              <p className="font-medium">Facturación mensual automática</p>
+              <p className="text-muted-foreground">
+                {proximoCobro
+                  ? `Próximo cobro: ${new Date(proximoCobro).toLocaleDateString("es-ES", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}`
+                  : "Se renueva automáticamente cada mes."}{" "}
+                Te avisaremos 5 días antes de cada cobro.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" asChild>
+                <a href="https://www.paypal.com/myaccount/autopay/" target="_blank" rel="noopener noreferrer">
+                  Gestionar en PayPal
+                </a>
+              </Button>
+              <Button variant="destructive" onClick={() => setCancelOpen(true)}>
+                Cancelar suscripción
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={cancelOpen} onOpenChange={(o) => !cancelling && setCancelOpen(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Cancelar tu suscripción?</DialogTitle>
+            <DialogDescription>
+              Se detendrá la facturación mensual y tu cuenta pasará a{" "}
+              <strong>solo lectura</strong> (sin plan).
+            </DialogDescription>
+          </DialogHeader>
+          <ul className="space-y-2 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-muted-foreground">
+            {[
+              "No se te volverá a cobrar.",
+              "Podrás ver tus datos y leads, pero no editarlos.",
+              "El widget dejará de recibir nuevos leads.",
+              "Puedes reactivar un plan cuando quieras.",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-destructive" />
+                {item}
+              </li>
+            ))}
+          </ul>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button type="button" variant="outline" disabled={cancelling} onClick={() => setCancelOpen(false)}>
+              Mantener suscripción
+            </Button>
+            <Button type="button" variant="destructive" disabled={cancelling} onClick={handleCancel}>
+              {cancelling ? "Cancelando…" : "Sí, cancelar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {isActive && isBasic && (
         <Card className="border-amber-200">

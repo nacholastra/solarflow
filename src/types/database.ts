@@ -38,6 +38,7 @@ export type Database = {
           leads_limite_mes: number;
           leads_usados_mes: number;
           periodo_reset: string | null;
+          proximo_cobro: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -63,6 +64,7 @@ export type Database = {
           leads_limite_mes?: number;
           leads_usados_mes?: number;
           periodo_reset?: string | null;
+          proximo_cobro?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -88,6 +90,7 @@ export type Database = {
           leads_limite_mes?: number;
           leads_usados_mes?: number;
           periodo_reset?: string | null;
+          proximo_cobro?: string | null;
           created_at?: string;
           updated_at?: string;
         };

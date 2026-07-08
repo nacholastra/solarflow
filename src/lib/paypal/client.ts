@@ -32,6 +32,10 @@ export interface PayPalSubscription {
   status: string;
   custom_id?: string;
   plan_id?: string;
+  billing_info?: {
+    next_billing_time?: string;
+    last_payment?: { time?: string };
+  };
 }
 
 export async function getPayPalSubscription(subscriptionId: string): Promise<PayPalSubscription> {
@@ -44,6 +48,17 @@ export async function getPayPalSubscription(subscriptionId: string): Promise<Pay
     throw new Error(json.message ?? "Suscripción PayPal no encontrada");
   }
   return json;
+}
+
+/** Devuelve la fecha del próximo cobro (next_billing_time) o null si no está disponible. */
+export async function getPayPalNextBillingTime(subscriptionId: string): Promise<string | null> {
+  try {
+    const sub = await getPayPalSubscription(subscriptionId);
+    return sub.billing_info?.next_billing_time ?? null;
+  } catch (e) {
+    console.warn("No se pudo obtener next_billing_time de PayPal:", e);
+    return null;
+  }
 }
 
 export function subscriptionMatchesPlan(sub: PayPalSubscription, plan: PlanId, currency: Currency): boolean {

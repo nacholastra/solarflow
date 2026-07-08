@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getTeamLimit } from "@/lib/config/plan-features";
 import { isSameOrigin } from "@/lib/security/api-origin";
 import { checkRateLimit } from "@/lib/security/rate-limit";
+import { READONLY_ERROR } from "@/lib/empresa/subscription-guard";
 import { z } from "zod";
 
 const schema = z.object({
@@ -47,12 +48,16 @@ export async function POST(request: Request) {
     const service = await createServiceClient();
     const { data: empresa } = await service
       .from("empresas")
-      .select("id, plan")
+      .select("id, plan, estado_suscripcion")
       .eq("id", equipo.empresa_id)
       .single();
 
     if (!empresa) {
       return NextResponse.json({ error: "Empresa no encontrada" }, { status: 404 });
+    }
+
+    if (empresa.estado_suscripcion !== "active") {
+      return NextResponse.json({ error: READONLY_ERROR }, { status: 403 });
     }
 
     const teamLimit = getTeamLimit(empresa.plan);

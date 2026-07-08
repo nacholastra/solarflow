@@ -1,5 +1,24 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getLeadsLimit, type PlanId } from "@/lib/config/plans";
+import { getPayPalNextBillingTime } from "@/lib/paypal/client";
+
+/**
+ * Actualiza proximo_cobro sin romper el flujo si la columna aún no existe
+ * (migración 008 pendiente). Los errores se registran, no se lanzan.
+ */
+async function updateProximoCobro(
+  service: SupabaseClient,
+  empresaId: string,
+  value: string | null,
+): Promise<void> {
+  const { error } = await service
+    .from("empresas")
+    .update({ proximo_cobro: value })
+    .eq("id", empresaId);
+  if (error) {
+    console.warn(`No se pudo actualizar proximo_cobro (¿migración 008 pendiente?): ${error.message}`);
+  }
+}
 
 export type PayPalWebhookResource = {
   id?: string;
@@ -54,6 +73,8 @@ export async function onSubscriptionPaymentSucceeded(
       periodo_reset: today,
     })
     .eq("id", empresa.id);
+
+  await updateProximoCobro(service, empresa.id, await getPayPalNextBillingTime(subscriptionId));
 }
 
 export async function onSubscriptionActivated(
@@ -75,6 +96,8 @@ export async function onSubscriptionActivated(
       periodo_reset: today,
     })
     .eq("id", empresaId);
+
+  await updateProximoCobro(service, empresaId, await getPayPalNextBillingTime(subscriptionId));
 }
 
 export async function setSubscriptionStatus(
@@ -82,10 +105,25 @@ export async function setSubscriptionStatus(
   subscriptionId: string,
   estado: "suspended" | "cancelled",
 ): Promise<void> {
-  await service
+  // Al cancelar/expirar la suscripción, la cuenta vuelve a "sin plan"
+  // (solo lectura). Al suspender por impago se conserva el plan para reactivar.
+  const patch: Record<string, unknown> =
+    estado === "cancelled"
+      ? { estado_suscripcion: estado, plan: null, proximo_cobro: null }
+      : { estado_suscripcion: estado };
+
+  const { error } = await service
     .from("empresas")
-    .update({ estado_suscripcion: estado })
+    .update(patch)
     .eq("paypal_subscription_id", subscriptionId);
+
+  if (error && estado === "cancelled") {
+    // Fallback si la columna proximo_cobro aún no existe (migración 008 pendiente)
+    await service
+      .from("empresas")
+      .update({ estado_suscripcion: estado, plan: null })
+      .eq("paypal_subscription_id", subscriptionId);
+  }
 }
 
 /** Eventos que deben estar suscritos en el webhook de PayPal. */

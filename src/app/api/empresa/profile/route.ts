@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 import { rateLimitResponse } from "@/lib/security/api-rate-limit";
+import { isEmpresaActive, READONLY_ERROR } from "@/lib/empresa/subscription-guard";
 import { z } from "zod";
 
 const schema = z.object({
@@ -33,6 +34,10 @@ export async function PATCH(request: Request) {
 
     const slug = slugify(body.nombre_empresa);
     const service = await createServiceClient();
+
+    if (!(await isEmpresaActive(service, equipo.empresa_id))) {
+      return NextResponse.json({ error: READONLY_ERROR }, { status: 403 });
+    }
 
     const { data: existing } = await service
       .from("empresas")
