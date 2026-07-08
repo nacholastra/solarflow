@@ -1,15 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, CalendarClock, X } from "lucide-react";
-
-type BillingStatus = {
-  estado: "pending" | "active" | "suspended" | "cancelled";
-  plan: "basic" | "pro" | null;
-  proximoCobro: string | null;
-  diasRestantes: number | null;
-};
+import type { BillingStatus } from "@/lib/dashboard/billing-status";
 
 const ESTADO_LABEL: Record<string, string> = {
   cancelled: "cancelada",
@@ -17,22 +11,8 @@ const ESTADO_LABEL: Record<string, string> = {
   pending: "pendiente de activación",
 };
 
-export function AccountStatusBanner() {
-  const [status, setStatus] = useState<BillingStatus | null>(null);
+export function AccountStatusBanner({ status }: { status: BillingStatus | null }) {
   const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    fetch("/api/empresa/billing-status")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: BillingStatus | null) => {
-        if (active && data) setStatus(data);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
 
   if (!status) return null;
 

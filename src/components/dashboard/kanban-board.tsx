@@ -22,8 +22,8 @@ import { DeleteConfirmDialog } from "@/components/shared/delete-confirm-dialog";
 import { KanbanColumn } from "./kanban-column";
 import { LeadDetailModal } from "./lead-detail-modal";
 
-export function KanbanBoard({ empresaId }: { empresaId: string }) {
-  const { data: leads = [], isLoading } = useLeads(empresaId);
+export function KanbanBoard({ empresaId, initialLeads }: { empresaId: string; initialLeads?: Lead[] }) {
+  const { data: leads = [], isLoading } = useLeads(empresaId, initialLeads);
   const invalidateLeads = useInvalidateLeads();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);

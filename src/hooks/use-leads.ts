@@ -23,10 +23,11 @@ async function fetchLeads(empresaId: string): Promise<Lead[]> {
   return (data ?? []) as Lead[];
 }
 
-export function useLeads(empresaId: string) {
+export function useLeads(empresaId: string, initialData?: Lead[]) {
   return useQuery({
     queryKey: leadsQueryKey(empresaId),
     queryFn: () => fetchLeads(empresaId),
+    initialData,
     staleTime: 30_000,
   });
 }

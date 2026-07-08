@@ -26,22 +26,35 @@ export default async function DashboardPage() {
   const { empresaId } = await requireDashboardContext();
   const supabase = await createClient();
 
-  const [{ data: empresa }, { data: leads }] = await Promise.all([
+  const [{ data: empresa }, totalRes, nuevosRes, cerradosRes] = await Promise.all([
     supabase
       .from("empresas")
       .select("nombre_empresa, plan, leads_limite_mes, leads_usados_mes, estado_suscripcion")
       .eq("id", empresaId)
       .single(),
-    supabase.from("leads").select("estado").eq("empresa_id", empresaId),
+    supabase
+      .from("leads")
+      .select("*", { count: "exact", head: true })
+      .eq("empresa_id", empresaId),
+    supabase
+      .from("leads")
+      .select("*", { count: "exact", head: true })
+      .eq("empresa_id", empresaId)
+      .eq("estado", "Nuevo"),
+    supabase
+      .from("leads")
+      .select("*", { count: "exact", head: true })
+      .eq("empresa_id", empresaId)
+      .eq("estado", "Cerrado"),
   ]);
 
   if (!empresa) {
     return <p className="text-muted-foreground">No se encontró tu empresa. Contacta soporte.</p>;
   }
 
-  const total = leads?.length ?? 0;
-  const nuevos = leads?.filter((l) => l.estado === "Nuevo").length ?? 0;
-  const cerrados = leads?.filter((l) => l.estado === "Cerrado").length ?? 0;
+  const total = totalRes.count ?? 0;
+  const nuevos = nuevosRes.count ?? 0;
+  const cerrados = cerradosRes.count ?? 0;
   const conversion = total > 0 ? (cerrados / total) * 100 : 0;
   const usagePct =
     empresa.leads_limite_mes > 0 ? (empresa.leads_usados_mes / empresa.leads_limite_mes) * 100 : 0;

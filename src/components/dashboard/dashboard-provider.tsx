@@ -33,10 +33,6 @@ export function DashboardProvider({
     setPlan(initial.plan);
   }, [initial.plan]);
 
-  useEffect(() => {
-    void refreshPlan();
-  }, [refreshPlan]);
-
   const value = useMemo(
     () => ({ ...initial, plan, refreshPlan }),
     [initial, plan, refreshPlan],

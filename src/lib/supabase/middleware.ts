@@ -2,6 +2,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isSameOrigin } from "@/lib/security/api-origin";
 import { ADMIN_COOKIE, verifyAdminToken } from "@/lib/admin/session";
+import { hasSupabaseAuthCookie } from "@/lib/supabase/auth-cookie";
 
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -41,6 +42,31 @@ export async function updateSession(request: NextRequest) {
       url.pathname = "/login";
       return NextResponse.redirect(url);
     }
+    return NextResponse.next({ request });
+  }
+
+  const hasAuthCookie = hasSupabaseAuthCookie(request);
+
+  if (isProtectedApi && !hasAuthCookie) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const skipSupabase =
+    pathname === "/" ||
+    pathname.startsWith("/widget/") ||
+    pathname.startsWith("/api/localidades") ||
+    pathname.startsWith("/api/leads") ||
+    pathname.startsWith("/api/auth/register") ||
+    pathname.startsWith("/api/auth/resend-confirmation") ||
+    pathname.startsWith("/api/paypal/webhook") ||
+    pathname.startsWith("/api/invite/") ||
+    ((pathname.startsWith("/login") ||
+      pathname.startsWith("/register") ||
+      pathname.startsWith("/verify-email") ||
+      pathname.startsWith("/invite")) &&
+      !hasAuthCookie);
+
+  if (skipSupabase) {
     return NextResponse.next({ request });
   }
 

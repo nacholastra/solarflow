@@ -4,6 +4,7 @@ import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { DashboardProvider } from "@/components/dashboard/dashboard-provider";
 import { AccountStatusBanner } from "@/components/dashboard/account-status-banner";
 import { requireDashboardContext } from "@/lib/dashboard/session";
+import { getBillingStatus } from "@/lib/dashboard/billing-status";
 import { PRIVATE_PAGE_ROBOTS } from "@/lib/config/seo";
 
 export const metadata: Metadata = {
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const context = await requireDashboardContext();
+  const billingStatus = await getBillingStatus(context.empresaId);
 
   return (
     <DashboardProvider value={context}>
@@ -21,7 +23,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <MobileNav />
           <main className="flex-1 overflow-y-auto overscroll-y-contain px-4 py-6 md:px-8 md:py-8">
             <div className="mx-auto max-w-6xl">
-              <AccountStatusBanner />
+              <AccountStatusBanner status={billingStatus} />
               {children}
             </div>
           </main>

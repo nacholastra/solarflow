@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
@@ -16,10 +16,18 @@ const navLinks = [
   { label: "FAQ", href: "#faq" },
 ];
 
-export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
+export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(Boolean(session));
+    });
+  }, []);
 
   async function handleLogout() {
     setLoggingOut(true);

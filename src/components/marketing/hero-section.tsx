@@ -1,7 +1,6 @@
-import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
+import { HeroCTAs } from "@/components/marketing/hero-ctas";
 
 const highlights = [
   "Simulador embebible en tu web",
@@ -9,7 +8,7 @@ const highlights = [
   "Integraciones con Zapier y Make",
 ];
 
-export function HeroSection({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
+export function HeroSection() {
   return (
     <section
       className="relative overflow-hidden border-b border-border"
@@ -34,28 +33,7 @@ export function HeroSection({ isAuthenticated = false }: { isAuthenticated?: boo
             organiza en un CRM pensado para equipos comerciales del sector solar.
           </p>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            {isAuthenticated ? (
-              <Button size="lg" asChild>
-                <Link href="/dashboard">
-                  Ir al panel
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-            ) : (
-              <>
-                <Button size="lg" asChild>
-                  <Link href="/register">
-                    Crear cuenta
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link href="/login">Acceder al panel</Link>
-                </Button>
-              </>
-            )}
-          </div>
+          <HeroCTAs />
 
           <ul className="mt-8 flex flex-col gap-2.5">
             {highlights.map((item) => (
