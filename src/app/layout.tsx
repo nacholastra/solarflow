@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   },
   description: BRAND.tagline,
   applicationName: BRAND.name,
+  verification: {
+    google: "6L6ylF9cVqh0z2TmWOMvu1v1M9z0MVd7BcdBR27JWDU",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
