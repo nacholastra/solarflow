@@ -103,7 +103,16 @@ export default function ContactsPage() {
             <tbody>
               {filtered.map((l) => (
                 <tr key={l.id} className="border-t hover:bg-muted/30">
-                  <td className="px-4 py-3 font-medium">{l.nombre}</td>
+                  <td className="px-4 py-3 font-medium">
+                    <span className="flex items-center gap-2">
+                      {l.nombre}
+                      {l.es_prueba && (
+                        <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                          Prueba
+                        </span>
+                      )}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">{l.email}</td>
                   <td className="px-4 py-3">{l.telefono}</td>
                   <td className="px-4 py-3">{l.ciudad}</td>

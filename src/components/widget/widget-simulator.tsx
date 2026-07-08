@@ -217,7 +217,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
         )}
         {preview && step < 4 && (
           <p className="text-xs text-center text-muted-foreground bg-muted rounded-md py-2">
-            Modo prueba — los datos se guardan en tu CRM
+            Modo prueba — se guarda en tu CRM como “Prueba” y no consume tu cuota mensual
           </p>
         )}
         {step === 0 && (

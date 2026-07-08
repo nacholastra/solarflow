@@ -150,6 +150,7 @@ export type Database = {
           utm_medium: string | null;
           utm_campaign: string | null;
           consentimiento_rgpd: boolean;
+          es_prueba: boolean;
           ip_hash: string | null;
           created_at: string;
           updated_at: string;
@@ -183,6 +184,7 @@ export type Database = {
           utm_medium?: string | null;
           utm_campaign?: string | null;
           consentimiento_rgpd: boolean;
+          es_prueba?: boolean;
           ip_hash?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -216,6 +218,7 @@ export type Database = {
           utm_medium?: string | null;
           utm_campaign?: string | null;
           consentimiento_rgpd?: boolean;
+          es_prueba?: boolean;
           ip_hash?: string | null;
           created_at?: string;
           updated_at?: string;

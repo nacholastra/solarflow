@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Lead } from "@/types/database";
 
 const LEAD_COLUMNS =
-  "id, empresa_id, nombre, email, telefono, ciudad, estado, kwp_estimado, ahorro_anual_eur, notas, created_at, updated_at";
+  "id, empresa_id, nombre, email, telefono, ciudad, comunidad, tipo_inmueble, estado, kwp_estimado, ahorro_anual_eur, payback_anos, notas, es_prueba, created_at, updated_at";
 
 export function leadsQueryKey(empresaId: string) {
   return ["leads", empresaId] as const;

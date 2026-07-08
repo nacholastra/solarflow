@@ -155,6 +155,7 @@ export async function POST(request: Request) {
       payback_anos: resultado.payback_anos,
       produccion_anual_kwh: resultado.produccion_anual_kwh,
       consentimiento_rgpd: true,
+      es_prueba: isPreview,
       utm_source: data.utm_source,
       utm_medium: data.utm_medium,
       utm_campaign: data.utm_campaign,
