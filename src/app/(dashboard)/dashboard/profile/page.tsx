@@ -9,6 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { DeleteConfirmDialog } from "@/components/shared/delete-confirm-dialog";
+
+const DELETE_CONSEQUENCES = [
+  "Se cancelará la suscripción PayPal activa",
+  "Se borrarán todos los leads y el historial del CRM",
+  "Se eliminarán los miembros del equipo y sus accesos",
+  "Se perderá la configuración del simulador y el widget",
+];
 
 interface ProfileData {
   empresa: {
@@ -32,6 +40,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   const load = useCallback(async () => {
@@ -67,7 +76,7 @@ export default function ProfilePage() {
     void load();
   }
 
-  async function handleDeleteAccount() {
+  function openDeleteDialog() {
     if (!profile || confirmDelete.trim() !== profile.empresa.nombre_empresa.trim()) {
       toast({
         variant: "destructive",
@@ -76,11 +85,11 @@ export default function ProfilePage() {
       });
       return;
     }
+    setDeleteDialogOpen(true);
+  }
 
-    const ok = window.confirm(
-      "Se cancelará la suscripción PayPal, se borrarán todos los leads y usuarios del equipo. ¿Continuar?",
-    );
-    if (!ok) return;
+  async function handleDeleteAccount() {
+    if (!profile) return;
 
     setDeleting(true);
     const res = await fetch("/api/empresa/account", {
@@ -96,6 +105,7 @@ export default function ProfilePage() {
       return;
     }
 
+    setDeleteDialogOpen(false);
     toast({ title: "Cuenta eliminada" });
     window.location.href = "/";
   }
@@ -203,13 +213,23 @@ export default function ProfilePage() {
               variant="outline"
               className="border-destructive text-destructive hover:bg-destructive/10"
               disabled={deleting || confirmDelete.trim() !== empresa.nombre_empresa.trim()}
-              onClick={handleDeleteAccount}
+              onClick={openDeleteDialog}
             >
-              {deleting ? "Eliminando..." : "Eliminar cuenta y todos los datos"}
+              Eliminar cuenta y todos los datos
             </Button>
           </CardContent>
         </Card>
       )}
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="¿Eliminar tu cuenta?"
+        entityName={empresa.nombre_empresa}
+        consequences={DELETE_CONSEQUENCES}
+        loading={deleting}
+        onConfirm={handleDeleteAccount}
+      />
     </div>
   );
 }

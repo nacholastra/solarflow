@@ -6,6 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DeleteConfirmDialog } from "@/components/shared/delete-confirm-dialog";
+import { cn } from "@/lib/utils";
+
+const ADMIN_DELETE_CONSEQUENCES = [
+  "Se cancelará la suscripción PayPal si existe",
+  "Se borrarán todos los leads y datos del CRM",
+  "Se eliminarán los usuarios del equipo",
+  "Se perderá toda la configuración de la empresa",
+];
 
 type EmpresaRow = {
   id: string;
@@ -29,6 +38,8 @@ export default function AdminPage() {
   const [filter, setFilter] = useState("");
   const [planFilter, setPlanFilter] = useState<"all" | "basic" | "pro" | "none">("all");
   const [estadoFilter, setEstadoFilter] = useState<"all" | (typeof ESTADOS)[number]>("all");
+  const [deleteTarget, setDeleteTarget] = useState<EmpresaRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/admin/empresas");
@@ -77,34 +88,20 @@ export default function AdminPage() {
     void load();
   }
 
-  async function updatePlan(id: string, plan: string) {
-    const value = plan === "none" ? null : plan;
-    const res = await fetch(`/api/admin/empresas/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plan: value }),
-    });
+  async function handleDeleteConfirm() {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
+    const res = await fetch(`/api/admin/empresas/${deleteTarget.id}`, { method: "DELETE" });
     const json = (await res.json()) as { error?: string };
+    setDeleting(false);
+
     if (!res.ok) {
       toast({ variant: "destructive", title: "Error", description: json.error });
       return;
     }
-    toast({ title: "Plan actualizado" });
-    void load();
-  }
 
-  async function deleteEmpresa(empresa: EmpresaRow) {
-    const ok = window.confirm(
-      `¿Eliminar "${empresa.nombre_empresa}" y todos sus datos? Esta acción no se puede deshacer.`,
-    );
-    if (!ok) return;
-
-    const res = await fetch(`/api/admin/empresas/${empresa.id}`, { method: "DELETE" });
-    const json = (await res.json()) as { error?: string };
-    if (!res.ok) {
-      toast({ variant: "destructive", title: "Error", description: json.error });
-      return;
-    }
+    setDeleteTarget(null);
     toast({ title: "Empresa eliminada" });
     void load();
   }
@@ -196,16 +193,21 @@ export default function AdminPage() {
                       <p className="font-medium">{e.nombre_empresa}</p>
                       <p className="text-xs text-neutral-500">{e.slug}</p>
                     </td>
-                    <td className="px-3 py-3 capitalize">
-                      <select
-                        className="rounded-md border border-neutral-700 bg-neutral-950 px-2 py-1 text-xs capitalize text-neutral-100"
-                        value={e.plan ?? "none"}
-                        onChange={(ev) => updatePlan(e.id, ev.target.value)}
-                      >
-                        <option value="none">Sin plan</option>
-                        <option value="basic">Basic</option>
-                        <option value="pro">Pro</option>
-                      </select>
+                    <td className="px-3 py-3">
+                      {e.plan ? (
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+                            e.plan === "pro"
+                              ? "bg-amber-500/15 text-amber-400"
+                              : "bg-sky-500/15 text-sky-400",
+                          )}
+                        >
+                          {e.plan}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-neutral-500">Sin plan</span>
+                      )}
                     </td>
                     <td className="px-3 py-3">
                       <select
@@ -233,7 +235,7 @@ export default function AdminPage() {
                         variant="outline"
                         size="sm"
                         className="text-destructive hover:text-destructive"
-                        onClick={() => deleteEmpresa(e)}
+                        onClick={() => setDeleteTarget(e)}
                       >
                         Eliminar
                       </Button>
@@ -254,6 +256,17 @@ export default function AdminPage() {
           </div>
         </CardContent>
       </Card>
+
+      <DeleteConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && !deleting && setDeleteTarget(null)}
+        title="¿Eliminar esta empresa?"
+        entityName={deleteTarget?.nombre_empresa ?? ""}
+        consequences={ADMIN_DELETE_CONSEQUENCES}
+        loading={deleting}
+        onConfirm={handleDeleteConfirm}
+        dark
+      />
     </div>
   );
 }

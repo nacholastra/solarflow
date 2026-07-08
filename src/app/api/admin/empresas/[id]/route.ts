@@ -2,14 +2,12 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { isAdminAuthenticated } from "@/lib/admin/guard";
 import { deleteEmpresaCompletely } from "@/lib/empresa/delete-empresa";
-import { PLANS, type PlanId } from "@/lib/config/plans";
 import { isSameOrigin } from "@/lib/security/api-origin";
 import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 import { z } from "zod";
 
 const patchSchema = z.object({
-  estado_suscripcion: z.enum(["pending", "active", "suspended", "cancelled"]).optional(),
-  plan: z.enum(["basic", "pro"]).nullable().optional(),
+  estado_suscripcion: z.enum(["pending", "active", "suspended", "cancelled"]),
 });
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -30,25 +28,10 @@ export async function PATCH(request: Request, context: RouteContext) {
     const { id } = await context.params;
     const body = patchSchema.parse(await request.json());
 
-    if (body.estado_suscripcion === undefined && body.plan === undefined) {
-      return NextResponse.json({ error: "Nada que actualizar" }, { status: 400 });
-    }
-
     const service = await createServiceClient();
-    const update: Record<string, unknown> = {};
-    if (body.estado_suscripcion !== undefined) {
-      update.estado_suscripcion = body.estado_suscripcion;
-    }
-    if (body.plan !== undefined) {
-      update.plan = body.plan;
-      if (body.plan) {
-        update.leads_limite_mes = PLANS[body.plan as PlanId].leadsLimit;
-      }
-    }
-
     const { data, error } = await service
       .from("empresas")
-      .update(update)
+      .update({ estado_suscripcion: body.estado_suscripcion })
       .eq("id", id)
       .select(
         "id, nombre_empresa, slug, plan, estado_suscripcion, leads_limite_mes, leads_usados_mes",
