@@ -5,12 +5,14 @@ import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 import { createAnonAuthClient, fetchInviteByToken, getInviteStatus } from "@/lib/team/invite";
 import { getSiteUrl } from "@/lib/config/site";
+import { PLANS } from "@/lib/config/plans";
 import { z } from "zod";
 
 const schema = z.object({
   email: z.string().email().max(254),
   password: z.string().min(8).max(128),
   nombre_empresa: z.string().min(2).max(120).optional(),
+  plan: z.enum(["basic", "pro"]).optional(),
   invite_token: z.string().uuid().optional(),
 });
 
@@ -85,6 +87,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nombre de empresa requerido" }, { status: 400 });
     }
 
+    if (!body.plan) {
+      return NextResponse.json({ error: "Debes elegir un plan" }, { status: 400 });
+    }
+
     const slug = slugify(body.nombre_empresa);
 
     const { data: existingSlug } = await service
@@ -116,6 +122,8 @@ export async function POST(request: Request) {
         owner_id: authData.user.id,
         nombre_empresa: body.nombre_empresa,
         slug,
+        plan: body.plan,
+        leads_limite_mes: PLANS[body.plan].leadsLimit,
         estado_suscripcion: "pending",
       })
       .select("id")

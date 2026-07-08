@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { createClient } from "@/lib/supabase/client";
+import { PLANS, type PlanId } from "@/lib/config/plans";
+import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
 function RegisterForm() {
@@ -16,6 +18,7 @@ function RegisterForm() {
   const inviteToken = searchParams.get("invite");
   const [inviteEmpresa, setInviteEmpresa] = useState<string | null>(null);
   const [nombreEmpresa, setNombreEmpresa] = useState("");
+  const [plan, setPlan] = useState<PlanId>("basic");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,6 +48,7 @@ function RegisterForm() {
           email,
           password,
           nombre_empresa: inviteToken ? undefined : nombreEmpresa,
+          plan: inviteToken ? undefined : plan,
           invite_token: inviteToken ?? undefined,
         }),
       });
@@ -127,6 +131,46 @@ function RegisterForm() {
                 className="h-11 bg-background"
                 required
               />
+            </div>
+          )}
+          {!inviteToken && (
+            <div className="space-y-2">
+              <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Elige tu plan
+              </Label>
+              <div className="grid grid-cols-2 gap-3">
+                {(Object.keys(PLANS) as PlanId[]).map((id) => {
+                  const p = PLANS[id];
+                  const selected = plan === id;
+                  return (
+                    <button
+                      type="button"
+                      key={id}
+                      onClick={() => setPlan(id)}
+                      className={cn(
+                        "rounded-xl border p-3 text-left transition",
+                        selected
+                          ? "border-primary bg-primary/5 ring-2 ring-primary/30"
+                          : "border-border hover:border-primary/50",
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">{p.name}</span>
+                        {selected && (
+                          <span className="h-2 w-2 rounded-full bg-primary" />
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">{p.priceEur} €/mes</p>
+                      <p className="text-xs text-muted-foreground">
+                        {p.leadsLimit} leads · {p.teamLimit} usuarios
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Podrás completar el pago tras crear la cuenta.
+              </p>
             </div>
           )}
           <div className="space-y-2">

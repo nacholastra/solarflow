@@ -36,7 +36,7 @@ export default function AdminPage() {
   const [empresas, setEmpresas] = useState<EmpresaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
-  const [planFilter, setPlanFilter] = useState<"all" | "basic" | "pro" | "none">("all");
+  const [planFilter, setPlanFilter] = useState<"all" | "basic" | "pro">("all");
   const [estadoFilter, setEstadoFilter] = useState<"all" | (typeof ESTADOS)[number]>("all");
   const [deleteTarget, setDeleteTarget] = useState<EmpresaRow | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -62,7 +62,6 @@ export default function AdminPage() {
     return empresas.filter((e) => {
       if (planFilter === "basic" && e.plan !== "basic") return false;
       if (planFilter === "pro" && e.plan !== "pro") return false;
-      if (planFilter === "none" && e.plan) return false;
       if (estadoFilter !== "all" && e.estado_suscripcion !== estadoFilter) return false;
       if (!q) return true;
       return (
@@ -157,7 +156,6 @@ export default function AdminPage() {
               <option value="all">Todos los planes</option>
               <option value="basic">Basic</option>
               <option value="pro">Pro</option>
-              <option value="none">Sin plan</option>
             </select>
             <select
               className="h-10 rounded-md border border-neutral-800 bg-neutral-950 px-3 text-sm text-neutral-100"
@@ -194,20 +192,16 @@ export default function AdminPage() {
                       <p className="text-xs text-neutral-500">{e.slug}</p>
                     </td>
                     <td className="px-3 py-3">
-                      {e.plan ? (
-                        <span
-                          className={cn(
-                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
-                            e.plan === "pro"
-                              ? "bg-amber-500/15 text-amber-400"
-                              : "bg-sky-500/15 text-sky-400",
-                          )}
-                        >
-                          {e.plan}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-neutral-500">Sin plan</span>
-                      )}
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+                          e.plan === "pro"
+                            ? "bg-amber-500/15 text-amber-400"
+                            : "bg-sky-500/15 text-sky-400",
+                        )}
+                      >
+                        {e.plan ?? "basic"}
+                      </span>
                     </td>
                     <td className="px-3 py-3">
                       <select
