@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const navLinks = [
   { label: "Producto", href: "#funcionalidades" },
@@ -13,8 +16,20 @@ const navLinks = [
   { label: "FAQ", href: "#faq" },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const router = useRouter();
+
+  async function handleLogout() {
+    setLoggingOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    toast({ title: "Sesión cerrada" });
+    setOpen(false);
+    router.refresh();
+    setLoggingOut(false);
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
@@ -34,12 +49,25 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="ghost" size="lg" asChild>
-            <Link href="/login">Acceder al panel</Link>
-          </Button>
-          <Button size="lg" asChild>
-            <Link href="/register">Crear cuenta</Link>
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <Button variant="ghost" size="lg" onClick={handleLogout} disabled={loggingOut}>
+                Cerrar sesión
+              </Button>
+              <Button size="lg" asChild>
+                <Link href="/dashboard">Ir al panel</Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="lg" asChild>
+                <Link href="/login">Acceder al panel</Link>
+              </Button>
+              <Button size="lg" asChild>
+                <Link href="/register">Crear cuenta</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         <Button
@@ -70,12 +98,25 @@ export function SiteHeader() {
               </a>
             ))}
             <div className="mt-2 flex flex-col gap-2">
-              <Button variant="outline" asChild>
-                <Link href="/login">Acceder al panel</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/register">Crear cuenta</Link>
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <Button variant="outline" onClick={handleLogout} disabled={loggingOut}>
+                    Cerrar sesión
+                  </Button>
+                  <Button asChild>
+                    <Link href="/dashboard">Ir al panel</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" asChild>
+                    <Link href="/login">Acceder al panel</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/register">Crear cuenta</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </nav>
         </div>
