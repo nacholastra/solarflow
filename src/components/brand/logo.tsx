@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { BRAND } from "@/lib/config/brand";
 
@@ -13,33 +14,14 @@ interface LogoProps {
 
 function LogoMark({ className }: { className?: string }) {
   return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        "flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground",
-        className,
-      )}
-    >
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="size-4 text-solar"
-      >
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2" />
-        <path d="M12 20v2" />
-        <path d="m4.93 4.93 1.41 1.41" />
-        <path d="m17.66 17.66 1.41 1.41" />
-        <path d="M2 12h2" />
-        <path d="M20 12h2" />
-        <path d="m6.34 17.66-1.41 1.41" />
-        <path d="m19.07 4.93-1.41 1.41" />
-      </svg>
-    </span>
+    <Image
+      src="/brand/logo.png"
+      alt=""
+      width={28}
+      height={28}
+      className={cn("size-7 shrink-0", className)}
+      aria-hidden
+    />
   );
 }
 
