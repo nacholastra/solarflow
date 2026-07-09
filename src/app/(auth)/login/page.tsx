@@ -9,12 +9,14 @@ import { Label } from "@/components/ui/label";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { safeRedirectPath } from "@/lib/security/safe-redirect";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get("invite");
   const presetEmail = searchParams.get("email") ?? "";
+  const authCallbackError = searchParams.get("error") === "auth_callback";
   const [email, setEmail] = useState(presetEmail);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,8 +55,7 @@ function LoginForm() {
       if (inviteToken) {
         router.push(`/invite/${inviteToken}`);
       } else {
-        const next = searchParams.get("next");
-        router.push(next && next.startsWith("/") ? next : "/dashboard");
+        router.push(safeRedirectPath(searchParams.get("next"), "/dashboard"));
       }
       router.refresh();
     } catch (err) {
@@ -77,6 +78,11 @@ function LoginForm() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {authCallbackError && !errorMsg && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive">
+              El enlace de confirmación ha expirado o no es válido. Inicia sesión o solicita un nuevo email.
+            </div>
+          )}
           {errorMsg && (
             <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive">
               {errorMsg}

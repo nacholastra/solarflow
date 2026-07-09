@@ -59,6 +59,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/api/auth/register") ||
     pathname.startsWith("/api/auth/resend-confirmation") ||
     pathname.startsWith("/api/paypal/webhook") ||
+    pathname === "/api/health" ||
     pathname.startsWith("/api/invite/") ||
     ((pathname.startsWith("/login") ||
       pathname.startsWith("/register") ||

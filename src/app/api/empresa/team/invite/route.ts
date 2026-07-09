@@ -107,7 +107,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No se pudo crear la invitación" }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true, token, invitePath: `/invite/${token}` });
+    return NextResponse.json({ ok: true, invitePath: `/invite/${token}` });
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: "Email inválido" }, { status: 400 });

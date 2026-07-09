@@ -19,6 +19,9 @@ Ejecutar en Supabase SQL Editor, en orden:
 4. **`005_security_hardening.sql`** — endurecimiento RLS, cuota atómica, protección de facturación
 5. **`006_plan_feature_gating.sql`** — webhooks salientes solo en plan Pro
 6. **`007_team_limit_enforcement.sql`** — límite de usuarios por plan en `equipo` e `invitaciones_equipo`
+7. **`008_billing_notice_and_readonly.sql`** — aviso de cobro y modo solo lectura
+8. **`009_test_leads.sql`** — leads de prueba (`es_prueba`)
+9. **`010_premium_security.sql`** — anti-SSRF webhooks, integraciones solo vía API, idempotencia PayPal
 
 > Si el proyecto se creó con `003_repair_partial_schema.sql`, omitir 001 y usar 003 en su lugar.
 
@@ -84,7 +87,7 @@ Copiar `.env.example` a `.env.local`. Obligatorias en producción:
 
 ## Checklist de despliegue
 
-- [ ] Migraciones 005, 006 y 007 aplicadas en Supabase
+- [ ] Migraciones 005–010 aplicadas en Supabase
 - [ ] Supabase Auth: confirmación de email activada
 - [ ] Redirect URL `https://tu-dominio/auth/callback` en Supabase
 - [ ] `PAYPAL_WEBHOOK_ID` configurado en Vercel

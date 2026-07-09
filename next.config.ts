@@ -10,6 +10,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  compress: true,
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },

@@ -12,11 +12,16 @@ const ESTADO_LABEL: Record<string, string> = {
 };
 
 export function AccountStatusBanner({ status }: { status: BillingStatus | null }) {
-  const [dismissed, setDismissed] = useState(false);
+  const dismissKey =
+    status?.proximoCobro != null ? `billing-dismiss:${status.proximoCobro}` : null;
+
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined" || !dismissKey) return false;
+    return localStorage.getItem(dismissKey) === "1";
+  });
 
   if (!status) return null;
 
-  // Cuenta en solo lectura (sin plan / cancelada / suspendida / pendiente)
   if (status.estado !== "active") {
     return (
       <div className="mb-6 flex flex-col gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between">
@@ -38,7 +43,11 @@ export function AccountStatusBanner({ status }: { status: BillingStatus | null }
     );
   }
 
-  // Aviso de próximo cobro (5 días o menos)
+  function dismissBillingNotice() {
+    if (dismissKey) localStorage.setItem(dismissKey, "1");
+    setDismissed(true);
+  }
+
   if (
     !dismissed &&
     status.diasRestantes !== null &&
@@ -77,7 +86,7 @@ export function AccountStatusBanner({ status }: { status: BillingStatus | null }
           <button
             type="button"
             aria-label="Cerrar aviso"
-            onClick={() => setDismissed(true)}
+            onClick={dismissBillingNotice}
             className="rounded-md p-1 text-sky-700 transition-colors hover:bg-sky-100"
           >
             <X className="h-4 w-4" />

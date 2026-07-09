@@ -2,9 +2,14 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { PLANS } from "@/lib/config/plans";
 import { PRO_ONLY_EMPRESA_FIELDS } from "@/lib/config/plan-features";
+import { isSameOrigin } from "@/lib/security/api-origin";
 import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 
 export async function POST(request: Request) {
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: "Origen no permitido" }, { status: 403 });
+  }
+
   const limited = rateLimitResponse(request, "empresa-activate-test", 5, 3_600_000);
   if (limited) return limited;
 

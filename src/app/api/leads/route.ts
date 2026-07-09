@@ -4,6 +4,7 @@ import { gastoToKwh } from "@/lib/solar/billing-es";
 import { calcularSimulacion } from "@/lib/solar/calculator";
 import type { Localidad, TipoInmueble } from "@/lib/solar/types";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
+import { hashClientIp } from "@/lib/security/ip-hash";
 import { z } from "zod";
 
 const leadSchema = z.object({
@@ -159,6 +160,7 @@ export async function POST(request: Request) {
       utm_source: data.utm_source,
       utm_medium: data.utm_medium,
       utm_campaign: data.utm_campaign,
+      ip_hash: hashClientIp(ip),
     });
 
     if (error) {

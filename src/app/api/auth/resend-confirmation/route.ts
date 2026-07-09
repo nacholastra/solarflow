@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAnonAuthClient } from "@/lib/team/invite";
-import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
+import { isSameOrigin } from "@/lib/security/api-origin";
+import { rateLimitResponse } from "@/lib/security/api-rate-limit";
 import { getSiteUrl } from "@/lib/config/site";
 import { z } from "zod";
 
@@ -10,14 +11,12 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const ip = getClientIp(request);
-    const rate = checkRateLimit(`resend-confirm:${ip}`, 3, 3_600_000);
-    if (!rate.allowed) {
-      return NextResponse.json(
-        { error: "Demasiados intentos. Inténtalo más tarde." },
-        { status: 429 },
-      );
+    if (!isSameOrigin(request)) {
+      return NextResponse.json({ error: "Origen no permitido" }, { status: 403 });
     }
+
+    const limited = rateLimitResponse(request, "auth-resend-confirmation", 3, 3_600_000);
+    if (limited) return limited;
 
     const body = schema.parse(await request.json());
     const supabase = createAnonAuthClient();
@@ -32,10 +31,13 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("resend confirmation error:", error.message);
-      return NextResponse.json({ error: "No se pudo reenviar el email" }, { status: 400 });
     }
 
-    return NextResponse.json({ ok: true });
+    // Respuesta uniforme para no revelar si el email existe
+    return NextResponse.json({
+      ok: true,
+      message: "Si el email está registrado, recibirás un nuevo enlace de confirmación.",
+    });
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: "Email inválido" }, { status: 400 });

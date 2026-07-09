@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
-import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { rateLimitResponse } from "@/lib/security/api-rate-limit";
+import { isSameOrigin } from "@/lib/security/api-origin";
 import { createAnonAuthClient, fetchInviteByToken, getInviteStatus } from "@/lib/team/invite";
 import { getSiteUrl } from "@/lib/config/site";
 import { PLANS } from "@/lib/config/plans";
@@ -38,17 +38,12 @@ function mapSignUpError(message: string | undefined): string {
 
 export async function POST(request: Request) {
   try {
+    if (!isSameOrigin(request)) {
+      return NextResponse.json({ error: "Origen no permitido" }, { status: 403 });
+    }
+
     const limited = rateLimitResponse(request, "auth-register", 5, 3_600_000);
     if (limited) return limited;
-
-    const ip = getClientIp(request);
-    const rate = checkRateLimit(`register:${ip}`, 5, 3_600_000);
-    if (!rate.allowed) {
-      return NextResponse.json(
-        { error: "Demasiados intentos de registro. Inténtalo más tarde." },
-        { status: 429 },
-      );
-    }
 
     const body = schema.parse(await request.json());
     const service = await createServiceClient();

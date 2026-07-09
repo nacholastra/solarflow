@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExternalLink } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +27,6 @@ const WidgetSimulator = dynamic(
 export function SimulatorPanel({ empresa, appUrl }: { empresa: SimulatorEmpresa; appUrl: string }) {
   const router = useRouter();
   const [activating, setActivating] = useState(false);
-  const supabase = createClient();
   const embedCode = `<iframe src="${appUrl}/widget/${empresa.slug}" width="100%" height="680" frameborder="0" style="border:none;border-radius:12px;"></iframe>`;
   const isActive = empresa.estado_suscripcion === "active";
 
@@ -52,24 +50,32 @@ export function SimulatorPanel({ empresa, appUrl }: { empresa: SimulatorEmpresa;
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const payload: Record<string, unknown> = {
+    const payload = {
       color_marca: fd.get("color_marca") as string,
-      logo_url: (fd.get("logo_url") as string) || null,
-      privacy_url: (fd.get("privacy_url") as string) || null,
+      logo_url: (fd.get("logo_url") as string) || "",
+      privacy_url: (fd.get("privacy_url") as string) || "",
       precio_eur_kwp: Number(fd.get("precio_eur_kwp")),
       ratio_autoconsumo: Number(fd.get("ratio_autoconsumo")) / 100,
       kwp_max: Number(fd.get("kwp_max")),
+      ...(canUseGtm(empresa.plan)
+        ? { gtm_id: (fd.get("gtm_id") as string) || "" }
+        : {}),
     };
-    if (canUseGtm(empresa.plan)) {
-      payload.gtm_id = (fd.get("gtm_id") as string) || null;
-    }
-    const { error } = await supabase.from("empresas").update(payload).eq("id", empresa.id);
 
-    if (error) toast({ variant: "destructive", title: "Error", description: error.message });
-    else {
-      toast({ title: "Configuración guardada", description: "La vista previa se actualiza al guardar" });
-      router.refresh();
+    const res = await fetch("/api/empresa/simulator", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const json = (await res.json()) as { error?: string };
+
+    if (!res.ok) {
+      toast({ variant: "destructive", title: "Error", description: json.error ?? "No se pudo guardar" });
+      return;
     }
+
+    toast({ title: "Configuración guardada", description: "La vista previa se actualiza al guardar" });
+    router.refresh();
   }
 
   async function handleActivateTest() {

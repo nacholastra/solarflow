@@ -10,16 +10,16 @@ Next.js 15 · Supabase · PayPal Subscriptions · Tailwind
 
 ```bash
 npm install
-cp .env.example .env.local   # completar credenciales
+cp .env.example .env.local   # completar credenciales (ver .env.example)
 npm run dev
 ```
 
 ## Base de datos
 
-Ejecutar en Supabase SQL Editor:
+Ejecutar en Supabase SQL Editor (en orden, ver `SECURITY.md`):
 
-1. `supabase/migrations/001_initial_schema.sql`
-2. `supabase/migrations/002_empresas_select_owner.sql`
+1. `supabase/migrations/001_initial_schema.sql` (o `003_repair_partial_schema.sql`)
+2. Migraciones `002`–`010` según `SECURITY.md`
 3. `supabase/seed/localidades.sql`
 
 ## Desplegar en Vercel

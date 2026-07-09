@@ -3,9 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { Lead } from "@/types/database";
-
-const LEAD_COLUMNS =
-  "id, empresa_id, nombre, email, telefono, ciudad, comunidad, tipo_inmueble, estado, kwp_estimado, ahorro_anual_eur, payback_anos, notas, es_prueba, created_at, updated_at";
+import { LEAD_SELECT_COLUMNS } from "@/lib/dashboard/lead-columns";
 
 export function leadsQueryKey(empresaId: string) {
   return ["leads", empresaId] as const;
@@ -15,7 +13,7 @@ async function fetchLeads(empresaId: string): Promise<Lead[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("leads")
-    .select(LEAD_COLUMNS)
+    .select(LEAD_SELECT_COLUMNS)
     .eq("empresa_id", empresaId)
     .order("created_at", { ascending: false });
 

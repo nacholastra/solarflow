@@ -21,9 +21,10 @@ import { Button } from "@/components/ui/button";
 import { DeleteConfirmDialog } from "@/components/shared/delete-confirm-dialog";
 import { KanbanColumn } from "./kanban-column";
 import { LeadDetailModal } from "./lead-detail-modal";
+import { DashboardEmptyState } from "./empty-state";
 
 export function KanbanBoard({ empresaId, initialLeads }: { empresaId: string; initialLeads?: Lead[] }) {
-  const { data: leads = [], isLoading } = useLeads(empresaId, initialLeads);
+  const { data: leads = [], isLoading, isError, refetch } = useLeads(empresaId, initialLeads);
   const invalidateLeads = useInvalidateLeads();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -107,6 +108,28 @@ export function KanbanBoard({ empresaId, initialLeads }: { empresaId: string; in
 
   if (isLoading) {
     return <div className="h-64 animate-pulse rounded-xl bg-muted" />;
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center gap-4 rounded-xl border border-destructive/20 bg-destructive/5 px-6 py-12 text-center">
+        <p className="text-sm text-destructive">No se pudieron cargar los leads.</p>
+        <Button variant="outline" size="sm" onClick={() => void refetch()}>
+          Reintentar
+        </Button>
+      </div>
+    );
+  }
+
+  if (leads.length === 0) {
+    return (
+      <DashboardEmptyState
+        title="Aún no tienes leads"
+        description="Comparte tu simulador en la web o pruébalo en modo preview. Los contactos que envíen el formulario aparecerán aquí."
+        actionHref="/dashboard/simulator"
+        actionLabel="Configurar simulador"
+      />
+    );
   }
 
   return (
