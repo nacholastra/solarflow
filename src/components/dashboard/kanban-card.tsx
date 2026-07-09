@@ -3,6 +3,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import type { Lead } from "@/types/database";
+import { leadHasNotas } from "@/lib/dashboard/lead-notes";
 
 export function KanbanCard({ lead, onClick }: { lead: Lead; onClick: () => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -13,6 +14,8 @@ export function KanbanCard({ lead, onClick }: { lead: Lead; onClick: () => void 
     ? { transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.5 : 1 }
     : undefined;
 
+  const hasNotas = leadHasNotas(lead);
+
   return (
     <div
       ref={setNodeRef}
@@ -20,8 +23,15 @@ export function KanbanCard({ lead, onClick }: { lead: Lead; onClick: () => void 
       {...attributes}
       {...listeners}
       onClick={onClick}
-      className={`cursor-grab rounded-lg border bg-card p-2.5 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing sm:p-3 ${lead.es_prueba ? "border-dashed border-warning/60 bg-warning/30" : ""}`}
+      className={`relative cursor-grab rounded-lg border bg-card p-2.5 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing sm:p-3 ${lead.es_prueba ? "border-dashed border-warning/60 bg-warning/30" : ""}`}
     >
+      {hasNotas && (
+        <span
+          className="absolute -right-1 -top-1 size-2.5 rounded-full bg-destructive ring-2 ring-card"
+          aria-hidden
+          title="Tiene notas"
+        />
+      )}
       <div className="flex items-start justify-between gap-2">
         <p className="truncate text-sm font-medium" title={lead.nombre}>{lead.nombre}</p>
         {lead.es_prueba && (

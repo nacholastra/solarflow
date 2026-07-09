@@ -27,7 +27,7 @@ export function KanbanBoard({ empresaId, initialLeads }: { empresaId: string; in
   const { data: leads = [], isLoading, isError, refetch } = useLeads(empresaId, initialLeads);
   const invalidateLeads = useInvalidateLeads();
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [purgeOpen, setPurgeOpen] = useState(false);
   const [purging, setPurging] = useState(false);
   const supabase = createClient();
@@ -64,6 +64,7 @@ export function KanbanBoard({ empresaId, initialLeads }: { empresaId: string; in
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
   const activeLead = activeId ? leads.find((l) => l.id === activeId) : undefined;
+  const selectedLead = selectedLeadId ? leads.find((l) => l.id === selectedLeadId) : undefined;
 
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -164,7 +165,7 @@ export function KanbanBoard({ empresaId, initialLeads }: { empresaId: string; in
               key={estado}
               estado={estado}
               leads={leadsByEstado[estado]}
-              onLeadClick={setSelectedLead}
+              onLeadClick={(lead) => setSelectedLeadId(lead.id)}
             />
           ))}
         </div>
@@ -180,7 +181,7 @@ export function KanbanBoard({ empresaId, initialLeads }: { empresaId: string; in
       {selectedLead && (
         <LeadDetailModal
           lead={selectedLead}
-          onClose={() => setSelectedLead(null)}
+          onClose={() => setSelectedLeadId(null)}
           onUpdated={() => invalidateLeads(empresaId)}
         />
       )}
