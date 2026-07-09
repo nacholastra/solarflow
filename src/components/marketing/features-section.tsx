@@ -1,3 +1,4 @@
+import { SectionHeader } from "@/components/marketing/section-header";
 import Image from "next/image";
 import {
   Calculator,
@@ -55,12 +56,10 @@ export function FeaturesSection() {
     <>
       <section className="border-b border-border bg-card">
         <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-20">
-          <div className="max-w-2xl">
-            <span className="text-sm font-semibold text-solar">El reto del sector</span>
-            <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Captar y cerrar clientes solares sigue siendo demasiado manual
-            </h2>
-          </div>
+          <SectionHeader
+            eyebrow="El reto del sector"
+            title="Captar y cerrar clientes solares sigue siendo demasiado manual"
+          />
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {problems.map((item) => (
               <div key={item.title} className="flex flex-col gap-3">
@@ -77,16 +76,11 @@ export function FeaturesSection() {
 
       <section id="funcionalidades" className="scroll-mt-16 border-b border-border">
         <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
-          <div className="max-w-2xl">
-            <span className="text-sm font-semibold text-solar">Funcionalidades</span>
-            <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Todo lo que necesitas para vender más instalaciones
-            </h2>
-            <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
-              Una plataforma diseñada específicamente para el flujo de trabajo de las empresas
-              instaladoras fotovoltaicas.
-            </p>
-          </div>
+          <SectionHeader
+            eyebrow="Funcionalidades"
+            title="Todo lo que necesitas para vender más instalaciones"
+            description="Una plataforma diseñada específicamente para el flujo de trabajo de las empresas instaladoras fotovoltaicas."
+          />
 
           <div className="mt-12 grid gap-6 lg:grid-cols-2">
             <div className="grid gap-6 sm:grid-cols-2">

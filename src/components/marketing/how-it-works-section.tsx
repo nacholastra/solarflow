@@ -1,3 +1,5 @@
+import { SectionHeader } from "@/components/marketing/section-header";
+
 const steps = [
   {
     number: "01",
@@ -25,12 +27,7 @@ export function HowItWorksSection() {
   return (
     <section id="como-funciona" className="scroll-mt-16 border-b border-border bg-card">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
-        <div className="max-w-2xl">
-          <span className="text-sm font-semibold text-solar">Cómo funciona</span>
-          <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-            En marcha en cuatro pasos
-          </h2>
-        </div>
+        <SectionHeader eyebrow="Cómo funciona" title="En marcha en cuatro pasos" />
 
         <ol className="mt-12 grid gap-8 md:grid-cols-4">
           {steps.map((step) => (

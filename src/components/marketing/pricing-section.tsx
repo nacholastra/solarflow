@@ -1,3 +1,4 @@
+import { SectionHeader } from "@/components/marketing/section-header";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { PLANS, getPlanPrice, getEurToUsdRate } from "@/lib/config/plans";
@@ -55,16 +56,12 @@ export function PricingSection() {
   return (
     <section id="precios" className="scroll-mt-16 border-b border-border">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="text-sm font-semibold text-solar">Precios</span>
-          <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-            Un plan para cada volumen de leads
-          </h2>
-          <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
-            Sin permanencia. Cancela cuando quieras. Precios base en euros; el dólar se calcula al tipo{" "}
-            {getEurToUsdRate().toFixed(2)}.
-          </p>
-        </div>
+        <SectionHeader
+          align="center"
+          eyebrow="Precios"
+          title="Un plan para cada volumen de leads"
+          description={`Sin permanencia. Cancela cuando quieras. Precios base en euros; el dólar se calcula al tipo ${getEurToUsdRate().toFixed(2)}.`}
+        />
 
         <div className="mx-auto mt-12 grid max-w-3xl gap-6 md:grid-cols-2">
           {(["basic", "pro"] as const).map((id) => {
@@ -73,7 +70,7 @@ export function PricingSection() {
             return (
               <Card
                 key={id}
-                className={cn("relative flex flex-col", meta.featured && "border-primary shadow-md")}
+                className={cn("relative flex flex-col", meta.featured && "border-solar/50 shadow-elevated")}
               >
                 {meta.featured && (
                   <Badge variant="solar" className="absolute -top-3 left-6">

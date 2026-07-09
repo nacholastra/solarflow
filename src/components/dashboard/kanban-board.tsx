@@ -135,7 +135,7 @@ export function KanbanBoard({ empresaId, initialLeads }: { empresaId: string; in
   return (
     <>
       {testLeadsCount > 0 && (
-        <div className="mb-4 flex flex-col gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between">
+        <div className="surface-warning mb-4 flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
           <p>
             Tienes <strong>{testLeadsCount}</strong> lead{testLeadsCount === 1 ? "" : "s"} de prueba.
             No cuentan en tu cuota mensual; puedes borrarlos cuando quieras.
@@ -143,7 +143,7 @@ export function KanbanBoard({ empresaId, initialLeads }: { empresaId: string; in
           <Button
             variant="outline"
             size="sm"
-            className="shrink-0 border-amber-300 bg-transparent text-amber-800 hover:bg-amber-100"
+            className="shrink-0 border-warning/50 bg-transparent text-warning-foreground hover:bg-warning/40"
             onClick={() => setPurgeOpen(true)}
           >
             <Trash2 className="mr-1.5 h-3.5 w-3.5" />

@@ -15,34 +15,37 @@ const columns = [
   {
     title: "Empresa",
     links: [
-      { label: "Sobre nosotros", href: "#" },
-      { label: "Blog", href: "#" },
       { label: "Contacto", href: `mailto:${BRAND.supportEmail}` },
       { label: "Soporte", href: `mailto:${BRAND.supportEmail}` },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { label: "Aviso legal", href: "#" },
-      { label: "Privacidad", href: "#" },
-      { label: "Cookies", href: "#" },
-      { label: "RGPD", href: "#" },
+      { label: "Acceder", href: "/login" },
+      { label: "Crear cuenta", href: "/register" },
     ],
   },
 ];
+
+const trustItems = ["PVGIS", "RGPD", "Sin permanencia", "Marca blanca en Pro"];
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-card">
       <div className="mx-auto w-full max-w-6xl px-4 py-12 md:px-6">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2">
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
               El software de captación y gestión de leads para instaladoras de energía solar en
               España.
             </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {trustItems.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
           </div>
           {columns.map((col) => (
             <div key={col.title}>
@@ -75,7 +78,7 @@ export function SiteFooter() {
             </Link>
             <Link
               href="/register"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="text-sm font-medium text-foreground transition-colors hover:text-solar"
             >
               Crear cuenta
             </Link>

@@ -189,7 +189,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
   const watermark = showWidgetWatermark(empresa.plan);
 
   return (
-    <div className="mx-auto max-w-lg rounded-2xl border bg-white shadow-xl overflow-hidden" style={{ "--brand": brandColor } as React.CSSProperties}>
+    <div className="mx-auto max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-elevated" style={{ "--brand": brandColor } as React.CSSProperties}>
       <div className="px-6 py-5 text-white" style={{ backgroundColor: brandColor }}>
         <div className="flex items-center gap-3">
           {empresa.logo_url ? (
@@ -229,7 +229,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
                   key={t}
                   type="button"
                   onClick={() => setTipo(t)}
-                  className={`rounded-xl border-2 p-4 text-left capitalize transition-colors ${tipo === t ? "border-[var(--brand)] bg-amber-50" : "border-gray-200"}`}
+                  className={`rounded-xl border-2 p-4 text-left capitalize transition-colors ${tipo === t ? "border-[var(--brand)] bg-muted" : "border-border"}`}
                 >
                   {t}
                 </button>
@@ -273,8 +273,8 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
           <>
             <h2 className="font-semibold text-lg">Tu consumo eléctrico</h2>
             <div className="flex rounded-lg border p-1">
-              <button type="button" className={`flex-1 rounded-md py-2 text-sm ${modoConsumo === "gasto" ? "bg-gray-100 font-medium" : ""}`} onClick={() => setModoConsumo("gasto")}>€/mes</button>
-              <button type="button" className={`flex-1 rounded-md py-2 text-sm ${modoConsumo === "kwh" ? "bg-gray-100 font-medium" : ""}`} onClick={() => setModoConsumo("kwh")}>kWh/mes</button>
+              <button type="button" className={`flex-1 rounded-md py-2 text-sm ${modoConsumo === "gasto" ? "bg-muted font-medium" : ""}`} onClick={() => setModoConsumo("gasto")}>€/mes</button>
+              <button type="button" className={`flex-1 rounded-md py-2 text-sm ${modoConsumo === "kwh" ? "bg-muted font-medium" : ""}`} onClick={() => setModoConsumo("kwh")}>kWh/mes</button>
             </div>
             {modoConsumo === "gasto" ? (
               <div>
@@ -420,7 +420,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
       </div>
 
       {watermark && (
-        <div className="border-t border-gray-100 bg-gray-50 px-4 py-2 text-center">
+        <div className="border-t border-border bg-muted/50 px-4 py-2 text-center">
           <a
             href={getSiteUrl()}
             target="_blank"

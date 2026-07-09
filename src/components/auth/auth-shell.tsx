@@ -13,12 +13,16 @@ const benefits = [
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
-      <aside className="relative hidden flex-col justify-between bg-primary p-10 text-primary-foreground lg:flex">
-        <Link href="/" aria-label={`${BRAND.name} inicio`}>
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-primary p-10 text-primary-foreground lg:flex">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,oklch(0.79_0.155_76/0.18),transparent_55%)]"
+        />
+        <Link href="/" aria-label={`${BRAND.name} inicio`} className="relative z-10">
           <Logo inverted wordmarkClassName="text-primary-foreground" />
         </Link>
 
-        <div className="max-w-md">
+        <div className="relative z-10 max-w-md">
           <h2 className="text-balance text-3xl font-semibold leading-tight tracking-tight">
             {BRAND.tagline}
           </h2>
@@ -28,25 +32,27 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-solar text-solar-foreground">
                   <Check className="size-3" />
                 </span>
-                <span className="text-primary-foreground/80">{item}</span>
+                <span className="text-primary-foreground/85">{item}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <p className="text-sm text-primary-foreground/50">
+        <p className="relative z-10 text-sm text-primary-foreground/50">
           © {new Date().getFullYear()} {BRAND.name}
         </p>
       </aside>
 
-      <main className="flex flex-col items-center justify-center px-4 py-10 md:px-8">
+      <main className="flex flex-col items-center justify-center bg-muted/30 px-4 py-10 dark:bg-background md:px-8">
         <div className="w-full max-w-sm">
           <div className="mb-8 lg:hidden">
             <Link href="/" aria-label={`${BRAND.name} inicio`}>
               <Logo />
             </Link>
           </div>
-          {children}
+          <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-soft md:p-8">
+            {children}
+          </div>
         </div>
       </main>
     </div>

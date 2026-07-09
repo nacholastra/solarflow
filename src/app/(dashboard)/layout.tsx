@@ -19,7 +19,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <DashboardProvider value={context}>
       <div className="flex h-dvh overflow-hidden bg-background">
         <DashboardSidebar empresaNombre={context.empresaNombre} plan={context.plan} />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-muted/35 dark:bg-background">
           <MobileNav />
           <main className="flex-1 overflow-y-auto overscroll-y-contain px-4 py-6 md:px-8 md:py-8">
             <div className="mx-auto max-w-6xl">

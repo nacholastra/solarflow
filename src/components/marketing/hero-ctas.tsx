@@ -31,7 +31,7 @@ export function HeroCTAs() {
 
   return (
     <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-      <Button size="lg" asChild>
+      <Button size="lg" variant="solar" asChild>
         <Link href="/register">
           Crear cuenta
           <ArrowRight className="size-4" />

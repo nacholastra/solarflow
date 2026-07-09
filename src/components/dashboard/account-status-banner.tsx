@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, CalendarClock, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { BillingStatus } from "@/lib/dashboard/billing-status";
 
 const ESTADO_LABEL: Record<string, string> = {
@@ -24,7 +25,7 @@ export function AccountStatusBanner({ status }: { status: BillingStatus | null }
 
   if (status.estado !== "active") {
     return (
-      <div className="mb-6 flex flex-col gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between">
+      <div className="surface-warning mb-6 flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
@@ -33,12 +34,9 @@ export function AccountStatusBanner({ status }: { status: BillingStatus | null }
             editarlos ni recibir nuevos leads hasta reactivar un plan.
           </p>
         </div>
-        <Link
-          href="/dashboard/subscription"
-          className="shrink-0 rounded-lg bg-amber-600 px-3 py-1.5 text-center font-medium text-white transition-colors hover:bg-amber-700"
-        >
-          Reactivar plan
-        </Link>
+        <Button size="sm" className="shrink-0 bg-warning-emphasis text-white hover:bg-warning-emphasis/90" asChild>
+          <Link href="/dashboard/subscription">Reactivar plan</Link>
+        </Button>
       </div>
     );
   }
@@ -68,7 +66,7 @@ export function AccountStatusBanner({ status }: { status: BillingStatus | null }
       : null;
 
     return (
-      <div className="mb-6 flex flex-col gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900 sm:flex-row sm:items-center sm:justify-between">
+      <div className="surface-info mb-6 flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-2">
           <CalendarClock className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
@@ -77,20 +75,19 @@ export function AccountStatusBanner({ status }: { status: BillingStatus | null }
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Link
-            href="/dashboard/subscription"
-            className="rounded-lg bg-sky-600 px-3 py-1.5 text-center font-medium text-white transition-colors hover:bg-sky-700"
-          >
-            Gestionar suscripción
-          </Link>
-          <button
+          <Button size="sm" className="bg-info-emphasis text-white hover:bg-info-emphasis/90" asChild>
+            <Link href="/dashboard/subscription">Gestionar suscripción</Link>
+          </Button>
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             aria-label="Cerrar aviso"
             onClick={dismissBillingNotice}
-            className="rounded-md p-1 text-sky-700 transition-colors hover:bg-sky-100"
+            className="size-8 text-info-foreground hover:bg-info/80"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
     );

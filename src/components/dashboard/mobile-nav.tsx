@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -53,7 +54,9 @@ export function MobileNav() {
     <div className="shrink-0 lg:hidden">
       <div className="flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar px-4">
         <Logo href="/dashboard" inverted />
-        <Button
+        <div className="flex items-center gap-1">
+          <ThemeToggle variant="sidebar" />
+          <Button
           variant="ghost"
           size="icon"
           aria-label={open ? "Cerrar menú" : "Abrir menú"}
@@ -62,6 +65,7 @@ export function MobileNav() {
         >
           {open ? <X /> : <Menu />}
         </Button>
+        </div>
       </div>
 
       {open && (

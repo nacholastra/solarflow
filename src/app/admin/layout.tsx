@@ -18,11 +18,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-dvh bg-neutral-950 text-neutral-100">
-      <header className="border-b border-neutral-800 px-4 py-4 md:px-8">
+    <div className="dark min-h-dvh bg-background text-foreground">
+      <header className="border-b border-border px-4 py-4 md:px-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Administración
             </p>
             <h1 className="text-lg font-semibold">Panel de control</h1>

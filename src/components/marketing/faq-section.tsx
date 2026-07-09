@@ -19,7 +19,7 @@ export function FaqSection() {
             </h2>
           </div>
 
-          <div className="mt-10 divide-y divide-border rounded-xl ring-1 ring-foreground/10">
+          <div className="mt-10 divide-y divide-border overflow-hidden rounded-xl border border-border/60 shadow-soft">
             {LANDING_FAQS.map(({ question, answer }) => (
               <details key={question} className="group bg-card first:rounded-t-xl last:rounded-b-xl">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-left text-base font-medium transition-colors hover:bg-muted/30 [&::-webkit-details-marker]:hidden">

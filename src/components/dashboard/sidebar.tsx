@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -50,7 +51,7 @@ function NavItem({
       className={cn(
         "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
         active
-          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+          ? "border-l-2 border-sidebar-primary bg-sidebar-accent pl-[10px] text-sidebar-accent-foreground"
           : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
       )}
     >
@@ -118,6 +119,12 @@ export function DashboardSidebar({
       </nav>
 
       <div className="border-t border-sidebar-border p-3">
+        <div className="mb-2 flex items-center justify-between px-3">
+          <span className="text-xs font-medium uppercase tracking-wider text-sidebar-foreground/40">
+            Tema
+          </span>
+          <ThemeToggle variant="sidebar" />
+        </div>
         <div className="flex items-center gap-3 rounded-md px-3 py-2">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-xs font-medium text-sidebar-accent-foreground">
             {getInitials(empresaNombre)}

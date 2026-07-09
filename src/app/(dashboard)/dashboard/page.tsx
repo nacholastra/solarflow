@@ -105,8 +105,8 @@ export default async function DashboardPage() {
             </div>
             <Progress value={usagePct} />
             {empresa.estado_suscripcion !== "active" ? (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200/60 bg-amber-50/50 px-4 py-3">
-                <p className="text-sm text-amber-900/80">
+              <div className="surface-warning flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                <p className="text-sm">
                   Suscripción inactiva. Activa un plan para recibir leads en el widget.
                 </p>
                 <Button size="sm" variant="outline" asChild>

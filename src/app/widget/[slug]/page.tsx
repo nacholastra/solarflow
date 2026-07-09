@@ -21,7 +21,7 @@ export default async function WidgetPage({ params }: { params: Promise<{ slug: s
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-muted/40 px-4 py-8 dark:bg-background">
       <WidgetSimulator empresa={widgetEmpresa} />
     </div>
   );
