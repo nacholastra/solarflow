@@ -19,7 +19,7 @@ function LogoMark({ className }: { className?: string }) {
       alt=""
       width={28}
       height={28}
-      className={cn("size-7 shrink-0", className)}
+      className={cn("size-7 shrink-0 rounded-full object-cover", className)}
       aria-hidden
     />
   );
