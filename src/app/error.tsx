@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -25,7 +26,7 @@ export default function GlobalError({
           <div className="flex flex-wrap justify-center gap-2">
             <Button onClick={reset}>Reintentar</Button>
             <Button variant="outline" asChild>
-              <a href="/">Ir al inicio</a>
+              <Link href="/">Ir al inicio</Link>
             </Button>
           </div>
         </div>
