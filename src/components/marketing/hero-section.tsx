@@ -44,14 +44,15 @@ export function HeroSection() {
         </div>
 
         <div className="relative">
-          <div className="overflow-hidden rounded-2xl border border-border/80 shadow-elevated">
+          <div className="aspect-[720/560] overflow-hidden rounded-2xl border border-border/80 shadow-elevated">
             <Image
               src="/hero-solar-installation.png"
               alt="Instaladores colocando paneles solares en un tejado residencial"
               width={720}
               height={560}
               priority
-              className="h-full w-full object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="h-full w-full object-cover object-[center_35%]"
             />
           </div>
           <div className="absolute -bottom-5 -left-5 hidden max-w-[220px] rounded-xl border border-border/80 bg-card/95 p-4 shadow-elevated backdrop-blur-sm sm:block">
@@ -60,7 +61,7 @@ export function HeroSection() {
               {MARKETING.trust[0].value}
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {MARKETING.trust[1].value} · cancela cuando quieras
+              {MARKETING.trust[1].value} · {MARKETING.trust[3].value.toLowerCase()}
             </p>
           </div>
         </div>

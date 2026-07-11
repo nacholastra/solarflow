@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
-import { BRAND } from "@/lib/config/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,7 +63,7 @@ export function ContactSection() {
       setSent(true);
       toast({
         title: "Mensaje enviado",
-        description: "Te responderemos por email lo antes posible.",
+        description: "Te responderemos al correo que indicaste lo antes posible.",
       });
     } catch {
       toast({
@@ -84,7 +83,7 @@ export function ContactSection() {
           <SectionHeader
             eyebrow="Contacto"
             title="¿Tienes dudas antes de registrarte?"
-            description={`Cuéntanos tu caso y te respondemos por email. También puedes escribir directamente a ${BRAND.supportEmail}.`}
+            description="Cuéntanos tu caso completando el formulario. Revisamos cada consulta y te respondemos al correo que indiques."
           />
 
           <div className="rounded-2xl border border-border/60 bg-background p-6 shadow-soft md:p-8">
@@ -141,7 +140,7 @@ export function ContactSection() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="contact-email">Email *</Label>
+                    <Label htmlFor="contact-email">Correo electrónico *</Label>
                     <Input
                       id="contact-email"
                       type="email"

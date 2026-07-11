@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { BRAND } from "@/lib/config/brand";
 import { LANDING_FAQS } from "@/lib/config/faq";
 import { Button } from "@/components/ui/button";
 
@@ -37,17 +36,11 @@ export function FaqSection() {
           </div>
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            ¿Prefieres escribirnos? Usa el{" "}
+            ¿Más dudas?{" "}
             <a href="#contacto" className="font-medium text-foreground underline-offset-4 hover:underline">
-              formulario de contacto
-            </a>{" "}
-            o{" "}
-            <a
-              href={`mailto:${BRAND.supportEmail}`}
-              className="font-medium text-foreground underline-offset-4 hover:underline"
-            >
-              {BRAND.supportEmail}
+              Usa el formulario de contacto
             </a>
+            .
           </p>
         </div>
       </section>
@@ -59,8 +52,8 @@ export function FaqSection() {
               Prueba el flujo completo en minutos
             </h2>
             <p className="mt-4 max-w-md text-pretty text-lg leading-relaxed text-primary-foreground/70">
-              Crea tu cuenta, configura el simulador y publícalo en tu web. Si necesitas ayuda, estamos
-              a un mensaje de distancia.
+              Crea tu cuenta, configura el simulador y publícalo en tu web. Si necesitas ayuda, déjanos
+              un mensaje en el formulario.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" variant="secondary" asChild>
@@ -75,7 +68,7 @@ export function FaqSection() {
                 className="border-primary-foreground/20 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
                 asChild
               >
-                <a href="#contacto">Contactar</a>
+                <a href="#contacto">Ir al formulario</a>
               </Button>
             </div>
           </div>

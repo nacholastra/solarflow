@@ -1,6 +1,6 @@
 import { BRAND } from "@/lib/config/brand";
 import { LANDING_FAQS } from "@/lib/config/faq";
-import { LANDING_DESCRIPTION, OG_IMAGE_URL } from "@/lib/config/seo";
+import { LANDING_DESCRIPTION, getOgImageUrl } from "@/lib/config/seo";
 import { getSiteUrl } from "@/lib/config/site";
 import { PLANS } from "@/lib/config/plans";
 
@@ -12,8 +12,7 @@ export function LandingJsonLd() {
     "@type": "Organization",
     name: BRAND.name,
     url: siteUrl,
-    logo: `${siteUrl}/favicon.ico`,
-    email: BRAND.supportEmail,
+    logo: `${siteUrl}/brand/logo.png`,
     description: BRAND.tagline,
     areaServed: {
       "@type": "Country",
@@ -52,7 +51,7 @@ export function LandingJsonLd() {
         name: `Plan ${PLANS.pro.name}`,
         price: PLANS.pro.priceEur,
         priceCurrency: "EUR",
-        description: `${PLANS.pro.leadsLimit} leads/mes, marca blanca, GTM, CSV y webhooks`,
+        description: `${PLANS.pro.leadsLimit} leads/mes, marca blanca, GTM, exportación CSV y webhooks`,
       },
     ],
     featureList: [
@@ -62,7 +61,7 @@ export function LandingJsonLd() {
       "Webhooks Zapier/Make (plan Pro)",
       "Captura de leads con consentimiento RGPD",
     ],
-    screenshot: OG_IMAGE_URL,
+    screenshot: getOgImageUrl(),
   };
 
   const faqPage = {

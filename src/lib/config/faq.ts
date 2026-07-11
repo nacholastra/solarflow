@@ -1,5 +1,4 @@
 import { PLANS } from "@/lib/config/plans";
-import { BRAND } from "@/lib/config/brand";
 
 export const LANDING_FAQS = [
   {
@@ -25,11 +24,11 @@ export const LANDING_FAQS = [
   {
     question: "¿Puedo conectar SolarFlow a mi CRM actual?",
     answer:
-      "Sí, con plan Pro mediante webhooks. Puedes enlazarlo con HubSpot, Pipedrive, Google Sheets o email a través de Zapier o Make. No hay integración nativa directa con esos CRM.",
+      "Sí, con plan Pro mediante webhooks. Puedes enlazarlo con HubSpot, Pipedrive, Google Sheets u otras herramientas a través de Zapier o Make. No hay integración nativa directa con esos CRM.",
   },
   {
     question: "¿Qué diferencia hay entre Basic y Pro?",
-    answer: `Basic (${PLANS.basic.priceEur} €/mes): ${PLANS.basic.leadsLimit} leads/mes, ${PLANS.basic.teamLimit} usuarios, simulador, CRM y watermark SolarFlow. Pro (${PLANS.pro.priceEur} €/mes): ${PLANS.pro.leadsLimit} leads/mes, ${PLANS.pro.teamLimit} usuarios, marca blanca, GTM en widget, export CSV y webhooks.`,
+    answer: `Basic (${PLANS.basic.priceEur} €/mes): ${PLANS.basic.leadsLimit} leads/mes, ${PLANS.basic.teamLimit} usuarios, simulador, CRM y marca SolarFlow visible. Pro (${PLANS.pro.priceEur} €/mes): ${PLANS.pro.leadsLimit} leads/mes, ${PLANS.pro.teamLimit} usuarios, marca blanca, GTM en el widget, exportación CSV y webhooks.`,
   },
   {
     question: "¿Hay permanencia o contrato anual?",
@@ -37,7 +36,8 @@ export const LANDING_FAQS = [
       "No. Los planes se facturan mensualmente con PayPal y puedes cancelar desde tu panel de suscripción cuando quieras.",
   },
   {
-    question: "¿Cómo tratáis mis datos si os escribo?",
-    answer: `Usamos tu email y mensaje solo para responder tu consulta. Necesitamos tu consentimiento explícito (RGPD). Puedes leer más en nuestra política de privacidad o escribir a ${BRAND.supportEmail}.`,
+    question: "¿Cómo tratáis mis datos si relleno el formulario?",
+    answer:
+      "Usamos tu correo y mensaje únicamente para responder tu consulta. Necesitamos tu consentimiento explícito (RGPD). Puedes leer más en nuestra política de privacidad.",
   },
 ] as const;

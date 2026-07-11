@@ -25,10 +25,9 @@ export default function PrivacidadPage() {
             <section className="space-y-3">
               <h2 className="text-lg font-semibold text-foreground">1. Responsable</h2>
               <p>
-                {BRAND.name} ({BRAND.supportEmail}) es responsable del tratamiento de los datos recogidos a
-                través de esta web y del servicio SaaS, salvo los leads capturados en el widget de cada
-                instaladora, que son responsabilidad de la empresa cliente que configura su propia URL de
-                privacidad.
+                {BRAND.name} es responsable del tratamiento de los datos recogidos a través de esta web
+                y del servicio SaaS, salvo los leads capturados en el widget de cada instaladora, que son
+                responsabilidad de la empresa cliente que configura su propia URL de privacidad.
               </p>
             </section>
 
@@ -87,11 +86,11 @@ export default function PrivacidadPage() {
               <h2 className="text-lg font-semibold text-foreground">6. Tus derechos</h2>
               <p>
                 Puedes acceder, rectificar, suprimir, oponerte, limitar el tratamiento y solicitar la
-                portabilidad escribiendo a{" "}
-                <a href={`mailto:${BRAND.supportEmail}`} className="text-foreground underline-offset-4 hover:underline">
-                  {BRAND.supportEmail}
-                </a>
-                . También puedes reclamar ante la AEPD.
+                portabilidad mediante el{" "}
+                <Link href="/#contacto" className="text-foreground underline-offset-4 hover:underline">
+                  formulario de contacto
+                </Link>
+                , indicando el derecho que deseas ejercer. También puedes reclamar ante la AEPD.
               </p>
             </section>
 

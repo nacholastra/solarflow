@@ -25,14 +25,14 @@ const planFeatures = {
     "CRM Kanban (6 estados) con notas por lead",
     "Listado de contactos con buscador",
     "Panel con KPIs y barra de uso del plan",
-    "Soporte por email",
+    "Atención mediante formulario de contacto",
   ],
   pro: [
     `${PLANS.pro.leadsLimit} leads reales al mes`,
     `Hasta ${PLANS.pro.teamLimit} usuarios en equipo`,
     "Todo lo incluido en Basic",
     "Marca blanca: sin watermark SolarFlow",
-    "Google Tag Manager en el widget (Pro)",
+    "Google Tag Manager en el widget",
     "Exportación CSV de contactos",
     "Webhooks HTTPS (Zapier, Make, etc.)",
     "Prueba de webhook desde el panel",
@@ -111,7 +111,7 @@ export function PricingSection() {
                     <Link href="/register">Empezar con {plan.name}</Link>
                   </Button>
                   <Button variant="ghost" size="sm" className="w-full text-muted-foreground" asChild>
-                    <Link href="#contacto">¿Dudas? Escríbenos</Link>
+                    <Link href="#contacto">¿Dudas? Contáctanos</Link>
                   </Button>
                 </CardFooter>
               </Card>

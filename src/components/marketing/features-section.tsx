@@ -25,7 +25,7 @@ const problems = [
   {
     icon: KanbanSquare,
     title: "Leads dispersos",
-    body: "Excel, WhatsApp y email mezclados dificultan saber en qué fase está cada oportunidad.",
+    body: "Excel, WhatsApp y correo mezclados dificultan saber en qué fase está cada oportunidad.",
   },
 ];
 
@@ -48,7 +48,7 @@ const features = [
   {
     icon: Webhook,
     title: "Automatización (Pro)",
-    body: `Webhooks HTTPS a Zapier o Make. Export CSV, GTM en el widget y marca blanca incluidos en plan Pro (${PLANS.pro.priceEur} €/mes).`,
+    body: `Webhooks HTTPS a Zapier o Make. Exportación CSV, GTM en el widget y marca blanca incluidos en plan Pro (${PLANS.pro.priceEur} €/mes).`,
   },
 ];
 
@@ -80,7 +80,7 @@ export function FeaturesSection() {
           <SectionHeader
             eyebrow="Funcionalidades"
             title="Herramientas concretas, no un ERP genérico"
-            description="SolarFlow cubre captación web + seguimiento comercial. No incluye diseño eléctrico, gestión de obra ni facturación de instalaciones."
+            description="SolarFlow cubre captación web y seguimiento comercial. No incluye diseño eléctrico, gestión de obra ni facturación de instalaciones."
           />
 
           <div className="mt-12 grid gap-6 lg:grid-cols-2">
@@ -100,13 +100,14 @@ export function FeaturesSection() {
               ))}
             </div>
 
-            <div className="relative overflow-hidden rounded-xl border border-border">
+            <div className="relative min-h-[320px] overflow-hidden rounded-xl border border-border lg:min-h-[480px]">
               <Image
                 src="/solar-rooftop-aerial.png"
                 alt="Vista aérea de paneles solares instalados en un tejado"
                 width={640}
                 height={720}
-                className="h-full w-full object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="h-full min-h-[320px] w-full object-cover object-center lg:min-h-[480px]"
               />
               <div className="absolute inset-x-4 bottom-4 flex items-center gap-3 rounded-lg border border-border bg-card/95 p-4 backdrop-blur">
                 <Code2 className="size-5 shrink-0 text-solar" />

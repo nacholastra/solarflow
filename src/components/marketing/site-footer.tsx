@@ -16,7 +16,7 @@ const columns = [
     title: "Legal",
     links: [
       { label: "Privacidad", href: "/privacidad" },
-      { label: "Soporte", href: `mailto:${BRAND.supportEmail}` },
+      { label: "Contacto", href: "#contacto" },
       { label: "Acceder", href: "/login" },
       { label: "Crear cuenta", href: "/register" },
     ],

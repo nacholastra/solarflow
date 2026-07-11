@@ -21,12 +21,14 @@ export const LANDING_TITLE =
 export const LANDING_DESCRIPTION =
   "Simulador solar embebible y CRM Kanban para instaladoras en España. Estimaciones por localidad (PVGIS), captura RGPD y planes desde 60 €/mes sin permanencia.";
 
-/** Imagen Open Graph (1200×630 recomendado) */
-export const OG_IMAGE_URL =
-  "https://images.unsplash.com/photo-1508514177221-1881a7f647ea?w=1200&h=630&fit=crop&q=80";
+/** Imagen Open Graph (asset propio del sitio) */
+export function getOgImageUrl(): string {
+  return `${getSiteUrl()}/hero-solar-installation.png`;
+}
 
 export function buildLandingMetadata(): Metadata {
   const siteUrl = getSiteUrl();
+  const ogImage = getOgImageUrl();
 
   return {
     title: LANDING_TITLE,
@@ -51,9 +53,9 @@ export function buildLandingMetadata(): Metadata {
       description: LANDING_DESCRIPTION,
       images: [
         {
-          url: OG_IMAGE_URL,
-          width: 1200,
-          height: 630,
+          url: ogImage,
+          width: 720,
+          height: 560,
           alt: "Instalación de paneles solares en tejado residencial — SolarFlow",
         },
       ],
@@ -62,7 +64,7 @@ export function buildLandingMetadata(): Metadata {
       card: "summary_large_image",
       title: LANDING_TITLE,
       description: LANDING_DESCRIPTION,
-      images: [OG_IMAGE_URL],
+      images: [ogImage],
     },
     robots: {
       index: true,

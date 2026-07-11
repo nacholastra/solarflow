@@ -11,14 +11,14 @@ export const MARKETING = {
     highlights: [
       `Desde ${PLANS.basic.priceEur} €/mes · sin permanencia`,
       `${PLANS.basic.leadsLimit}–${PLANS.pro.leadsLimit} leads/mes según plan`,
-      "Webhooks con Zapier/Make en plan Pro",
+      "Webhooks con Zapier o Make (plan Pro)",
     ],
   },
   trust: [
     { label: "Precio claro", value: `${PLANS.basic.priceEur}–${PLANS.pro.priceEur} €/mes` },
     { label: "Leads incluidos", value: `${PLANS.basic.leadsLimit} / ${PLANS.pro.leadsLimit} al mes` },
     { label: "Equipo", value: `${PLANS.basic.teamLimit}–${PLANS.pro.teamLimit} usuarios` },
-    { label: "Facturación", value: "PayPal · cancela cuando quieras" },
+    { label: "Facturación", value: "PayPal · cancelación cuando quieras" },
   ],
   honesty: {
     title: "Transparencia sobre lo que ofrecemos",
@@ -33,7 +33,7 @@ export const MARKETING = {
       },
       {
         title: "Integraciones reales",
-        body: "Basic incluye CRM y simulador. Pro añade webhooks HTTPS hacia Zapier/Make, export CSV, GTM en el widget y marca blanca. No hay conectores nativos HubSpot/Pipedrive: se conectan vía automatización.",
+        body: "Basic incluye CRM y simulador. Pro añade webhooks HTTPS hacia Zapier o Make, exportación CSV, GTM en el widget y marca blanca. No hay conectores nativos con HubSpot o Pipedrive: se enlazan mediante automatización.",
       },
       {
         title: "Lo que verás en Basic",
@@ -42,7 +42,7 @@ export const MARKETING = {
     ],
   },
   productExample: {
-    disclaimer: "Vista de ejemplo ilustrativa. Los resultados reales dependen de la localidad, consumo y parámetros que configures.",
+    disclaimer: "Vista de ejemplo ilustrativa. Los resultados reales dependen de la localidad, el consumo y los parámetros que configures.",
     location: "Vivienda · Valencia · 150 €/mes",
     stats: {
       ahorro: "1.240 €",

@@ -13,13 +13,13 @@ const steps = [
   },
   {
     number: "03",
-    title: "Publica el iframe",
-    body: "Copia el código desde el panel y pégalo en tu web. Prueba antes con leads de test (no cuentan en la cuota).",
+    title: "Publica el simulador",
+    body: "Copia el código iframe desde el panel y pégalo en tu web. Prueba antes con leads de prueba (no cuentan en la cuota).",
   },
   {
     number: "04",
     title: "Gestiona y automatiza",
-    body: "Recibe leads en el Kanban. En Pro, exporta CSV o envía cada lead a Zapier/Make con webhooks.",
+    body: "Recibe leads en el Kanban. En Pro, exporta contactos en CSV o envía cada lead a Zapier o Make con webhooks.",
   },
 ];
 
