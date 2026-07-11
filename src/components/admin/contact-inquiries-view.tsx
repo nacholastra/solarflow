@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, ExternalLink, Mail, Phone, RotateCcw } from "lucide-react";
+import { Check, ExternalLink, Mail, Phone, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DeleteConfirmDialog } from "@/components/shared/delete-confirm-dialog";
 import { cn } from "@/lib/utils";
 import { useAdminInquiries, type ContactInquiry } from "@/components/admin/admin-inquiries-context";
 
@@ -27,6 +28,8 @@ export function ContactInquiriesView() {
     useAdminInquiries();
   const [filter, setFilter] = useState<Filter>("pendientes");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ContactInquiry | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filtered = useMemo(() => {
     if (filter === "pendientes") return inquiries.filter((q) => !q.gestionado);
@@ -65,6 +68,24 @@ export function ContactInquiriesView() {
     }
 
     toast({ title: gestionado ? "Marcada como gestionada" : "Marcada como pendiente" });
+    await refresh();
+  }
+
+  async function handleDeleteConfirm() {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
+    const res = await fetch(`/api/admin/contact-inquiries/${deleteTarget.id}`, { method: "DELETE" });
+    const json = (await res.json()) as { error?: string };
+    setDeleting(false);
+
+    if (!res.ok) {
+      toast({ variant: "destructive", title: "Error", description: json.error });
+      return;
+    }
+
+    setDeleteTarget(null);
+    toast({ title: "Mensaje eliminado" });
     await refresh();
   }
 
@@ -141,6 +162,7 @@ export function ContactInquiriesView() {
                 inquiry={selected}
                 updating={updatingId === selected.id}
                 onToggleGestionado={toggleGestionado}
+                onDelete={() => setDeleteTarget(selected)}
               />
             ) : (
               <p className="px-4 py-12 text-center text-sm text-neutral-500">
@@ -162,6 +184,21 @@ export function ContactInquiriesView() {
           <ExternalLink className="size-3" />
         </a>
       </p>
+
+      <DeleteConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && !deleting && setDeleteTarget(null)}
+        title="¿Eliminar este mensaje?"
+        entityName={deleteTarget?.nombre ?? ""}
+        consequences={[
+          "Se borrará de forma permanente de la base de datos",
+          "Útil solo para limpiar envíos de prueba",
+        ]}
+        confirmLabel="Eliminar mensaje"
+        loading={deleting}
+        onConfirm={handleDeleteConfirm}
+        dark
+      />
     </div>
   );
 }
@@ -209,10 +246,12 @@ function InquiryDetail({
   inquiry,
   updating,
   onToggleGestionado,
+  onDelete,
 }: {
   inquiry: ContactInquiry;
   updating: boolean;
   onToggleGestionado: (id: string, gestionado: boolean) => void;
+  onDelete: () => void;
 }) {
   return (
     <div className="space-y-4 p-5">
@@ -292,6 +331,16 @@ function InquiryDetail({
               Marcar gestionada
             </>
           )}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          disabled={updating}
+          onClick={onDelete}
+        >
+          <Trash2 className="size-3.5" />
+          Eliminar (pruebas)
         </Button>
       </div>
     </div>

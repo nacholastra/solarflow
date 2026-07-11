@@ -45,3 +45,36 @@ export async function PATCH(
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const service = await createServiceClient();
+    const { data, error } = await service
+      .from("contact_inquiries")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      console.error("admin contact inquiry delete:", error.message);
+      return NextResponse.json({ error: "No se pudo eliminar" }, { status: 500 });
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: "Consulta no encontrada" }, { status: 404 });
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+  }
+}
