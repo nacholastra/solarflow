@@ -122,6 +122,13 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Empresas</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Gestiona planes, estado y eliminación de cuentas registradas.
+        </p>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {[
           { label: "Total empresas", value: stats.total },
@@ -143,7 +150,7 @@ export default function AdminPage() {
         <CardHeader>
           <CardTitle>Empresas registradas</CardTitle>
           <CardDescription className="text-neutral-400">
-            Gestiona planes, estado y eliminación de cuentas. Los mensajes están en el panel lateral.
+            Listado de cuentas con filtros por plan y estado de suscripción.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

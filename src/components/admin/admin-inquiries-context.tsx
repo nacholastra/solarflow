@@ -30,6 +30,7 @@ type AdminInquiriesContextValue = {
   refresh: () => Promise<void>;
   hasNewAlert: boolean;
   clearNewAlert: () => void;
+  dismissBellAlert: () => void;
   newInquiryIds: Set<string>;
 };
 
@@ -69,6 +70,10 @@ export function AdminInquiriesProvider({ children }: { children: React.ReactNode
   const clearNewAlert = useCallback(() => {
     setHasNewAlert(false);
     setNewInquiryIds(new Set());
+  }, []);
+
+  const dismissBellAlert = useCallback(() => {
+    setHasNewAlert(false);
   }, []);
 
   const refresh = useCallback(async () => {
@@ -130,9 +135,10 @@ export function AdminInquiriesProvider({ children }: { children: React.ReactNode
       refresh,
       hasNewAlert,
       clearNewAlert,
+      dismissBellAlert,
       newInquiryIds,
     }),
-    [inquiries, pendingCount, selectedId, setSelectedId, refresh, hasNewAlert, clearNewAlert, newInquiryIds],
+    [inquiries, pendingCount, selectedId, setSelectedId, refresh, hasNewAlert, clearNewAlert, dismissBellAlert, newInquiryIds],
   );
 
   return (
