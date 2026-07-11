@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { Check } from "lucide-react";
 import { HeroCTAs } from "@/components/marketing/hero-ctas";
+import { WidgetBrowserMock } from "@/components/marketing/widget-browser-mock";
 import { MARKETING } from "@/lib/config/marketing";
 
 export function HeroSection() {
@@ -44,24 +44,16 @@ export function HeroSection() {
         </div>
 
         <div className="relative">
-          <div className="aspect-[720/560] overflow-hidden rounded-2xl border border-border/80 shadow-elevated">
-            <Image
-              src="/hero-solar-installation.png"
-              alt="Instaladores colocando paneles solares en un tejado residencial"
-              width={720}
-              height={560}
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="h-full w-full object-cover object-[center_35%]"
-            />
-          </div>
-          <div className="absolute -bottom-5 -left-5 hidden max-w-[220px] rounded-xl border border-border/80 bg-card/95 p-4 shadow-elevated backdrop-blur-sm sm:block">
+          <WidgetBrowserMock compact className="shadow-elevated" />
+          <div className="absolute -bottom-5 -left-5 hidden max-w-[240px] rounded-xl border border-border/80 bg-card/95 p-4 shadow-elevated backdrop-blur-sm sm:block">
             <p className="text-xs font-medium text-muted-foreground">Plan Basic</p>
             <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
               {MARKETING.trust[0].value}
             </p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {MARKETING.trust[1].value} · {MARKETING.trust[3].value.toLowerCase()}
+            <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+              {MARKETING.trust[1].value}
+              <br />
+              {MARKETING.trust[3].value}
             </p>
           </div>
         </div>

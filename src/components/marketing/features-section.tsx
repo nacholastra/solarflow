@@ -1,8 +1,7 @@
 import { SectionHeader } from "@/components/marketing/section-header";
-import Image from "next/image";
+import { IframeEmbedVisual } from "@/components/marketing/widget-browser-mock";
 import {
   Calculator,
-  Code2,
   KanbanSquare,
   MapPin,
   TrendingDown,
@@ -100,22 +99,7 @@ export function FeaturesSection() {
               ))}
             </div>
 
-            <div className="relative min-h-[320px] overflow-hidden rounded-xl border border-border lg:min-h-[480px]">
-              <Image
-                src="/solar-rooftop-aerial.png"
-                alt="Vista aérea de paneles solares instalados en un tejado"
-                width={640}
-                height={720}
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="h-full min-h-[320px] w-full object-cover object-center lg:min-h-[480px]"
-              />
-              <div className="absolute inset-x-4 bottom-4 flex items-center gap-3 rounded-lg border border-border bg-card/95 p-4 backdrop-blur">
-                <Code2 className="size-5 shrink-0 text-solar" />
-                <p className="text-sm font-medium text-foreground">
-                  Copia el iframe desde el panel. Vista previa incluida antes de publicar.
-                </p>
-              </div>
-            </div>
+            <IframeEmbedVisual className="lg:sticky lg:top-24" />
           </div>
         </div>
       </section>

@@ -23,7 +23,7 @@ export const LANDING_DESCRIPTION =
 
 /** Imagen Open Graph (asset propio del sitio) */
 export function getOgImageUrl(): string {
-  return `${getSiteUrl()}/hero-solar-installation.png`;
+  return `${getSiteUrl()}/brand/logo.png`;
 }
 
 export function buildLandingMetadata(): Metadata {
@@ -54,9 +54,9 @@ export function buildLandingMetadata(): Metadata {
       images: [
         {
           url: ogImage,
-          width: 720,
-          height: 560,
-          alt: "Instalación de paneles solares en tejado residencial — SolarFlow",
+          width: 512,
+          height: 512,
+          alt: "SolarFlow — Simulador solar y CRM para instaladoras",
         },
       ],
     },

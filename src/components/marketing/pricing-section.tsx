@@ -62,7 +62,7 @@ export function PricingSection() {
           description={`Facturación mensual con PayPal. Sin permanencia. Precios en euros; referencia USD al tipo ${getEurToUsdRate().toFixed(2)}. Los leads de prueba del panel no consumen cuota.`}
         />
 
-        <div className="mx-auto mt-12 grid max-w-3xl gap-6 md:grid-cols-2">
+        <div className="mx-auto mt-12 grid max-w-3xl gap-8 md:grid-cols-2">
           {(["basic", "pro"] as const).map((id) => {
             const plan = PLANS[id];
             const meta = planMeta[id];
@@ -71,12 +71,12 @@ export function PricingSection() {
                 key={id}
                 className={cn("relative flex flex-col", meta.featured && "border-solar/50 shadow-elevated")}
               >
-                {meta.featured && (
-                  <Badge variant="solar" className="absolute -top-3 left-6">
-                    Más completo
-                  </Badge>
-                )}
-                <CardHeader>
+                <CardHeader className={cn(meta.featured && "pt-8")}>
+                  {meta.featured && (
+                    <Badge variant="solar" className="mb-3 w-fit">
+                      Más completo
+                    </Badge>
+                  )}
                   <CardTitle className="text-lg">{plan.name}</CardTitle>
                   <CardDescription>{meta.description}</CardDescription>
                   <div className="mt-4 flex items-baseline gap-1">
