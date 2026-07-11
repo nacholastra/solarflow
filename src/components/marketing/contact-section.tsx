@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SectionHeader } from "@/components/marketing/section-header";
+import { AdminContactNotice } from "@/components/marketing/admin-contact-notice";
 import { toast } from "@/hooks/use-toast";
 
 export function ContactSection() {
@@ -80,11 +81,14 @@ export function ContactSection() {
     <section id="contacto" className="scroll-mt-16 border-b border-border bg-card">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
-          <SectionHeader
-            eyebrow="Contacto"
-            title="¿Tienes dudas antes de registrarte?"
-            description="Cuéntanos tu caso completando el formulario. Revisamos cada consulta y te respondemos al correo que indiques."
-          />
+          <div>
+            <SectionHeader
+              eyebrow="Contacto"
+              title="¿Tienes dudas antes de registrarte?"
+              description="Cuéntanos tu caso completando el formulario. Revisamos cada consulta y te respondemos al correo que indiques."
+            />
+            <AdminContactNotice />
+          </div>
 
           <div className="rounded-2xl border border-border/60 bg-background p-6 shadow-soft md:p-8">
             {sent ? (

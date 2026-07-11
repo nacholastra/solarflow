@@ -20,6 +20,7 @@ const columns = [
       { label: "Contacto", href: "#contacto" },
       { label: "Acceder", href: "/login" },
       { label: "Crear cuenta", href: "/register" },
+      { label: "Administración", href: "/admin/login" },
     ],
   },
 ];

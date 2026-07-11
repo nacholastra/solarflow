@@ -11,9 +11,9 @@ export async function GET() {
     const service = await createServiceClient();
     const { data, error } = await service
       .from("contact_inquiries")
-      .select("id, nombre, email, empresa, telefono, mensaje, created_at")
+      .select("id, nombre, email, empresa, telefono, mensaje, gestionado, created_at")
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(200);
 
     if (error) {
       console.error("admin contact inquiries:", error.message);

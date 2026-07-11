@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmDialog } from "@/components/shared/delete-confirm-dialog";
 import { cn } from "@/lib/utils";
+import { ContactInquiriesPanel, type ContactInquiry } from "@/components/admin/contact-inquiries-panel";
 
 const ADMIN_DELETE_CONSEQUENCES = [
   "Se cancelará la suscripción PayPal si existe",
@@ -27,16 +28,6 @@ type EmpresaRow = {
   moneda_facturacion: string;
   owner_email: string;
   miembros: number;
-  created_at: string;
-};
-
-type ContactInquiry = {
-  id: string;
-  nombre: string;
-  email: string;
-  empresa: string | null;
-  telefono: string | null;
-  mensaje: string;
   created_at: string;
 };
 
@@ -68,6 +59,12 @@ export default function AdminPage() {
     setEmpresas(json.empresas ?? []);
     if (contactRes.ok) {
       setInquiries(contactJson.inquiries ?? []);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Consultas de contacto",
+        description: contactJson.error ?? "No se pudieron cargar las consultas.",
+      });
     }
     setLoading(false);
   }, []);
@@ -132,16 +129,18 @@ export default function AdminPage() {
       pro: empresas.filter((e) => e.plan === "pro").length,
       basic: empresas.filter((e) => e.plan === "basic").length,
       sinPlan: empresas.filter((e) => e.plan === null).length,
+      contactPending: inquiries.filter((q) => !q.gestionado).length,
     }),
-    [empresas],
+    [empresas, inquiries],
   );
 
   if (loading) return <div className="h-64 animate-pulse rounded-xl bg-neutral-900" />;
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
         {[
+          { label: "Consultas pendientes", value: stats.contactPending, highlight: stats.contactPending > 0 },
           { label: "Total empresas", value: stats.total },
           { label: "Activas", value: stats.active },
           { label: "Plan Pro", value: stats.pro },
@@ -151,42 +150,13 @@ export default function AdminPage() {
           <Card key={s.label} className="border-neutral-800 bg-neutral-900 text-neutral-100">
             <CardHeader className="pb-2">
               <CardDescription className="text-neutral-400">{s.label}</CardDescription>
-              <CardTitle className="text-3xl">{s.value}</CardTitle>
+              <CardTitle className={s.highlight ? "text-3xl text-solar" : "text-3xl"}>{s.value}</CardTitle>
             </CardHeader>
           </Card>
         ))}
       </div>
 
-      {inquiries.length > 0 && (
-        <Card className="border-neutral-800 bg-neutral-900 text-neutral-100">
-          <CardHeader>
-            <CardTitle>Consultas de contacto</CardTitle>
-            <CardDescription className="text-neutral-400">
-              Mensajes recibidos desde el formulario de la landing
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {inquiries.slice(0, 10).map((q) => (
-              <div key={q.id} className="rounded-lg border border-neutral-800 bg-neutral-950 p-4 text-sm">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <p className="font-medium">{q.nombre}</p>
-                    <p className="text-xs text-neutral-400">
-                      {q.email}
-                      {q.empresa ? ` · ${q.empresa}` : ""}
-                      {q.telefono ? ` · ${q.telefono}` : ""}
-                    </p>
-                  </div>
-                  <time className="text-xs text-neutral-500">
-                    {new Date(q.created_at).toLocaleString("es-ES")}
-                  </time>
-                </div>
-                <p className="mt-2 whitespace-pre-wrap text-neutral-300">{q.mensaje}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+      <ContactInquiriesPanel inquiries={inquiries} onUpdated={load} />
 
       <Card className="border-neutral-800 bg-neutral-900 text-neutral-100">
         <CardHeader>

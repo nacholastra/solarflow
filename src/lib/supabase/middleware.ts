@@ -144,7 +144,10 @@ async function handleAdminRoutes(
   request: NextRequest,
   pathname: string,
 ): Promise<NextResponse | null> {
-  const isAdminAuthApi = pathname === "/api/admin/login" || pathname === "/api/admin/logout";
+  const isAdminAuthApi =
+    pathname === "/api/admin/login" ||
+    pathname === "/api/admin/logout" ||
+    pathname === "/api/admin/me";
   const isAdminApi = pathname.startsWith("/api/admin");
   const isAdminLogin = pathname === "/admin/login";
   const isAdminPage = pathname.startsWith("/admin");
