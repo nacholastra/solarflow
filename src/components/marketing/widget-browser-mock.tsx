@@ -69,27 +69,3 @@ export function WidgetBrowserMock({
     </div>
   );
 }
-
-export function IframeEmbedVisual({ className }: { className?: string }) {
-  return (
-    <div className={cn("flex flex-col gap-4", className)}>
-      <div className="overflow-hidden rounded-xl border border-border bg-muted/40">
-        <div className="border-b border-border bg-muted px-4 py-2">
-          <p className="text-xs font-medium text-muted-foreground">Código iframe (desde tu panel)</p>
-        </div>
-        <pre className="overflow-x-auto p-4 text-[11px] leading-relaxed text-foreground sm:text-xs">
-          <code>{`<iframe
-  src="https://solarflow.app/widget/tu-empresa"
-  width="100%"
-  height="680"
-  style="border:0;border-radius:12px"
-  loading="lazy"
-  title="Simulador solar"
-></iframe>`}</code>
-        </pre>
-      </div>
-
-      <WidgetBrowserMock url="tuinstaladora.es/simulador" />
-    </div>
-  );
-}
