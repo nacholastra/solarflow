@@ -399,6 +399,45 @@ export type Database = {
         };
         Relationships: NoRelationships;
       };
+      contact_inquiries: {
+        Row: {
+          id: string;
+          nombre: string;
+          email: string;
+          empresa: string | null;
+          telefono: string | null;
+          mensaje: string;
+          consentimiento_rgpd: boolean;
+          ip_hash: string | null;
+          user_agent: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          nombre: string;
+          email: string;
+          empresa?: string | null;
+          telefono?: string | null;
+          mensaje: string;
+          consentimiento_rgpd?: boolean;
+          ip_hash?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          nombre?: string;
+          email?: string;
+          empresa?: string | null;
+          telefono?: string | null;
+          mensaje?: string;
+          consentimiento_rgpd?: boolean;
+          ip_hash?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
+        };
+        Relationships: NoRelationships;
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

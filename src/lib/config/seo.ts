@@ -19,7 +19,7 @@ export const LANDING_TITLE =
   "SolarFlow — Simulador solar y CRM para instaladoras en España";
 
 export const LANDING_DESCRIPTION =
-  "Capta leads cualificados con un simulador de rentabilidad solar embebible. Cálculos por ciudad con PVGIS, CRM Kanban e integración Zapier. Planes desde 60 USD/mes.";
+  "Simulador solar embebible y CRM Kanban para instaladoras en España. Estimaciones por localidad (PVGIS), captura RGPD y planes desde 60 €/mes sin permanencia.";
 
 /** Imagen Open Graph (1200×630 recomendado) */
 export const OG_IMAGE_URL =

@@ -9,45 +9,46 @@ import {
   Webhook,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PLANS } from "@/lib/config/plans";
 
 const problems = [
   {
     icon: TrendingDown,
-    title: "Leads que se enfrían",
-    body: "Los formularios de contacto genéricos no cualifican al visitante ni transmiten el valor del ahorro solar.",
+    title: "Formularios que no cualifican",
+    body: "Un “contacta con nosotros” genérico no muestra ahorro ni potencia. El visitante se va sin entender el valor.",
   },
   {
     icon: MapPin,
-    title: "Cálculos manuales lentos",
-    body: "Cada presupuesto exige horas de trabajo antes de saber si el cliente es realmente viable.",
+    title: "Presupuestos lentos",
+    body: "Calcular a mano cada visita web consume tiempo comercial antes de saber si el lead merece una visita.",
   },
   {
     icon: KanbanSquare,
-    title: "Sin proceso comercial claro",
-    body: "Hojas de cálculo dispersas hacen que se pierdan oportunidades entre el primer contacto y el cierre.",
+    title: "Leads dispersos",
+    body: "Excel, WhatsApp y email mezclados dificultan saber en qué fase está cada oportunidad.",
   },
 ];
 
 const features = [
   {
     icon: Calculator,
-    title: "Simulador de ahorro",
-    body: "El visitante calcula su ahorro, potencia recomendada en kWp y periodo de amortización en segundos.",
+    title: "Simulador en tu web",
+    body: "Widget embebible por iframe. El visitante indica consumo y obtiene kWp, ahorro anual y payback estimados antes de dejar sus datos.",
   },
   {
     icon: MapPin,
-    title: "Cálculo por ciudad",
-    body: "Irradiación y precios ajustados a la localidad con PVGIS, peajes, cargos, IEE e IVA/IGIC.",
+    title: "Estimación por localidad",
+    body: "Producción solar (PVGIS) y tarifas españolas por ciudad: peajes, cargos, IEE e IVA/IGIC. Siempre como orientación, no como proyecto ejecutivo.",
   },
   {
     icon: KanbanSquare,
     title: "CRM Kanban",
-    body: "Arrastra cada lead por tu embudo: Nuevo, Contactado, Visita, Presupuesto, Cerrado.",
+    body: "6 estados: Nuevo, Contactado, Visita, Presupuesto, Cerrado y Descartado. Arrastra tarjetas, añade notas y filtra leads de prueba.",
   },
   {
     icon: Webhook,
-    title: "Integraciones webhook",
-    body: "Envía automáticamente cada lead a Zapier o Make y conéctalo con tus herramientas.",
+    title: "Automatización (Pro)",
+    body: `Webhooks HTTPS a Zapier o Make. Export CSV, GTM en el widget y marca blanca incluidos en plan Pro (${PLANS.pro.priceEur} €/mes).`,
   },
 ];
 
@@ -57,8 +58,8 @@ export function FeaturesSection() {
       <section className="border-b border-border bg-card">
         <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-20">
           <SectionHeader
-            eyebrow="El reto del sector"
-            title="Captar y cerrar clientes solares sigue siendo demasiado manual"
+            eyebrow="El problema"
+            title="Tu web genera visitas, pero no siempre genera oportunidades claras"
           />
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {problems.map((item) => (
@@ -78,8 +79,8 @@ export function FeaturesSection() {
         <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
           <SectionHeader
             eyebrow="Funcionalidades"
-            title="Todo lo que necesitas para vender más instalaciones"
-            description="Una plataforma diseñada específicamente para el flujo de trabajo de las empresas instaladoras fotovoltaicas."
+            title="Herramientas concretas, no un ERP genérico"
+            description="SolarFlow cubre captación web + seguimiento comercial. No incluye diseño eléctrico, gestión de obra ni facturación de instalaciones."
           />
 
           <div className="mt-12 grid gap-6 lg:grid-cols-2">
@@ -110,7 +111,7 @@ export function FeaturesSection() {
               <div className="absolute inset-x-4 bottom-4 flex items-center gap-3 rounded-lg border border-border bg-card/95 p-4 backdrop-blur">
                 <Code2 className="size-5 shrink-0 text-solar" />
                 <p className="text-sm font-medium text-foreground">
-                  Embebe el widget en tu web con una sola línea de código iframe.
+                  Copia el iframe desde el panel. Vista previa incluida antes de publicar.
                 </p>
               </div>
             </div>

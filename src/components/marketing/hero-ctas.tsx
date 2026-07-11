@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -30,15 +30,18 @@ export function HeroCTAs() {
   }
 
   return (
-    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+    <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
       <Button size="lg" variant="solar" asChild>
         <Link href="/register">
-          Crear cuenta
+          Probar SolarFlow
           <ArrowRight className="size-4" />
         </Link>
       </Button>
       <Button size="lg" variant="outline" asChild>
-        <Link href="/login">Acceder al panel</Link>
+        <a href="#contacto">
+          <MessageCircle className="size-4" />
+          Hablar con nosotros
+        </a>
       </Button>
     </div>
   );

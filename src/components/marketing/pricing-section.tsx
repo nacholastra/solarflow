@@ -16,38 +16,37 @@ import { cn } from "@/lib/utils";
 
 const planFeatures = {
   basic: [
-    `${PLANS.basic.leadsLimit} leads al mes`,
-    `${PLANS.basic.teamLimit} usuarios (1 Admin + 1 Comercial)`,
-    "Simulador embebible con vista previa e iframe",
-    "Personalización: color y logo",
-    'Marca "Powered by SolarFlow" en el widget',
-    "Motor ROI (€/kWp, autoconsumo, kWp máx.)",
-    "CRM Kanban con 6 estados y notas",
+    `${PLANS.basic.leadsLimit} leads reales al mes (cuota del plan)`,
+    `${PLANS.basic.teamLimit} usuarios: 1 Admin + 1 Comercial`,
+    "Simulador embebible + vista previa + iframe",
+    "Personalización de color y logo",
+    'Marca "Powered by SolarFlow" visible en el widget',
+    "Motor ROI configurable (€/kWp, autoconsumo, kWp máx.)",
+    "CRM Kanban (6 estados) con notas por lead",
     "Listado de contactos con buscador",
-    "Panel con KPIs y uso del plan",
+    "Panel con KPIs y barra de uso del plan",
     "Soporte por email",
   ],
   pro: [
-    `${PLANS.pro.leadsLimit} leads al mes`,
-    `${PLANS.pro.teamLimit} usuarios en equipo`,
-    "Todo lo del plan Basic",
-    "Marca blanca (sin watermark SolarFlow)",
-    "Google Tag Manager en el widget",
+    `${PLANS.pro.leadsLimit} leads reales al mes`,
+    `Hasta ${PLANS.pro.teamLimit} usuarios en equipo`,
+    "Todo lo incluido en Basic",
+    "Marca blanca: sin watermark SolarFlow",
+    "Google Tag Manager en el widget (Pro)",
     "Exportación CSV de contactos",
-    "Webhooks automáticos (Zapier, Make, CRM)",
-    "Prueba de webhooks desde el panel",
-    "Upgrade automático desde Basic",
-    "Soporte comercial prioritario",
+    "Webhooks HTTPS (Zapier, Make, etc.)",
+    "Prueba de webhook desde el panel",
+    "Upgrade desde Basic sin crear cuenta nueva",
   ],
 };
 
 const planMeta = {
   basic: {
-    description: "Valida el retorno de inversión captando y gestionando tus primeros leads.",
+    description: "Para validar captación en tu web con pocos leads al mes y un equipo pequeño.",
     featured: false,
   },
   pro: {
-    description: "Escala tu captación con marca blanca, analítica y automatizaciones B2B.",
+    description: "Para escalar volumen, quitar nuestra marca y automatizar con webhooks.",
     featured: true,
   },
 } as const;
@@ -59,8 +58,8 @@ export function PricingSection() {
         <SectionHeader
           align="center"
           eyebrow="Precios"
-          title="Un plan para cada volumen de leads"
-          description={`Sin permanencia. Cancela cuando quieras. Precios base en euros; el dólar se calcula al tipo ${getEurToUsdRate().toFixed(2)}.`}
+          title="Planes claros, sin letra pequeña"
+          description={`Facturación mensual con PayPal. Sin permanencia. Precios en euros; referencia USD al tipo ${getEurToUsdRate().toFixed(2)}. Los leads de prueba del panel no consumen cuota.`}
         />
 
         <div className="mx-auto mt-12 grid max-w-3xl gap-6 md:grid-cols-2">
@@ -74,7 +73,7 @@ export function PricingSection() {
               >
                 {meta.featured && (
                   <Badge variant="solar" className="absolute -top-3 left-6">
-                    Recomendado
+                    Más completo
                   </Badge>
                 )}
                 <CardHeader>
@@ -87,7 +86,7 @@ export function PricingSection() {
                     <span className="text-sm text-muted-foreground">€ / mes</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    ≈ {getPlanPrice(id, "USD")} $ / mes
+                    ≈ {getPlanPrice(id, "USD")} $ / mes · IVA no incluido
                   </p>
                 </CardHeader>
                 <CardContent className="flex-1 pt-0">
@@ -102,14 +101,17 @@ export function PricingSection() {
                     ))}
                   </ul>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex-col gap-2">
                   <Button
-                    variant={meta.featured ? "default" : "outline"}
+                    variant={meta.featured ? "solar" : "outline"}
                     size="lg"
                     className="w-full"
                     asChild
                   >
                     <Link href="/register">Empezar con {plan.name}</Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" className="w-full text-muted-foreground" asChild>
+                    <Link href="#contacto">¿Dudas? Escríbenos</Link>
                   </Button>
                 </CardFooter>
               </Card>

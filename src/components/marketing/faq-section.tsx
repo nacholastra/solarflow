@@ -15,7 +15,7 @@ export function FaqSection() {
               id="faq-heading"
               className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl"
             >
-              Resolvemos tus dudas
+              Respuestas directas, sin rodeos
             </h2>
           </div>
 
@@ -37,7 +37,11 @@ export function FaqSection() {
           </div>
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            ¿Más dudas? Escríbenos a{" "}
+            ¿Prefieres escribirnos? Usa el{" "}
+            <a href="#contacto" className="font-medium text-foreground underline-offset-4 hover:underline">
+              formulario de contacto
+            </a>{" "}
+            o{" "}
             <a
               href={`mailto:${BRAND.supportEmail}`}
               className="font-medium text-foreground underline-offset-4 hover:underline"
@@ -52,10 +56,11 @@ export function FaqSection() {
         <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
           <div className="flex flex-col items-center rounded-2xl bg-primary px-6 py-14 text-center text-primary-foreground md:px-12">
             <h2 className="max-w-xl text-balance text-3xl font-semibold tracking-tight md:text-4xl">
-              Empieza a captar más instalaciones hoy
+              Prueba el flujo completo en minutos
             </h2>
             <p className="mt-4 max-w-md text-pretty text-lg leading-relaxed text-primary-foreground/70">
-              Crea tu cuenta, configura tu simulador y publícalo en tu web en cuestión de minutos.
+              Crea tu cuenta, configura el simulador y publícalo en tu web. Si necesitas ayuda, estamos
+              a un mensaje de distancia.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" variant="secondary" asChild>
@@ -70,7 +75,7 @@ export function FaqSection() {
                 className="border-primary-foreground/20 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
                 asChild
               >
-                <Link href="/login">Acceder al panel</Link>
+                <a href="#contacto">Contactar</a>
               </Button>
             </div>
           </div>

@@ -56,11 +56,11 @@ export function LandingJsonLd() {
       },
     ],
     featureList: [
-      "Simulador solar embebible",
-      "Cálculo ROI por localidad PVGIS",
-      "CRM Kanban",
-      "Integración Zapier y Make",
-      "Multiusuario con roles",
+      "Simulador solar embebible por iframe",
+      "Estimaciones ROI por localidad (PVGIS precargado)",
+      "CRM Kanban con 6 estados",
+      "Webhooks Zapier/Make (plan Pro)",
+      "Captura de leads con consentimiento RGPD",
     ],
     screenshot: OG_IMAGE_URL,
   };

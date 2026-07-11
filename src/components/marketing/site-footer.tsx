@@ -6,16 +6,16 @@ const columns = [
   {
     title: "Producto",
     links: [
-      { label: "Widget simulador", href: "#funcionalidades" },
-      { label: "CRM Kanban", href: "#funcionalidades" },
-      { label: "Integraciones", href: "#funcionalidades" },
+      { label: "Funcionalidades", href: "#funcionalidades" },
       { label: "Precios", href: "#precios" },
+      { label: "FAQ", href: "#faq" },
+      { label: "Contacto", href: "#contacto" },
     ],
   },
   {
-    title: "Empresa",
+    title: "Legal",
     links: [
-      { label: "Contacto", href: `mailto:${BRAND.supportEmail}` },
+      { label: "Privacidad", href: "/privacidad" },
       { label: "Soporte", href: `mailto:${BRAND.supportEmail}` },
       { label: "Acceder", href: "/login" },
       { label: "Crear cuenta", href: "/register" },
@@ -23,7 +23,7 @@ const columns = [
   },
 ];
 
-const trustItems = ["PVGIS", "RGPD", "Sin permanencia", "Marca blanca en Pro"];
+const trustItems = ["PVGIS", "RGPD", "Sin permanencia", "PayPal mensual"];
 
 export function SiteFooter() {
   return (

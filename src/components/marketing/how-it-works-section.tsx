@@ -3,23 +3,23 @@ import { SectionHeader } from "@/components/marketing/section-header";
 const steps = [
   {
     number: "01",
-    title: "Configura tu simulador",
-    body: "Ajusta colores, logo, precio por kWp y parámetros de autoconsumo desde el panel.",
+    title: "Crea tu cuenta",
+    body: "Regístrate, elige Basic o Pro y activa la suscripción con PayPal. Sin permanencia.",
   },
   {
     number: "02",
-    title: "Embébelo en tu web",
-    body: "Copia el código iframe y pégalo en tu página. Sin conocimientos técnicos.",
+    title: "Configura el simulador",
+    body: "Ajusta color, logo, €/kWp, autoconsumo, kWp máximo y enlace a tu política de privacidad.",
   },
   {
     number: "03",
-    title: "Capta leads cualificados",
-    body: "Los visitantes calculan su ahorro y dejan sus datos con consentimiento RGPD.",
+    title: "Publica el iframe",
+    body: "Copia el código desde el panel y pégalo en tu web. Prueba antes con leads de test (no cuentan en la cuota).",
   },
   {
     number: "04",
-    title: "Gestiona y cierra",
-    body: "Organiza cada lead en el CRM Kanban y llévalo hasta la instalación.",
+    title: "Gestiona y automatiza",
+    body: "Recibe leads en el Kanban. En Pro, exporta CSV o envía cada lead a Zapier/Make con webhooks.",
   },
 ];
 
@@ -27,7 +27,7 @@ export function HowItWorksSection() {
   return (
     <section id="como-funciona" className="scroll-mt-16 border-b border-border bg-card">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
-        <SectionHeader eyebrow="Cómo funciona" title="En marcha en cuatro pasos" />
+        <SectionHeader eyebrow="Cómo funciona" title="De registro a primer lead en cuatro pasos" />
 
         <ol className="mt-12 grid gap-8 md:grid-cols-4">
           {steps.map((step) => (

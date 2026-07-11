@@ -30,10 +30,21 @@ type EmpresaRow = {
   created_at: string;
 };
 
+type ContactInquiry = {
+  id: string;
+  nombre: string;
+  email: string;
+  empresa: string | null;
+  telefono: string | null;
+  mensaje: string;
+  created_at: string;
+};
+
 const ESTADOS = ["pending", "active", "suspended", "cancelled"] as const;
 
 export default function AdminPage() {
   const [empresas, setEmpresas] = useState<EmpresaRow[]>([]);
+  const [inquiries, setInquiries] = useState<ContactInquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [planFilter, setPlanFilter] = useState<"all" | "basic" | "pro" | "sin_plan">("all");
@@ -42,14 +53,22 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
-    const res = await fetch("/api/admin/empresas");
-    const json = (await res.json()) as { empresas?: EmpresaRow[]; error?: string };
-    if (!res.ok) {
+    const [empRes, contactRes] = await Promise.all([
+      fetch("/api/admin/empresas"),
+      fetch("/api/admin/contact-inquiries"),
+    ]);
+    const json = (await empRes.json()) as { empresas?: EmpresaRow[]; error?: string };
+    const contactJson = (await contactRes.json()) as { inquiries?: ContactInquiry[]; error?: string };
+
+    if (!empRes.ok) {
       toast({ variant: "destructive", title: "Error", description: json.error });
       setLoading(false);
       return;
     }
     setEmpresas(json.empresas ?? []);
+    if (contactRes.ok) {
+      setInquiries(contactJson.inquiries ?? []);
+    }
     setLoading(false);
   }, []);
 
@@ -137,6 +156,37 @@ export default function AdminPage() {
           </Card>
         ))}
       </div>
+
+      {inquiries.length > 0 && (
+        <Card className="border-neutral-800 bg-neutral-900 text-neutral-100">
+          <CardHeader>
+            <CardTitle>Consultas de contacto</CardTitle>
+            <CardDescription className="text-neutral-400">
+              Mensajes recibidos desde el formulario de la landing
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {inquiries.slice(0, 10).map((q) => (
+              <div key={q.id} className="rounded-lg border border-neutral-800 bg-neutral-950 p-4 text-sm">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <p className="font-medium">{q.nombre}</p>
+                    <p className="text-xs text-neutral-400">
+                      {q.email}
+                      {q.empresa ? ` · ${q.empresa}` : ""}
+                      {q.telefono ? ` · ${q.telefono}` : ""}
+                    </p>
+                  </div>
+                  <time className="text-xs text-neutral-500">
+                    {new Date(q.created_at).toLocaleString("es-ES")}
+                  </time>
+                </div>
+                <p className="mt-2 whitespace-pre-wrap text-neutral-300">{q.mensaje}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="border-neutral-800 bg-neutral-900 text-neutral-100">
         <CardHeader>

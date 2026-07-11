@@ -15,6 +15,7 @@ const navLinks = [
   { label: "Cómo funciona", href: "#como-funciona" },
   { label: "Precios", href: "#precios" },
   { label: "FAQ", href: "#faq" },
+  { label: "Contacto", href: "#contacto" },
 ];
 
 export function SiteHeader() {
