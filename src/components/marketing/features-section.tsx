@@ -1,5 +1,5 @@
 import { SectionHeader } from "@/components/marketing/section-header";
-import { IframeEmbedVisual } from "@/components/marketing/widget-browser-mock";
+import { WidgetBrowserMock } from "@/components/marketing/widget-browser-mock";
 import {
   Calculator,
   KanbanSquare,
@@ -99,7 +99,12 @@ export function FeaturesSection() {
               ))}
             </div>
 
-            <IframeEmbedVisual className="lg:sticky lg:top-24" />
+            <div className="lg:sticky lg:top-24">
+              <WidgetBrowserMock url="tuinstaladora.es/simulador" />
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                Vista previa del simulador embebido en tu web. El código de instalación solo está en tu panel.
+              </p>
+            </div>
           </div>
         </div>
       </section>
