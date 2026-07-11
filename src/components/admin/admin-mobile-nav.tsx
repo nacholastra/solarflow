@@ -60,13 +60,21 @@ export function AdminMobileNav() {
                   active
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
-                  isMensajes && hasNewAlert && !active && "ring-1 ring-solar/40",
                 )}
               >
-                <item.icon className={cn("size-4", isMensajes && hasNewAlert && "text-solar")} />
-                <span className="flex-1">{item.label}</span>
+                <item.icon className="size-4" />
+                <span className="flex flex-1 items-center gap-2">
+                  {item.label}
+                  {isMensajes && hasNewAlert && (
+                    <span
+                      className="size-2 shrink-0 rounded-full bg-red-500"
+                      title="Nuevo mensaje"
+                      aria-label="Nuevo mensaje"
+                    />
+                  )}
+                </span>
                 {isMensajes && pendingCount > 0 && (
-                  <span className="rounded-full bg-solar px-1.5 py-0.5 text-[10px] font-semibold text-solar-foreground">
+                  <span className="rounded-full bg-neutral-700 px-1.5 py-0.5 text-[10px] font-semibold text-neutral-200">
                     {pendingCount > 99 ? "99+" : pendingCount}
                   </span>
                 )}

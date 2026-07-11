@@ -15,14 +15,14 @@ function NavItem({
   icon: Icon,
   active,
   badge,
-  highlight,
+  showNewDot,
 }: {
   href: string;
   label: string;
   icon: React.ElementType;
   active: boolean;
   badge?: number;
-  highlight?: boolean;
+  showNewDot?: boolean;
 }) {
   return (
     <Link
@@ -33,13 +33,21 @@ function NavItem({
         active
           ? "border-l-2 border-sidebar-primary bg-sidebar-accent pl-[10px] text-sidebar-accent-foreground"
           : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
-        highlight && !active && "ring-1 ring-solar/40",
       )}
     >
-      <Icon className={cn("size-4 shrink-0", highlight && "text-solar")} />
-      <span className="flex-1">{label}</span>
+      <Icon className="size-4 shrink-0" />
+      <span className="flex flex-1 items-center gap-2">
+        {label}
+        {showNewDot && (
+          <span
+            className="size-2 shrink-0 rounded-full bg-red-500"
+            title="Nuevo mensaje"
+            aria-label="Nuevo mensaje"
+          />
+        )}
+      </span>
       {badge !== undefined && badge > 0 && (
-        <span className="rounded-full bg-solar px-1.5 py-0.5 text-[10px] font-semibold text-solar-foreground">
+        <span className="rounded-full bg-neutral-700 px-1.5 py-0.5 text-[10px] font-semibold text-neutral-200">
           {badge > 99 ? "99+" : badge}
         </span>
       )}
@@ -77,7 +85,7 @@ export function AdminSidebar() {
             icon={item.icon}
             active={isAdminNavActive(pathname, item.href, "exact" in item && item.exact)}
             badge={item.href === "/admin/mensajes" ? pendingCount : undefined}
-            highlight={item.href === "/admin/mensajes" && hasNewAlert}
+            showNewDot={item.href === "/admin/mensajes" && hasNewAlert}
           />
         ))}
       </nav>
