@@ -24,7 +24,7 @@ function formatRelative(dateStr: string) {
 }
 
 export function ContactInquiriesView() {
-  const { inquiries, selectedId, setSelectedId, refresh, newInquiryIds, pendingCount, dismissBellAlert } =
+  const { inquiries, selectedId, setSelectedId, refresh, patchInquiry, newInquiryIds, pendingCount, dismissBellAlert } =
     useAdminInquiries();
   const [filter, setFilter] = useState<Filter>("pendientes");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -39,8 +39,8 @@ export function ContactInquiriesView() {
   }, [inquiries, filter]);
 
   const selected = useMemo(
-    () => inquiries.find((q) => q.id === selectedId) ?? null,
-    [inquiries, selectedId],
+    () => filtered.find((q) => q.id === selectedId) ?? null,
+    [filtered, selectedId],
   );
 
   useEffect(() => {
@@ -55,6 +55,16 @@ export function ContactInquiriesView() {
 
   async function toggleGestionado(id: string, gestionado: boolean) {
     setUpdatingId(id);
+    patchInquiry(id, { gestionado });
+
+    if (gestionado && filter === "pendientes") {
+      const nextPending = inquiries.find((q) => q.id !== id && !q.gestionado);
+      setSelectedId(nextPending?.id ?? null);
+    } else if (!gestionado && filter === "gestionadas") {
+      const nextGestionada = inquiries.find((q) => q.id !== id && q.gestionado);
+      setSelectedId(nextGestionada?.id ?? null);
+    }
+
     const res = await fetch(`/api/admin/contact-inquiries/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -65,11 +75,11 @@ export function ContactInquiriesView() {
 
     if (!res.ok) {
       toast({ variant: "destructive", title: "Error", description: json.error });
+      await refresh();
       return;
     }
 
     toast({ title: gestionado ? "Marcada como gestionada" : "Marcada como pendiente" });
-    await refresh();
   }
 
   async function handleDeleteConfirm() {

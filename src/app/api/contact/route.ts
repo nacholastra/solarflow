@@ -4,6 +4,10 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { isSameOrigin } from "@/lib/security/api-origin";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { hashClientIp } from "@/lib/security/ip-hash";
+import {
+  CONTACT_FORM_RATE_LIMIT,
+  formatRetryAfterMessage,
+} from "@/lib/config/contact-rate-limit";
 
 const MIN_FORM_MS = 1_500;
 const MAX_FORM_AGE_MS = 86_400_000;
@@ -19,19 +23,17 @@ const contactSchema = z.object({
   form_started_at: z.number().int().positive(),
 });
 
+function rateLimitResponse(retryAfterSec?: number) {
+  return NextResponse.json(
+    { error: formatRetryAfterMessage(retryAfterSec) },
+    { status: 429, headers: { "Retry-After": String(retryAfterSec ?? 300) } },
+  );
+}
+
 export async function POST(request: Request) {
   try {
     if (!isSameOrigin(request)) {
       return NextResponse.json({ error: "Origen no permitido" }, { status: 403 });
-    }
-
-    const ip = getClientIp(request);
-    const rate = checkRateLimit(`contact:${ip}`, 3, 3_600_000);
-    if (!rate.allowed) {
-      return NextResponse.json(
-        { error: "Demasiadas solicitudes. Inténtalo más tarde." },
-        { status: 429, headers: { "Retry-After": String(rate.retryAfterSec ?? 3600) } },
-      );
     }
 
     const json = await request.json();
@@ -51,12 +53,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Solicitud no válida" }, { status: 400 });
     }
 
+    const ip = getClientIp(request);
+    const emailKey = data.email.toLowerCase();
+
+    const ipRate = checkRateLimit(
+      `contact:ip:${ip}`,
+      CONTACT_FORM_RATE_LIMIT.perIp.limit,
+      CONTACT_FORM_RATE_LIMIT.perIp.windowMs,
+    );
+    if (!ipRate.allowed) {
+      return rateLimitResponse(ipRate.retryAfterSec);
+    }
+
+    const emailRate = checkRateLimit(
+      `contact:email:${emailKey}`,
+      CONTACT_FORM_RATE_LIMIT.perEmail.limit,
+      CONTACT_FORM_RATE_LIMIT.perEmail.windowMs,
+    );
+    if (!emailRate.allowed) {
+      return rateLimitResponse(emailRate.retryAfterSec);
+    }
+
     const userAgent = request.headers.get("user-agent");
     const supabase = await createServiceClient();
 
     const { error } = await supabase.from("contact_inquiries").insert({
       nombre: data.nombre,
-      email: data.email.toLowerCase(),
+      email: emailKey,
       empresa: data.empresa?.trim() || null,
       telefono: data.telefono?.trim() || null,
       mensaje: data.mensaje,

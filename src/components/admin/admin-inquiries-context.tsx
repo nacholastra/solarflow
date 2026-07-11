@@ -28,6 +28,7 @@ type AdminInquiriesContextValue = {
   selectedId: string | null;
   setSelectedId: (id: string | null) => void;
   refresh: () => Promise<boolean>;
+  patchInquiry: (id: string, patch: Partial<Pick<ContactInquiry, "gestionado">>) => void;
   hasNewAlert: boolean;
   clearNewAlert: () => void;
   dismissBellAlert: () => void;
@@ -75,6 +76,17 @@ export function AdminInquiriesProvider({ children }: { children: React.ReactNode
   const dismissBellAlert = useCallback(() => {
     setHasNewAlert(false);
   }, []);
+
+  const patchInquiry = useCallback(
+    (id: string, patch: Partial<Pick<ContactInquiry, "gestionado">>) => {
+      setInquiries((prev) => {
+        const next = prev.map((q) => (q.id === id ? { ...q, ...patch } : q));
+        prevPendingRef.current = next.filter((q) => !q.gestionado).length;
+        return next;
+      });
+    },
+    [],
+  );
 
   const refresh = useCallback(async (): Promise<boolean> => {
     const res = await fetch("/api/admin/contact-inquiries");
@@ -135,12 +147,13 @@ export function AdminInquiriesProvider({ children }: { children: React.ReactNode
       selectedId,
       setSelectedId,
       refresh,
+      patchInquiry,
       hasNewAlert,
       clearNewAlert,
       dismissBellAlert,
       newInquiryIds,
     }),
-    [inquiries, pendingCount, selectedId, setSelectedId, refresh, hasNewAlert, clearNewAlert, dismissBellAlert, newInquiryIds],
+    [inquiries, pendingCount, selectedId, setSelectedId, refresh, patchInquiry, hasNewAlert, clearNewAlert, dismissBellAlert, newInquiryIds],
   );
 
   return (
