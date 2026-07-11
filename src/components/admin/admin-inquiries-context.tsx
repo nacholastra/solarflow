@@ -27,7 +27,7 @@ type AdminInquiriesContextValue = {
   pendingCount: number;
   selectedId: string | null;
   setSelectedId: (id: string | null) => void;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<boolean>;
   hasNewAlert: boolean;
   clearNewAlert: () => void;
   dismissBellAlert: () => void;
@@ -76,10 +76,10 @@ export function AdminInquiriesProvider({ children }: { children: React.ReactNode
     setHasNewAlert(false);
   }, []);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (): Promise<boolean> => {
     const res = await fetch("/api/admin/contact-inquiries");
     const json = (await res.json()) as { inquiries?: ContactInquiry[]; error?: string };
-    if (!res.ok) return;
+    if (!res.ok) return false;
 
     const next = json.inquiries ?? [];
     const nextPending = next.filter((q) => !q.gestionado).length;
@@ -118,6 +118,8 @@ export function AdminInquiriesProvider({ children }: { children: React.ReactNode
     if (selectedIdRef.current && !next.some((q) => q.id === selectedIdRef.current)) {
       setSelectedIdState(next.find((q) => !q.gestionado)?.id ?? next[0]?.id ?? null);
     }
+
+    return true;
   }, []);
 
   useEffect(() => {

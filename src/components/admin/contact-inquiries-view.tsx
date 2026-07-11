@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, ExternalLink, Mail, Phone, RotateCcw, Trash2 } from "lucide-react";
+import { Check, ExternalLink, Mail, Phone, RefreshCw, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ export function ContactInquiriesView() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ContactInquiry | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const filtered = useMemo(() => {
     if (filter === "pendientes") return inquiries.filter((q) => !q.gestionado);
@@ -89,6 +90,22 @@ export function ContactInquiriesView() {
     await refresh();
   }
 
+  async function handleRefresh() {
+    setRefreshing(true);
+    const ok = await refresh();
+    setRefreshing(false);
+
+    if (ok) {
+      toast({ title: "Lista actualizada" });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudieron cargar los mensajes.",
+      });
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -109,7 +126,17 @@ export function ContactInquiriesView() {
                   : "Sin mensajes pendientes"}
               </CardDescription>
             </div>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap items-center gap-1">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 border-neutral-700 text-xs"
+                onClick={handleRefresh}
+                disabled={refreshing}
+              >
+                <RefreshCw className={cn("size-3.5", refreshing && "animate-spin")} />
+                Refrescar
+              </Button>
               {(
                 [
                   { id: "pendientes", label: "Pendientes" },
