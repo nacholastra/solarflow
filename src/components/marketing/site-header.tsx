@@ -11,7 +11,8 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 const navLinks = [
-  { label: "Producto", href: "#funcionalidades" },
+  { label: "Simulador", href: "#producto" },
+  { label: "Funcionalidades", href: "#funcionalidades" },
   { label: "Cómo funciona", href: "#como-funciona" },
   { label: "Precios", href: "#precios" },
   { label: "FAQ", href: "#faq" },

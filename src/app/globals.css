@@ -202,4 +202,47 @@
   .shadow-elevated {
     box-shadow: var(--shadow-elevated);
   }
+
+  @keyframes marketing-hero-in {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .marketing-hero-in {
+    animation: marketing-hero-in 0.65s ease-out both;
+  }
+
+  .marketing-hero-in-delay-1 {
+    animation-delay: 0.05s;
+  }
+
+  .marketing-hero-in-delay-2 {
+    animation-delay: 0.12s;
+  }
+
+  .marketing-hero-in-delay-3 {
+    animation-delay: 0.2s;
+  }
+
+  .marketing-hero-in-delay-4 {
+    animation-delay: 0.28s;
+  }
+
+  .marketing-hero-in-delay-5 {
+    animation-delay: 0.36s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marketing-hero-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
 }

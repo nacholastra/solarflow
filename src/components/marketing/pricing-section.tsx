@@ -1,4 +1,5 @@
 import { SectionHeader } from "@/components/marketing/section-header";
+import { RevealOnScroll } from "@/components/marketing/reveal-on-scroll";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { PLANS, getPlanPrice, getEurToUsdRate } from "@/lib/config/plans";
@@ -55,21 +56,23 @@ export function PricingSection() {
   return (
     <section id="precios" className="scroll-mt-16 border-b border-border">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
-        <SectionHeader
-          align="center"
-          eyebrow="Precios"
-          title="Planes claros, sin letra pequeña"
-          description={`Facturación mensual con PayPal. Sin permanencia. Precios en euros; referencia USD al tipo ${getEurToUsdRate().toFixed(2)}. Los leads de prueba del panel no consumen cuota.`}
-        />
+        <RevealOnScroll>
+          <SectionHeader
+            align="center"
+            eyebrow="Precios"
+            title="Planes claros, sin letra pequeña"
+            description={`Facturación mensual con PayPal. Sin permanencia. Precios en euros; referencia USD al tipo ${getEurToUsdRate().toFixed(2)}. Los leads de prueba del panel no consumen cuota.`}
+          />
+        </RevealOnScroll>
 
         <div className="mx-auto mt-12 grid max-w-3xl gap-8 md:grid-cols-2">
-          {(["basic", "pro"] as const).map((id) => {
+          {(["basic", "pro"] as const).map((id, index) => {
             const plan = PLANS[id];
             const meta = planMeta[id];
             return (
+              <RevealOnScroll key={id} delay={index * 100}>
               <Card
-                key={id}
-                className={cn("relative flex flex-col", meta.featured && "border-solar/50 shadow-elevated")}
+                className={cn("relative flex h-full flex-col", meta.featured && "border-solar/50 shadow-elevated")}
               >
                 <CardHeader className={cn(meta.featured && "pt-8")}>
                   {meta.featured && (
@@ -115,6 +118,7 @@ export function PricingSection() {
                   </Button>
                 </CardFooter>
               </Card>
+              </RevealOnScroll>
             );
           })}
         </div>

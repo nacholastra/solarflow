@@ -1,9 +1,8 @@
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { HeroSection } from "@/components/marketing/hero-section";
-import { TrustSection } from "@/components/marketing/trust-section";
-import { FeaturesSection } from "@/components/marketing/features-section";
 import { ProductShowcase } from "@/components/marketing/product-showcase";
+import { FeaturesSection } from "@/components/marketing/features-section";
 import { HowItWorksSection } from "@/components/marketing/how-it-works-section";
 import { HonestySection } from "@/components/marketing/honesty-section";
 import { PricingSection } from "@/components/marketing/pricing-section";
@@ -24,9 +23,8 @@ export default function HomePage() {
         <SiteHeader />
         <main id="main-content" className="flex-1">
           <HeroSection />
-          <TrustSection />
-          <FeaturesSection />
           <ProductShowcase />
+          <FeaturesSection />
           <HowItWorksSection />
           <HonestySection />
           <PricingSection />

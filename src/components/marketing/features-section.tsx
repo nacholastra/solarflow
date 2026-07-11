@@ -1,12 +1,6 @@
 import { SectionHeader } from "@/components/marketing/section-header";
-import { WidgetBrowserMock } from "@/components/marketing/widget-browser-mock";
-import {
-  Calculator,
-  KanbanSquare,
-  MapPin,
-  TrendingDown,
-  Webhook,
-} from "lucide-react";
+import { RevealOnScroll } from "@/components/marketing/reveal-on-scroll";
+import { KanbanSquare, MapPin, ShieldCheck, TrendingDown, Webhook } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PLANS } from "@/lib/config/plans";
 
@@ -30,24 +24,24 @@ const problems = [
 
 const features = [
   {
-    icon: Calculator,
-    title: "Simulador en tu web",
-    body: "Widget embebible por iframe. El visitante indica consumo y obtiene kWp, ahorro anual y payback estimados antes de dejar sus datos.",
-  },
-  {
     icon: MapPin,
     title: "Estimación por localidad",
-    body: "Producción solar (PVGIS) y tarifas españolas por ciudad: peajes, cargos, IEE e IVA/IGIC. Siempre como orientación, no como proyecto ejecutivo.",
+    body: "Producción solar (PVGIS) y tarifas españolas por ciudad. Siempre como orientación, no como proyecto ejecutivo.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Captura con consentimiento",
+    body: "Formulario con checkbox RGPD obligatorio y enlace a tu política de privacidad antes de guardar el lead.",
   },
   {
     icon: KanbanSquare,
     title: "CRM Kanban",
-    body: "6 estados: Nuevo, Contactado, Visita, Presupuesto, Cerrado y Descartado. Arrastra tarjetas, añade notas y filtra leads de prueba.",
+    body: "6 estados: Nuevo, Contactado, Visita, Presupuesto, Cerrado y Descartado. Notas por lead y filtro de pruebas.",
   },
   {
     icon: Webhook,
     title: "Automatización (Pro)",
-    body: `Webhooks HTTPS a Zapier o Make. Exportación CSV, GTM en el widget y marca blanca incluidos en plan Pro (${PLANS.pro.priceEur} €/mes).`,
+    body: `Webhooks HTTPS a Zapier o Make, exportación CSV, GTM y marca blanca en plan Pro (${PLANS.pro.priceEur} €/mes).`,
   },
 ];
 
@@ -56,19 +50,23 @@ export function FeaturesSection() {
     <>
       <section className="border-b border-border bg-card">
         <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-20">
-          <SectionHeader
-            eyebrow="El problema"
-            title="Tu web genera visitas, pero no siempre genera oportunidades claras"
-          />
+          <RevealOnScroll>
+            <SectionHeader
+              eyebrow="El problema"
+              title="Tu web genera visitas, pero no siempre genera oportunidades claras"
+            />
+          </RevealOnScroll>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {problems.map((item) => (
-              <div key={item.title} className="flex flex-col gap-3">
-                <span className="flex size-10 items-center justify-center rounded-lg border border-border bg-background text-foreground">
-                  <item.icon className="size-5" />
-                </span>
-                <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">{item.body}</p>
-              </div>
+            {problems.map((item, index) => (
+              <RevealOnScroll key={item.title} delay={index * 80}>
+                <div className="flex h-full flex-col gap-3">
+                  <span className="flex size-10 items-center justify-center rounded-lg border border-border bg-background text-foreground">
+                    <item.icon className="size-5" />
+                  </span>
+                  <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+                </div>
+              </RevealOnScroll>
             ))}
           </div>
         </div>
@@ -76,16 +74,18 @@ export function FeaturesSection() {
 
       <section id="funcionalidades" className="scroll-mt-16 border-b border-border">
         <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
-          <SectionHeader
-            eyebrow="Funcionalidades"
-            title="Herramientas concretas, no un ERP genérico"
-            description="SolarFlow cubre captación web y seguimiento comercial. No incluye diseño eléctrico, gestión de obra ni facturación de instalaciones."
-          />
+          <RevealOnScroll>
+            <SectionHeader
+              eyebrow="Funcionalidades"
+              title="Todo lo que necesitas después del simulador"
+              description="SolarFlow cubre captación web y seguimiento comercial. No incluye diseño eléctrico, gestión de obra ni facturación de instalaciones."
+            />
+          </RevealOnScroll>
 
-          <div className="mt-12 grid gap-6 lg:grid-cols-2">
-            <div className="grid gap-6 sm:grid-cols-2">
-              {features.map((feature) => (
-                <Card key={feature.title}>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2">
+            {features.map((feature, index) => (
+              <RevealOnScroll key={feature.title} delay={index * 70}>
+                <Card className="h-full">
                   <CardHeader>
                     <span className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                       <feature.icon className="size-5" />
@@ -96,15 +96,8 @@ export function FeaturesSection() {
                     <p className="text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-
-            <div className="lg:sticky lg:top-24">
-              <WidgetBrowserMock url="tuinstaladora.es/simulador" />
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                Vista previa del simulador embebido en tu web. El código de instalación solo está en tu panel.
-              </p>
-            </div>
+              </RevealOnScroll>
+            ))}
           </div>
         </div>
       </section>

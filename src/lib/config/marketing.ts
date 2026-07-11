@@ -1,4 +1,3 @@
-import { PLANS } from "@/lib/config/plans";
 import { BRAND } from "@/lib/config/brand";
 
 /** Copy de marketing alineado con lo que el producto implementa hoy. */
@@ -9,17 +8,11 @@ export const MARKETING = {
     subtitle:
       "Simulador embebible con estimaciones por localidad, captura con consentimiento RGPD y gestión en Kanban. Sin promesas vacías: sabes qué incluye cada plan antes de pagar.",
     highlights: [
-      `Desde ${PLANS.basic.priceEur} €/mes · sin permanencia`,
-      `${PLANS.basic.leadsLimit}–${PLANS.pro.leadsLimit} leads/mes según plan`,
-      "Webhooks con Zapier o Make (plan Pro)",
+      "Simulador embebible en tu web",
+      "CRM Kanban con 6 estados",
+      "Consentimiento RGPD integrado",
     ],
   },
-  trust: [
-    { label: "Precio claro", value: `${PLANS.basic.priceEur}–${PLANS.pro.priceEur} €/mes` },
-    { label: "Leads incluidos", value: `${PLANS.basic.leadsLimit} / ${PLANS.pro.leadsLimit} al mes` },
-    { label: "Equipo", value: `${PLANS.basic.teamLimit}–${PLANS.pro.teamLimit} usuarios` },
-    { label: "Facturación", value: "PayPal · cancelación cuando quieras" },
-  ],
   honesty: {
     title: "Transparencia sobre lo que ofrecemos",
     items: [
@@ -28,15 +21,7 @@ export const MARKETING = {
         body: BRAND.disclaimer,
       },
       {
-        title: "Datos solares por localidad",
-        body: "Usamos producción PVGIS precargada por ciudad y tarifas españolas (peajes, cargos, IEE, IVA/IGIC). No sustituye una visita técnica ni un dimensionamiento final.",
-      },
-      {
-        title: "Integraciones reales",
-        body: "Basic incluye CRM y simulador. Pro añade webhooks HTTPS hacia Zapier o Make, exportación CSV, GTM en el widget y marca blanca. No hay conectores nativos con HubSpot o Pipedrive: se enlazan mediante automatización.",
-      },
-      {
-        title: "Lo que verás en Basic",
+        title: "Marca visible en Basic",
         body: 'El widget muestra "Powered by SolarFlow". En Pro puedes quitarlo y personalizar color y logo.',
       },
     ],

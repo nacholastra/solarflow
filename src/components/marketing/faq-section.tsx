@@ -1,13 +1,12 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { LANDING_FAQS } from "@/lib/config/faq";
-import { Button } from "@/components/ui/button";
+import { RevealOnScroll } from "@/components/marketing/reveal-on-scroll";
 
 export function FaqSection() {
   return (
-    <>
-      <section id="faq" className="scroll-mt-16 border-b border-border bg-card" aria-labelledby="faq-heading">
-        <div className="mx-auto w-full max-w-3xl px-4 py-16 md:px-6 md:py-24">
+    <section id="faq" className="scroll-mt-16 border-b border-border bg-card" aria-labelledby="faq-heading">
+      <div className="mx-auto w-full max-w-3xl px-4 py-16 md:px-6 md:py-24">
+        <RevealOnScroll>
           <div className="text-center">
             <span className="text-sm font-semibold text-solar">Preguntas frecuentes</span>
             <h2
@@ -17,14 +16,16 @@ export function FaqSection() {
               Respuestas directas, sin rodeos
             </h2>
           </div>
+        </RevealOnScroll>
 
+        <RevealOnScroll delay={100}>
           <div className="mt-10 divide-y divide-border overflow-hidden rounded-xl border border-border/60 shadow-soft">
             {LANDING_FAQS.map(({ question, answer }) => (
               <details key={question} className="group bg-card first:rounded-t-xl last:rounded-b-xl">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-left text-base font-medium transition-colors hover:bg-muted/30 [&::-webkit-details-marker]:hidden">
                   {question}
                   <span
-                    className="shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                    className="shrink-0 text-muted-foreground transition-transform duration-300 group-open:rotate-180"
                     aria-hidden
                   >
                     ▾
@@ -34,46 +35,20 @@ export function FaqSection() {
               </details>
             ))}
           </div>
+        </RevealOnScroll>
 
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            ¿Más dudas?{" "}
-            <a href="#contacto" className="font-medium text-foreground underline-offset-4 hover:underline">
-              Usa el formulario de contacto
-            </a>
-            .
-          </p>
-        </div>
-      </section>
-
-      <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
-          <div className="flex flex-col items-center rounded-2xl bg-primary px-6 py-14 text-center text-primary-foreground md:px-12">
-            <h2 className="max-w-xl text-balance text-3xl font-semibold tracking-tight md:text-4xl">
-              Prueba el flujo completo en minutos
-            </h2>
-            <p className="mt-4 max-w-md text-pretty text-lg leading-relaxed text-primary-foreground/70">
-              Crea tu cuenta, configura el simulador y publícalo en tu web. Si necesitas ayuda, déjanos
-              un mensaje en el formulario.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button size="lg" variant="secondary" asChild>
-                <Link href="/register">
-                  Crear cuenta
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-primary-foreground/20 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                asChild
-              >
-                <a href="#contacto">Ir al formulario</a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-    </>
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          ¿Más dudas?{" "}
+          <a href="#contacto" className="font-medium text-foreground underline-offset-4 hover:underline">
+            Usa el formulario de contacto
+          </a>{" "}
+          o{" "}
+          <Link href="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
+            crea tu cuenta
+          </Link>
+          .
+        </p>
+      </div>
+    </section>
   );
 }
