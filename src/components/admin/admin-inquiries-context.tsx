@@ -25,15 +25,12 @@ export type ContactInquiry = {
 type AdminInquiriesContextValue = {
   inquiries: ContactInquiry[];
   pendingCount: number;
-  sidebarOpen: boolean;
-  openSidebar: () => void;
-  closeSidebar: () => void;
-  toggleSidebar: () => void;
   selectedId: string | null;
   setSelectedId: (id: string | null) => void;
   refresh: () => Promise<void>;
   hasNewAlert: boolean;
   clearNewAlert: () => void;
+  newInquiryIds: Set<string>;
 };
 
 const AdminInquiriesContext = createContext<AdminInquiriesContextValue | null>(null);
@@ -42,9 +39,9 @@ const POLL_MS = 45_000;
 
 export function AdminInquiriesProvider({ children }: { children: React.ReactNode }) {
   const [inquiries, setInquiries] = useState<ContactInquiry[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedIdState] = useState<string | null>(null);
   const [hasNewAlert, setHasNewAlert] = useState(false);
+  const [newInquiryIds, setNewInquiryIds] = useState<Set<string>>(new Set());
   const prevPendingRef = useRef<number | null>(null);
   const knownIdsRef = useRef<Set<string>>(new Set());
   const initializedRef = useRef(false);
@@ -56,6 +53,24 @@ export function AdminInquiriesProvider({ children }: { children: React.ReactNode
     [inquiries],
   );
 
+  const setSelectedId = useCallback((id: string | null) => {
+    setSelectedIdState(id);
+    if (id) {
+      setNewInquiryIds((prev) => {
+        if (!prev.has(id)) return prev;
+        const next = new Set(prev);
+        next.delete(id);
+        if (next.size === 0) setHasNewAlert(false);
+        return next;
+      });
+    }
+  }, []);
+
+  const clearNewAlert = useCallback(() => {
+    setHasNewAlert(false);
+    setNewInquiryIds(new Set());
+  }, []);
+
   const refresh = useCallback(async () => {
     const res = await fetch("/api/admin/contact-inquiries");
     const json = (await res.json()) as { inquiries?: ContactInquiry[]; error?: string };
@@ -65,25 +80,30 @@ export function AdminInquiriesProvider({ children }: { children: React.ReactNode
     const nextPending = next.filter((q) => !q.gestionado).length;
 
     if (initializedRef.current) {
-      const newIds = next.filter((q) => !knownIdsRef.current.has(q.id));
+      const newItems = next.filter((q) => !knownIdsRef.current.has(q.id));
       const pendingIncreased =
         prevPendingRef.current !== null && nextPending > prevPendingRef.current;
 
-      if (newIds.length > 0 && newIds.some((q) => !q.gestionado)) {
+      if (newItems.length > 0 && newItems.some((q) => !q.gestionado)) {
+        const ids = newItems.filter((q) => !q.gestionado).map((q) => q.id);
         setHasNewAlert(true);
+        setNewInquiryIds((prev) => new Set([...prev, ...ids]));
+        setSelectedIdState(ids[0] ?? null);
         toast({
-          title: "Nueva consulta de contacto",
-          description: `${newIds[0]?.nombre ?? "Alguien"} ha enviado un mensaje desde la landing.`,
+          title: "Nuevo mensaje de contacto",
+          description: `${newItems[0]?.nombre ?? "Alguien"} ha escrito desde la landing.`,
         });
       } else if (pendingIncreased) {
         setHasNewAlert(true);
         toast({
-          title: "Nueva consulta de contacto",
-          description: "Hay mensajes pendientes por revisar.",
+          title: "Nuevo mensaje de contacto",
+          description: "Hay un mensaje pendiente en el panel lateral.",
         });
       }
     } else {
       initializedRef.current = true;
+      const firstPending = next.find((q) => !q.gestionado);
+      setSelectedIdState(firstPending?.id ?? next[0]?.id ?? null);
     }
 
     knownIdsRef.current = new Set(next.map((q) => q.id));
@@ -91,7 +111,7 @@ export function AdminInquiriesProvider({ children }: { children: React.ReactNode
     setInquiries(next);
 
     if (selectedIdRef.current && !next.some((q) => q.id === selectedIdRef.current)) {
-      setSelectedId(next.find((q) => !q.gestionado)?.id ?? next[0]?.id ?? null);
+      setSelectedIdState(next.find((q) => !q.gestionado)?.id ?? next[0]?.id ?? null);
     }
   }, []);
 
@@ -101,41 +121,18 @@ export function AdminInquiriesProvider({ children }: { children: React.ReactNode
     return () => clearInterval(interval);
   }, [refresh]);
 
-  const openSidebar = useCallback(() => {
-    setSidebarOpen(true);
-    setHasNewAlert(false);
-    if (!selectedId) {
-      const firstPending = inquiries.find((q) => !q.gestionado);
-      setSelectedId(firstPending?.id ?? inquiries[0]?.id ?? null);
-    }
-  }, [inquiries, selectedId]);
-
   const value = useMemo(
     () => ({
       inquiries,
       pendingCount,
-      sidebarOpen,
-      openSidebar,
-      closeSidebar: () => setSidebarOpen(false),
-      toggleSidebar: () => {
-        setSidebarOpen((open) => {
-          if (!open) {
-            setHasNewAlert(false);
-            if (!selectedId) {
-              const firstPending = inquiries.find((q) => !q.gestionado);
-              setSelectedId(firstPending?.id ?? inquiries[0]?.id ?? null);
-            }
-          }
-          return !open;
-        });
-      },
       selectedId,
       setSelectedId,
       refresh,
       hasNewAlert,
-      clearNewAlert: () => setHasNewAlert(false),
+      clearNewAlert,
+      newInquiryIds,
     }),
-    [inquiries, pendingCount, sidebarOpen, openSidebar, selectedId, refresh, hasNewAlert],
+    [inquiries, pendingCount, selectedId, setSelectedId, refresh, hasNewAlert, clearNewAlert, newInquiryIds],
   );
 
   return (

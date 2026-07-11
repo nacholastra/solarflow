@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, ExternalLink, Mail, Phone, RotateCcw, X } from "lucide-react";
+import { Check, ExternalLink, Mail, Phone, RotateCcw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,14 +22,8 @@ function formatRelative(dateStr: string) {
 }
 
 export function ContactInquiriesSidebar() {
-  const {
-    inquiries,
-    sidebarOpen,
-    closeSidebar,
-    selectedId,
-    setSelectedId,
-    refresh,
-  } = useAdminInquiries();
+  const { inquiries, selectedId, setSelectedId, refresh, newInquiryIds, pendingCount } =
+    useAdminInquiries();
   const [filter, setFilter] = useState<Filter>("pendientes");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -45,19 +39,10 @@ export function ContactInquiriesSidebar() {
   );
 
   useEffect(() => {
-    if (!sidebarOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeSidebar();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [sidebarOpen, closeSidebar]);
-
-  useEffect(() => {
-    if (sidebarOpen && filtered.length > 0 && !filtered.some((q) => q.id === selectedId)) {
+    if (filtered.length > 0 && !filtered.some((q) => q.id === selectedId)) {
       setSelectedId(filtered[0]?.id ?? null);
     }
-  }, [sidebarOpen, filtered, selectedId, setSelectedId]);
+  }, [filtered, selectedId, setSelectedId]);
 
   async function toggleGestionado(id: string, gestionado: boolean) {
     setUpdatingId(id);
@@ -79,118 +64,108 @@ export function ContactInquiriesSidebar() {
   }
 
   return (
-    <>
-      <div
-        className={cn(
-          "fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 md:bg-black/30",
-          sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-        onClick={closeSidebar}
-        aria-hidden={!sidebarOpen}
-      />
-
-      <aside
-        className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col border-l border-neutral-800 bg-neutral-950 text-neutral-100 shadow-2xl transition-transform duration-300 ease-out",
-          sidebarOpen ? "translate-x-0" : "translate-x-full",
-        )}
-        aria-label="Mensajes de contacto"
-        aria-hidden={!sidebarOpen}
-      >
-        <header className="flex items-start justify-between gap-3 border-b border-neutral-800 px-4 py-4">
+    <aside
+      className="flex w-full shrink-0 flex-col border-t border-neutral-800 bg-neutral-950 text-neutral-100 lg:w-[22rem] lg:border-l lg:border-t-0 xl:w-[26rem]"
+      aria-label="Mensajes de contacto"
+    >
+      <header className="border-b border-neutral-800 px-4 py-4">
+        <div className="flex items-center justify-between gap-2">
           <div>
-            <h2 className="text-base font-semibold">Mensajes de contacto</h2>
+            <h2 className="text-sm font-semibold">Mensajes</h2>
             <p className="text-xs text-neutral-400">Formulario de la landing</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={closeSidebar} aria-label="Cerrar mensajes">
-            <X className="size-4" />
-          </Button>
-        </header>
-
-        <div className="flex gap-2 border-b border-neutral-800 px-4 py-3">
-          {(
-            [
-              { id: "pendientes", label: "Pendientes" },
-              { id: "gestionadas", label: "Gestionadas" },
-              { id: "todas", label: "Todas" },
-            ] as const
-          ).map((item) => (
-            <Button
-              key={item.id}
-              size="sm"
-              variant={filter === item.id ? "secondary" : "ghost"}
-              className={cn(filter !== item.id && "text-neutral-400")}
-              onClick={() => setFilter(item.id)}
-            >
-              {item.label}
-            </Button>
-          ))}
+          {pendingCount > 0 && (
+            <Badge variant="outline" className="border-neutral-700 text-xs text-solar">
+              {pendingCount} pendiente{pendingCount === 1 ? "" : "s"}
+            </Badge>
+          )}
         </div>
+      </header>
 
-        <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-          <div className="min-h-0 border-b border-neutral-800 md:w-[42%] md:border-b-0 md:border-r">
-            <div className="h-48 overflow-y-auto md:h-full">
-              {filtered.length === 0 ? (
-                <p className="px-4 py-10 text-center text-sm text-neutral-500">
-                  {filter === "pendientes"
-                    ? "No hay mensajes pendientes."
-                    : filter === "gestionadas"
-                      ? "No hay mensajes gestionados."
-                      : "Aún no hay mensajes."}
-                </p>
-              ) : (
-                <ul>
-                  {filtered.map((q) => (
-                    <InquiryListItem
-                      key={q.id}
-                      inquiry={q}
-                      selected={q.id === selectedId}
-                      onSelect={() => setSelectedId(q.id)}
-                    />
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {selected ? (
-              <InquiryDetail
-                inquiry={selected}
-                updating={updatingId === selected.id}
-                onToggleGestionado={toggleGestionado}
-              />
-            ) : (
-              <p className="px-4 py-10 text-center text-sm text-neutral-500">
-                Selecciona un mensaje para ver el detalle.
-              </p>
-            )}
-          </div>
-        </div>
-
-        <footer className="border-t border-neutral-800 px-4 py-2 text-xs text-neutral-500">
-          <a
-            href="/#contacto"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 hover:text-neutral-300"
+      <div className="flex gap-1 border-b border-neutral-800 px-3 py-2">
+        {(
+          [
+            { id: "pendientes", label: "Pendientes" },
+            { id: "gestionadas", label: "Gestionadas" },
+            { id: "todas", label: "Todas" },
+          ] as const
+        ).map((item) => (
+          <Button
+            key={item.id}
+            size="sm"
+            variant={filter === item.id ? "secondary" : "ghost"}
+            className={cn("h-8 px-2.5 text-xs", filter !== item.id && "text-neutral-400")}
+            onClick={() => setFilter(item.id)}
           >
-            Ver formulario en la landing
-            <ExternalLink className="size-3" />
-          </a>
-        </footer>
-      </aside>
-    </>
+            {item.label}
+          </Button>
+        ))}
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="max-h-52 overflow-y-auto border-b border-neutral-800 lg:max-h-64">
+          {filtered.length === 0 ? (
+            <p className="px-4 py-8 text-center text-xs text-neutral-500">
+              {filter === "pendientes"
+                ? "No hay mensajes pendientes."
+                : filter === "gestionadas"
+                  ? "No hay mensajes gestionados."
+                  : "Aún no hay mensajes."}
+            </p>
+          ) : (
+            <ul>
+              {filtered.map((q) => (
+                <InquiryListItem
+                  key={q.id}
+                  inquiry={q}
+                  selected={q.id === selectedId}
+                  isNew={newInquiryIds.has(q.id)}
+                  onSelect={() => setSelectedId(q.id)}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {selected ? (
+            <InquiryDetail
+              inquiry={selected}
+              updating={updatingId === selected.id}
+              onToggleGestionado={toggleGestionado}
+            />
+          ) : (
+            <p className="px-4 py-8 text-center text-xs text-neutral-500">
+              Selecciona un mensaje para ver el detalle.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <footer className="border-t border-neutral-800 px-4 py-2 text-xs text-neutral-500">
+        <a
+          href="/#contacto"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 hover:text-neutral-300"
+        >
+          Ver formulario en la landing
+          <ExternalLink className="size-3" />
+        </a>
+      </footer>
+    </aside>
   );
 }
 
 function InquiryListItem({
   inquiry,
   selected,
+  isNew,
   onSelect,
 }: {
   inquiry: ContactInquiry;
   selected: boolean;
+  isNew: boolean;
   onSelect: () => void;
 }) {
   return (
@@ -201,14 +176,18 @@ function InquiryListItem({
         className={cn(
           "w-full border-b border-neutral-800/80 px-4 py-3 text-left transition-colors hover:bg-neutral-900",
           selected && "bg-neutral-900",
-          !inquiry.gestionado && !selected && "border-l-2 border-l-solar",
+          isNew && "border-l-2 border-l-solar bg-solar/5",
+          !inquiry.gestionado && !selected && !isNew && "border-l-2 border-l-neutral-600",
         )}
       >
         <div className="flex items-start justify-between gap-2">
           <p className="truncate text-sm font-medium">{inquiry.nombre}</p>
-          <time className="shrink-0 text-[10px] text-neutral-500">
-            {formatRelative(inquiry.created_at)}
-          </time>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {isNew && (
+              <span className="size-2 rounded-full bg-solar" title="Nuevo" aria-label="Nuevo" />
+            )}
+            <time className="text-[10px] text-neutral-500">{formatRelative(inquiry.created_at)}</time>
+          </div>
         </div>
         <p className="mt-0.5 truncate text-xs text-neutral-400">{inquiry.email}</p>
         <p className="mt-1 line-clamp-2 text-xs text-neutral-500">{inquiry.mensaje}</p>
@@ -227,9 +206,9 @@ function InquiryDetail({
   onToggleGestionado: (id: string, gestionado: boolean) => void;
 }) {
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-3 p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-base font-semibold">{inquiry.nombre}</h3>
+        <h3 className="text-sm font-semibold">{inquiry.nombre}</h3>
         <Badge
           variant="outline"
           className={cn(
@@ -241,25 +220,25 @@ function InquiryDetail({
         </Badge>
       </div>
 
-      <dl className="space-y-2 text-sm">
+      <dl className="space-y-1.5 text-xs">
         <div>
-          <dt className="text-xs text-neutral-500">Correo</dt>
-          <dd>{inquiry.email}</dd>
+          <dt className="text-neutral-500">Correo</dt>
+          <dd className="break-all">{inquiry.email}</dd>
         </div>
         {inquiry.empresa && (
           <div>
-            <dt className="text-xs text-neutral-500">Empresa</dt>
+            <dt className="text-neutral-500">Empresa</dt>
             <dd>{inquiry.empresa}</dd>
           </div>
         )}
         {inquiry.telefono && (
           <div>
-            <dt className="text-xs text-neutral-500">Teléfono</dt>
+            <dt className="text-neutral-500">Teléfono</dt>
             <dd>{inquiry.telefono}</dd>
           </div>
         )}
         <div>
-          <dt className="text-xs text-neutral-500">Fecha</dt>
+          <dt className="text-neutral-500">Fecha</dt>
           <dd>{new Date(inquiry.created_at).toLocaleString("es-ES")}</dd>
         </div>
       </dl>
@@ -272,14 +251,14 @@ function InquiryDetail({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant="outline" className="border-neutral-700" asChild>
+        <Button size="sm" variant="outline" className="h-8 border-neutral-700 text-xs" asChild>
           <a href={`mailto:${encodeURIComponent(inquiry.email)}`}>
             <Mail className="size-3.5" />
             Responder
           </a>
         </Button>
         {inquiry.telefono && (
-          <Button size="sm" variant="outline" className="border-neutral-700" asChild>
+          <Button size="sm" variant="outline" className="h-8 border-neutral-700 text-xs" asChild>
             <a href={`tel:${inquiry.telefono.replace(/\s/g, "")}`}>
               <Phone className="size-3.5" />
               Llamar
@@ -289,19 +268,19 @@ function InquiryDetail({
         <Button
           size="sm"
           variant={inquiry.gestionado ? "outline" : "secondary"}
-          className={inquiry.gestionado ? "border-neutral-700" : undefined}
+          className={cn("h-8 text-xs", inquiry.gestionado && "border-neutral-700")}
           disabled={updating}
           onClick={() => onToggleGestionado(inquiry.id, !inquiry.gestionado)}
         >
           {inquiry.gestionado ? (
             <>
               <RotateCcw className="size-3.5" />
-              Marcar pendiente
+              Pendiente
             </>
           ) : (
             <>
               <Check className="size-3.5" />
-              Marcar gestionada
+              Gestionada
             </>
           )}
         </Button>

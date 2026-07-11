@@ -8,9 +8,9 @@ import { AdminLogoutButton } from "@/app/admin/logout-button";
 export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <AdminInquiriesProvider>
-      <div className="dark min-h-dvh bg-background text-foreground">
-        <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-4 py-4 backdrop-blur md:px-8">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+      <div className="dark flex min-h-dvh flex-col bg-background text-foreground">
+        <header className="sticky top-0 z-30 shrink-0 border-b border-border bg-background/95 px-4 py-4 backdrop-blur md:px-6">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Administración
@@ -23,8 +23,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </header>
-        <ContactInquiriesSidebar />
-        <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">{children}</main>
+
+        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+          <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 md:px-6 md:py-8">
+            <div className="mx-auto max-w-6xl">{children}</div>
+          </main>
+          <ContactInquiriesSidebar />
+        </div>
       </div>
     </AdminInquiriesProvider>
   );

@@ -1,35 +1,37 @@
 "use client";
 
 import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAdminInquiries } from "@/components/admin/admin-inquiries-context";
 
 export function InquiriesBell() {
-  const { pendingCount, hasNewAlert, toggleSidebar, sidebarOpen } = useAdminInquiries();
+  const { hasNewAlert, clearNewAlert } = useAdminInquiries();
+
+  if (!hasNewAlert) {
+    return (
+      <div
+        className="flex size-9 items-center justify-center rounded-md border border-neutral-800 bg-neutral-900 text-neutral-500"
+        aria-label="Sin mensajes nuevos"
+        title="Sin mensajes nuevos"
+      >
+        <Bell className="size-4" />
+      </div>
+    );
+  }
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
+    <button
+      type="button"
       className={cn(
-        "relative border-neutral-700 bg-neutral-900",
-        hasNewAlert && "ring-2 ring-solar/60 ring-offset-2 ring-offset-background",
+        "relative flex size-9 items-center justify-center rounded-md border border-solar/40 bg-solar/10 text-solar",
+        "ring-2 ring-solar/50 ring-offset-2 ring-offset-background",
       )}
-      aria-label={
-        pendingCount > 0
-          ? `${pendingCount} consulta${pendingCount === 1 ? "" : "s"} pendiente${pendingCount === 1 ? "" : "s"}`
-          : "Ver mensajes de contacto"
-      }
-      aria-expanded={sidebarOpen}
-      onClick={toggleSidebar}
+      aria-label="Nuevo mensaje de contacto. Pulsa para marcar como visto."
+      title="Nuevo mensaje — pulsa para marcar como visto"
+      onClick={clearNewAlert}
     >
-      <Bell className={cn("size-4", hasNewAlert && "animate-pulse text-solar")} />
-      {pendingCount > 0 && (
-        <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-solar px-1 text-[10px] font-semibold text-solar-foreground">
-          {pendingCount > 99 ? "99+" : pendingCount}
-        </span>
-      )}
-    </Button>
+      <Bell className="size-4 animate-pulse" />
+      <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-solar" aria-hidden />
+    </button>
   );
 }

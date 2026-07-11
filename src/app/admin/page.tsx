@@ -143,8 +143,7 @@ export default function AdminPage() {
         <CardHeader>
           <CardTitle>Empresas registradas</CardTitle>
           <CardDescription className="text-neutral-400">
-            Gestiona planes, estado y eliminación de cuentas. Los mensajes de contacto están en la
-            campana del header.
+            Gestiona planes, estado y eliminación de cuentas. Los mensajes están en el panel lateral.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
