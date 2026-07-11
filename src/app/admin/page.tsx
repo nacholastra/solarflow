@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmDialog } from "@/components/shared/delete-confirm-dialog";
 import { cn } from "@/lib/utils";
-import { ContactInquiriesPanel, type ContactInquiry } from "@/components/admin/contact-inquiries-panel";
 
 const ADMIN_DELETE_CONSEQUENCES = [
   "Se cancelará la suscripción PayPal si existe",
@@ -35,7 +34,6 @@ const ESTADOS = ["pending", "active", "suspended", "cancelled"] as const;
 
 export default function AdminPage() {
   const [empresas, setEmpresas] = useState<EmpresaRow[]>([]);
-  const [inquiries, setInquiries] = useState<ContactInquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [planFilter, setPlanFilter] = useState<"all" | "basic" | "pro" | "sin_plan">("all");
@@ -44,28 +42,15 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
-    const [empRes, contactRes] = await Promise.all([
-      fetch("/api/admin/empresas"),
-      fetch("/api/admin/contact-inquiries"),
-    ]);
-    const json = (await empRes.json()) as { empresas?: EmpresaRow[]; error?: string };
-    const contactJson = (await contactRes.json()) as { inquiries?: ContactInquiry[]; error?: string };
+    const res = await fetch("/api/admin/empresas");
+    const json = (await res.json()) as { empresas?: EmpresaRow[]; error?: string };
 
-    if (!empRes.ok) {
+    if (!res.ok) {
       toast({ variant: "destructive", title: "Error", description: json.error });
       setLoading(false);
       return;
     }
     setEmpresas(json.empresas ?? []);
-    if (contactRes.ok) {
-      setInquiries(contactJson.inquiries ?? []);
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Consultas de contacto",
-        description: contactJson.error ?? "No se pudieron cargar las consultas.",
-      });
-    }
     setLoading(false);
   }, []);
 
@@ -129,18 +114,16 @@ export default function AdminPage() {
       pro: empresas.filter((e) => e.plan === "pro").length,
       basic: empresas.filter((e) => e.plan === "basic").length,
       sinPlan: empresas.filter((e) => e.plan === null).length,
-      contactPending: inquiries.filter((q) => !q.gestionado).length,
     }),
-    [empresas, inquiries],
+    [empresas],
   );
 
   if (loading) return <div className="h-64 animate-pulse rounded-xl bg-neutral-900" />;
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {[
-          { label: "Consultas pendientes", value: stats.contactPending, highlight: stats.contactPending > 0 },
           { label: "Total empresas", value: stats.total },
           { label: "Activas", value: stats.active },
           { label: "Plan Pro", value: stats.pro },
@@ -150,18 +133,19 @@ export default function AdminPage() {
           <Card key={s.label} className="border-neutral-800 bg-neutral-900 text-neutral-100">
             <CardHeader className="pb-2">
               <CardDescription className="text-neutral-400">{s.label}</CardDescription>
-              <CardTitle className={s.highlight ? "text-3xl text-solar" : "text-3xl"}>{s.value}</CardTitle>
+              <CardTitle className="text-3xl">{s.value}</CardTitle>
             </CardHeader>
           </Card>
         ))}
       </div>
 
-      <ContactInquiriesPanel inquiries={inquiries} onUpdated={load} />
-
       <Card className="border-neutral-800 bg-neutral-900 text-neutral-100">
         <CardHeader>
           <CardTitle>Empresas registradas</CardTitle>
-          <CardDescription className="text-neutral-400">Gestiona planes, estado y eliminación de cuentas</CardDescription>
+          <CardDescription className="text-neutral-400">
+            Gestiona planes, estado y eliminación de cuentas. Los mensajes de contacto están en la
+            campana del header.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -271,8 +255,12 @@ export default function AdminPage() {
           )}
 
           <div className="flex flex-wrap gap-2 text-xs text-neutral-500">
-            <Badge variant="outline" className="border-neutral-700 text-neutral-400">{filtered.length} mostradas</Badge>
-            <Badge variant="outline" className="border-neutral-700 text-neutral-400">{empresas.length} total</Badge>
+            <Badge variant="outline" className="border-neutral-700 text-neutral-400">
+              {filtered.length} mostradas
+            </Badge>
+            <Badge variant="outline" className="border-neutral-700 text-neutral-400">
+              {empresas.length} total
+            </Badge>
           </div>
         </CardContent>
       </Card>
