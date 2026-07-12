@@ -32,6 +32,11 @@ export function ContactInquiriesView() {
   const [deleting, setDeleting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  const gestionadasCount = useMemo(
+    () => inquiries.filter((q) => q.gestionado).length,
+    [inquiries],
+  );
+
   const filtered = useMemo(() => {
     if (filter === "pendientes") return inquiries.filter((q) => !q.gestionado);
     if (filter === "gestionadas") return inquiries.filter((q) => q.gestionado);
@@ -149,19 +154,27 @@ export function ContactInquiriesView() {
               </Button>
               {(
                 [
-                  { id: "pendientes", label: "Pendientes" },
-                  { id: "gestionadas", label: "Gestionadas" },
-                  { id: "todas", label: "Todas" },
+                  { id: "pendientes", label: "Pendientes", count: pendingCount },
+                  { id: "gestionadas", label: "Gestionadas", count: gestionadasCount },
+                  { id: "todas", label: "Todas", count: inquiries.length },
                 ] as const
               ).map((item) => (
                 <Button
                   key={item.id}
                   size="sm"
                   variant={filter === item.id ? "secondary" : "ghost"}
-                  className={cn("h-8 text-xs", filter !== item.id && "text-neutral-400")}
+                  className={cn("h-8 gap-1.5 text-xs", filter !== item.id && "text-neutral-400")}
                   onClick={() => setFilter(item.id)}
                 >
                   {item.label}
+                  <span
+                    className={cn(
+                      "tabular-nums",
+                      filter === item.id ? "text-neutral-300" : "text-neutral-500",
+                    )}
+                  >
+                    ({item.count})
+                  </span>
                 </Button>
               ))}
             </div>
