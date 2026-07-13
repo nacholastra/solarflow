@@ -6,6 +6,7 @@ import { useState } from "react";
 import {
   Contact,
   CreditCard,
+  HelpCircle,
   KanbanSquare,
   LayoutDashboard,
   LogOut,
@@ -30,6 +31,7 @@ const links = [
   { label: "Contactos", href: "/dashboard/contacts", icon: Contact },
   { label: "Integraciones", href: "/dashboard/integrations", icon: Webhook },
   { label: "Equipo", href: "/dashboard/team", icon: Users },
+  { label: "Ayuda", href: "/dashboard/ayuda", icon: HelpCircle },
   { label: "Suscripción", href: "/dashboard/subscription", icon: CreditCard },
   { label: "Mi perfil", href: "/dashboard/profile", icon: User },
 ];

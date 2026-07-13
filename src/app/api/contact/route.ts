@@ -8,6 +8,7 @@ import {
   CONTACT_FORM_RATE_LIMIT,
   formatRetryAfterMessage,
 } from "@/lib/config/contact-rate-limit";
+import { notifyContactInquiry } from "@/lib/email/send";
 
 const MIN_FORM_MS = 1_500;
 const MAX_FORM_AGE_MS = 86_400_000;
@@ -92,6 +93,14 @@ export async function POST(request: Request) {
       console.error("contact insert:", error.message);
       return NextResponse.json({ error: "No se pudo enviar el mensaje" }, { status: 500 });
     }
+
+    void notifyContactInquiry({
+      nombre: data.nombre,
+      email: emailKey,
+      empresa: data.empresa,
+      telefono: data.telefono,
+      mensaje: data.mensaje,
+    });
 
     return NextResponse.json({ ok: true });
   } catch {

@@ -1,6 +1,11 @@
 import { PLANS } from "@/lib/config/plans";
+import { TRIAL_DAYS } from "@/lib/config/trial";
 
 export const LANDING_FAQS = [
+  {
+    question: "¿Hay periodo de prueba?",
+    answer: `Sí. Al registrarte tienes ${TRIAL_DAYS} días de prueba gratuita con acceso al plan que elijas (Basic o Pro). Puedes configurar el simulador, instalar el widget y recibir leads. Activa el pago con PayPal cuando quieras continuar.`,
+  },
   {
     question: "¿Para quién está pensado SolarFlow?",
     answer:

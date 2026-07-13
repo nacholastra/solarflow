@@ -39,6 +39,8 @@ export type Database = {
           leads_usados_mes: number;
           periodo_reset: string | null;
           proximo_cobro: string | null;
+          trial_ends_at: string | null;
+          terms_accepted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -65,6 +67,8 @@ export type Database = {
           leads_usados_mes?: number;
           periodo_reset?: string | null;
           proximo_cobro?: string | null;
+          trial_ends_at?: string | null;
+          terms_accepted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -91,6 +95,8 @@ export type Database = {
           leads_usados_mes?: number;
           periodo_reset?: string | null;
           proximo_cobro?: string | null;
+          trial_ends_at?: string | null;
+          terms_accepted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

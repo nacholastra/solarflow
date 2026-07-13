@@ -1,19 +1,36 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  expireTrialIfNeeded,
+  isSubscriptionUsable,
+  type EmpresaSubscriptionFields,
+} from "@/lib/empresa/subscription-access";
 
-/**
- * Comprueba si una empresa tiene la suscripción activa.
- * Cuando no lo está, la cuenta queda en modo solo lectura.
- */
 export async function isEmpresaActive(
   service: SupabaseClient,
   empresaId: string,
 ): Promise<boolean> {
   const { data } = await service
     .from("empresas")
-    .select("estado_suscripcion")
+    .select("estado_suscripcion, trial_ends_at, paypal_subscription_id")
     .eq("id", empresaId)
     .single();
-  return data?.estado_suscripcion === "active";
+
+  if (!data) return false;
+
+  await expireTrialIfNeeded(service, empresaId, data);
+  if (
+    data.trial_ends_at &&
+    !data.paypal_subscription_id &&
+    new Date(data.trial_ends_at) <= new Date()
+  ) {
+    return false;
+  }
+
+  return isSubscriptionUsable(data);
+}
+
+export function isEmpresaActiveSync(empresa: EmpresaSubscriptionFields): boolean {
+  return isSubscriptionUsable(empresa);
 }
 
 export const READONLY_ERROR =

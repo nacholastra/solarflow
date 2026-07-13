@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { createClient } from "@/lib/supabase/client";
 import { PLANS, type PlanId } from "@/lib/config/plans";
+import { TRIAL_DAYS } from "@/lib/config/trial";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -21,6 +22,7 @@ function RegisterForm() {
   const [plan, setPlan] = useState<PlanId>("basic");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -50,6 +52,7 @@ function RegisterForm() {
           nombre_empresa: inviteToken ? undefined : nombreEmpresa,
           plan: inviteToken ? undefined : plan,
           invite_token: inviteToken ?? undefined,
+          accepted_terms: inviteToken ? undefined : acceptedTerms,
         }),
       });
 
@@ -86,9 +89,11 @@ function RegisterForm() {
 
       toast({
         title: inviteToken ? "Cuenta creada" : "Cuenta creada",
-        description: inviteToken ? `Te has unido a ${inviteEmpresa ?? "el equipo"}` : "Elige tu plan para activar el simulador",
+        description: inviteToken
+          ? `Te has unido a ${inviteEmpresa ?? "el equipo"}`
+          : `Tienes ${TRIAL_DAYS} días de prueba gratuita. Configura tu simulador.`,
       });
-      router.push(inviteToken ? "/dashboard" : "/dashboard/subscription");
+      router.push("/dashboard");
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error de conexión";
@@ -169,7 +174,7 @@ function RegisterForm() {
                 })}
               </div>
               <p className="text-xs text-muted-foreground">
-                Podrás completar el pago tras crear la cuenta.
+                {TRIAL_DAYS} días de prueba gratuita incluidos. Activa el pago cuando quieras continuar.
               </p>
             </div>
           )}
@@ -201,7 +206,29 @@ function RegisterForm() {
               required
             />
           </div>
-          <Button type="submit" className="h-11 w-full" disabled={loading}>
+          {!inviteToken && (
+            <label className="flex items-start gap-3 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                className="mt-1 size-4 rounded border-border"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                required
+              />
+              <span>
+                Acepto los{" "}
+                <Link href="/terminos" className="font-medium text-foreground underline-offset-4 hover:underline" target="_blank">
+                  términos de servicio
+                </Link>{" "}
+                y la{" "}
+                <Link href="/privacidad" className="font-medium text-foreground underline-offset-4 hover:underline" target="_blank">
+                  política de privacidad
+                </Link>
+                .
+              </span>
+            </label>
+          )}
+          <Button type="submit" className="h-11 w-full" disabled={loading || (!inviteToken && !acceptedTerms)}>
             {loading ? "Creando..." : inviteToken ? "Crear cuenta y unirme" : "Registrarse"}
           </Button>
         </form>

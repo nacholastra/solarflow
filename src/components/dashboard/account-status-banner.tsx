@@ -23,6 +23,30 @@ export function AccountStatusBanner({ status }: { status: BillingStatus | null }
 
   if (!status) return null;
 
+  if (status.onTrial && status.trialDaysRemaining !== null) {
+    const cuando =
+      status.trialDaysRemaining <= 0
+        ? "hoy"
+        : status.trialDaysRemaining === 1
+          ? "mañana"
+          : `en ${status.trialDaysRemaining} días`;
+
+    return (
+      <div className="surface-info mb-6 flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-2">
+          <CalendarClock className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            Estás en <strong>periodo de prueba gratuito</strong>. Termina {cuando}. Activa tu
+            suscripción para seguir recibiendo leads sin interrupciones.
+          </p>
+        </div>
+        <Button size="sm" className="shrink-0 bg-info-emphasis text-white hover:bg-info-emphasis/90" asChild>
+          <Link href="/dashboard/subscription">Activar plan</Link>
+        </Button>
+      </div>
+    );
+  }
+
   if (status.estado !== "active") {
     return (
       <div className="surface-warning mb-6 flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">

@@ -59,6 +59,7 @@ export async function POST(request: Request) {
       plan: body.plan as PlanId,
       moneda_facturacion: body.currency as Currency,
       estado_suscripcion: "active",
+      trial_ends_at: null,
       leads_limite_mes: PLANS[body.plan].leadsLimit,
       leads_usados_mes: 0,
       periodo_reset: new Date().toISOString().slice(0, 10),

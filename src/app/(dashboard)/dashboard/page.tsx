@@ -19,6 +19,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
 import { formatNumber } from "@/lib/utils";
 import { requireDashboardContext } from "@/lib/dashboard/session";
 
@@ -29,7 +30,9 @@ export default async function DashboardPage() {
   const [{ data: empresa }, totalRes, nuevosRes, cerradosRes] = await Promise.all([
     supabase
       .from("empresas")
-      .select("nombre_empresa, plan, leads_limite_mes, leads_usados_mes, estado_suscripcion")
+      .select(
+        "nombre_empresa, plan, leads_limite_mes, leads_usados_mes, estado_suscripcion, privacy_url, trial_ends_at, paypal_subscription_id",
+      )
       .eq("id", empresaId)
       .single(),
     supabase
@@ -65,6 +68,14 @@ export default async function DashboardPage() {
       <PageHeader
         title="Panel"
         description={`Resumen de la actividad de ${empresa.nombre_empresa}.`}
+      />
+
+      <OnboardingChecklist
+        privacyUrl={empresa.privacy_url}
+        hasPaypal={Boolean(empresa.paypal_subscription_id)}
+        trialEndsAt={empresa.trial_ends_at}
+        estadoSuscripcion={empresa.estado_suscripcion}
+        totalLeads={total}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -113,6 +124,10 @@ export default async function DashboardPage() {
                   <Link href="/dashboard/subscription">Activar plan</Link>
                 </Button>
               </div>
+            ) : empresa.trial_ends_at && !empresa.paypal_subscription_id ? (
+              <p className="text-sm text-muted-foreground">
+                Periodo de prueba activo. Te quedan {remaining} leads este mes.
+              </p>
             ) : (
               <p className="text-sm text-muted-foreground">
                 Te quedan {remaining} leads este mes.

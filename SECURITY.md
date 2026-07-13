@@ -22,6 +22,9 @@ Ejecutar en Supabase SQL Editor, en orden:
 7. **`008_billing_notice_and_readonly.sql`** — aviso de cobro y modo solo lectura
 8. **`009_test_leads.sql`** — leads de prueba (`es_prueba`)
 9. **`010_premium_security.sql`** — anti-SSRF webhooks, integraciones solo vía API, idempotencia PayPal
+10. **`011_contact_inquiries.sql`** — formulario de contacto de la landing
+11. **`012_contact_inquiries_gestionado.sql`** — estado gestionado en consultas
+12. **`013_trial_and_terms.sql`** — periodo de prueba y aceptación de términos
 
 > Si el proyecto se creó con `003_repair_partial_schema.sql`, omitir 001 y usar 003 en su lugar.
 
@@ -65,8 +68,15 @@ Ejecutar en Supabase SQL Editor, en orden:
 | `/api/empresa/*` (mutaciones) | 10–30/min por IP |
 | `/api/paypal/*` (excepto webhook) | 15/min por IP |
 | `/api/invite/*` | 10–30/min por IP/token |
+| `/api/contact` | 20/hora por IP + 10/hora por email |
 
 Para producción a escala, usar **Vercel Firewall** o **Upstash Redis**.
+
+## Email transaccional
+
+- Consultas de contacto → `CONTACT_NOTIFY_EMAIL` vía Resend
+- Invitaciones de equipo → email al invitado vía Resend
+- Requiere `RESEND_API_KEY` y `EMAIL_FROM` en producción
 
 ## CSRF
 
@@ -87,11 +97,13 @@ Copiar `.env.example` a `.env.local`. Obligatorias en producción:
 
 ## Checklist de despliegue
 
-- [ ] Migraciones 005–010 aplicadas en Supabase
+- [ ] Migraciones 005–013 aplicadas en Supabase
 - [ ] Supabase Auth: confirmación de email activada
 - [ ] Redirect URL `https://tu-dominio/auth/callback` en Supabase
 - [ ] `PAYPAL_WEBHOOK_ID` configurado en Vercel
 - [ ] `NEXT_PUBLIC_APP_URL` apunta a producción (no localhost)
+- [ ] `RESEND_API_KEY` configurada para emails de contacto e invitaciones
+- [ ] Páginas legales publicadas (`/terminos`, `/aviso-legal`, `/cookies`, `/dpa`)
 - [ ] `ALLOW_TEST_PLAN` no activo en producción
 
 ## Pendiente recomendado

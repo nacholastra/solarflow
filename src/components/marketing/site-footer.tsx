@@ -10,6 +10,7 @@ const columns = [
       { label: "Funcionalidades", href: "#funcionalidades" },
       { label: "Precios", href: "#precios" },
       { label: "FAQ", href: "#faq" },
+      { label: "Ayuda", href: "/ayuda" },
       { label: "Contacto", href: "#contacto" },
     ],
   },
@@ -17,15 +18,17 @@ const columns = [
     title: "Legal",
     links: [
       { label: "Privacidad", href: "/privacidad" },
-      { label: "Contacto", href: "#contacto" },
+      { label: "Términos", href: "/terminos" },
+      { label: "Aviso legal", href: "/aviso-legal" },
+      { label: "Cookies", href: "/cookies" },
+      { label: "DPA", href: "/dpa" },
       { label: "Acceder", href: "/login" },
       { label: "Crear cuenta", href: "/register" },
-      { label: "Administración", href: "/admin/login" },
     ],
   },
 ];
 
-const trustItems = ["PVGIS", "RGPD", "Sin permanencia", "PayPal mensual"];
+const trustItems = ["PVGIS", "RGPD", "14 días gratis", "Sin permanencia", "PayPal mensual"];
 
 export function SiteFooter() {
   return (

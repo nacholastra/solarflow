@@ -3,6 +3,7 @@ import { RevealOnScroll } from "@/components/marketing/reveal-on-scroll";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { PLANS, getPlanPrice, getEurToUsdRate } from "@/lib/config/plans";
+import { TRIAL_DAYS } from "@/lib/config/trial";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,7 +62,7 @@ export function PricingSection() {
             align="center"
             eyebrow="Precios"
             title="Planes claros, sin letra pequeña"
-            description={`Facturación mensual con PayPal. Sin permanencia. Precios en euros; referencia USD al tipo ${getEurToUsdRate().toFixed(2)}. Los leads de prueba del panel no consumen cuota.`}
+            description={`${TRIAL_DAYS} días de prueba gratuita. Facturación mensual con PayPal. Sin permanencia. Precios en euros; referencia USD al tipo ${getEurToUsdRate().toFixed(2)}. Los leads de prueba del panel no consumen cuota.`}
           />
         </RevealOnScroll>
 

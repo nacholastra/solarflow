@@ -4,6 +4,8 @@ import { getTeamLimit } from "@/lib/config/plan-features";
 import { isSameOrigin } from "@/lib/security/api-origin";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { READONLY_ERROR } from "@/lib/empresa/subscription-guard";
+import { getSiteUrl } from "@/lib/config/site";
+import { sendTeamInviteEmail } from "@/lib/email/send";
 import { z } from "zod";
 
 const schema = z.object({
@@ -48,7 +50,7 @@ export async function POST(request: Request) {
     const service = await createServiceClient();
     const { data: empresa } = await service
       .from("empresas")
-      .select("id, plan, estado_suscripcion")
+      .select("id, plan, estado_suscripcion, nombre_empresa")
       .eq("id", equipo.empresa_id)
       .single();
 
@@ -106,6 +108,13 @@ export async function POST(request: Request) {
       console.error("team invite failed:", error.message);
       return NextResponse.json({ error: "No se pudo crear la invitación" }, { status: 500 });
     }
+
+    const inviteUrl = `${getSiteUrl()}/invite/${token}`;
+    void sendTeamInviteEmail({
+      to: email,
+      empresaNombre: empresa.nombre_empresa,
+      inviteUrl,
+    });
 
     return NextResponse.json({ ok: true, invitePath: `/invite/${token}` });
   } catch (e) {

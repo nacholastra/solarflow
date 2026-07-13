@@ -11,6 +11,7 @@ export type SubscriptionEmpresa = Pick<
   | "leads_limite_mes"
   | "leads_usados_mes"
   | "paypal_subscription_id"
+  | "trial_ends_at"
 > & {
   proximo_cobro: string | null;
 };
@@ -21,7 +22,7 @@ export const getSubscriptionData = cache(
     const { data } = await supabase
       .from("empresas")
       .select(
-        "id, plan, moneda_facturacion, estado_suscripcion, leads_limite_mes, leads_usados_mes, paypal_subscription_id, proximo_cobro",
+        "id, plan, moneda_facturacion, estado_suscripcion, leads_limite_mes, leads_usados_mes, paypal_subscription_id, proximo_cobro, trial_ends_at",
       )
       .eq("id", empresaId)
       .single();

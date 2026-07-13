@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { WidgetSimulator } from "@/components/widget/widget-simulator";
+import { isSubscriptionUsable } from "@/lib/empresa/subscription-access";
 
 export default async function WidgetPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -8,12 +9,11 @@ export default async function WidgetPage({ params }: { params: Promise<{ slug: s
 
   const { data: empresa } = await supabase
     .from("empresas")
-    .select("id, slug, nombre_empresa, color_marca, logo_url, privacy_url, precio_eur_kwp, tarifa_kwh_override, ratio_autoconsumo, kwp_max, gtm_id, estado_suscripcion, plan")
+    .select("id, slug, nombre_empresa, color_marca, logo_url, privacy_url, precio_eur_kwp, tarifa_kwh_override, ratio_autoconsumo, kwp_max, gtm_id, estado_suscripcion, trial_ends_at, paypal_subscription_id, plan")
     .eq("slug", slug)
-    .eq("estado_suscripcion", "active")
     .single();
 
-  if (!empresa) notFound();
+  if (!empresa || !isSubscriptionUsable(empresa)) notFound();
 
   const widgetEmpresa = {
     ...empresa,

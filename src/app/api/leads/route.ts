@@ -5,6 +5,10 @@ import { calcularSimulacion } from "@/lib/solar/calculator";
 import type { Localidad, TipoInmueble } from "@/lib/solar/types";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { hashClientIp } from "@/lib/security/ip-hash";
+import {
+  expireTrialIfNeeded,
+  isSubscriptionUsable,
+} from "@/lib/empresa/subscription-access";
 import { z } from "zod";
 
 const leadSchema = z.object({
@@ -53,7 +57,7 @@ export async function POST(request: Request) {
     const { data: empresa } = await supabase
       .from("empresas")
       .select(
-        "id, slug, estado_suscripcion, leads_usados_mes, leads_limite_mes, precio_eur_kwp, tarifa_kwh_override, ratio_autoconsumo, kwp_max",
+        "id, slug, estado_suscripcion, trial_ends_at, paypal_subscription_id, leads_usados_mes, leads_limite_mes, precio_eur_kwp, tarifa_kwh_override, ratio_autoconsumo, kwp_max",
       )
       .eq("slug", data.empresa_slug)
       .single();
@@ -61,6 +65,8 @@ export async function POST(request: Request) {
     if (!empresa) {
       return NextResponse.json({ error: "Empresa no encontrada" }, { status: 404 });
     }
+
+    await expireTrialIfNeeded(supabase, empresa.id, empresa);
 
     const isPreview = data.preview === true;
 
@@ -81,7 +87,7 @@ export async function POST(request: Request) {
       if (!equipo) {
         return NextResponse.json({ error: "Sin permisos para modo prueba" }, { status: 403 });
       }
-    } else if (empresa.estado_suscripcion !== "active") {
+    } else if (!isSubscriptionUsable(empresa)) {
       return NextResponse.json({ error: "Empresa no encontrada o inactiva" }, { status: 403 });
     } else if (empresa.leads_usados_mes >= empresa.leads_limite_mes) {
       return NextResponse.json({ error: "Límite de leads alcanzado" }, { status: 402 });

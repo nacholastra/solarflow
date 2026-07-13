@@ -9,7 +9,7 @@ import { PricingSection } from "@/components/marketing/pricing-section";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { ContactSection } from "@/components/marketing/contact-section";
 import { LandingJsonLd } from "@/components/marketing/landing-json-ld";
-import { LandingAnalytics } from "@/components/analytics/landing-analytics";
+import { ConditionalAnalytics } from "@/components/analytics/conditional-analytics";
 import { buildLandingMetadata } from "@/lib/config/seo";
 
 export const metadata = buildLandingMetadata();
@@ -17,7 +17,7 @@ export const metadata = buildLandingMetadata();
 export default function HomePage() {
   return (
     <>
-      <LandingAnalytics />
+      <ConditionalAnalytics />
       <LandingJsonLd />
       <div className="flex min-h-dvh flex-col">
         <SiteHeader />

@@ -20,6 +20,8 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { useDashboardContext } from "@/components/dashboard/dashboard-provider";
 import { PayPalSubscribeButtons } from "@/components/dashboard/paypal-subscribe-buttons";
 import type { SubscriptionEmpresa } from "@/lib/dashboard/subscription-data";
+import { getTrialDaysRemaining, isTrialActive } from "@/lib/empresa/subscription-access";
+import { TRIAL_DAYS } from "@/lib/config/trial";
 
 type PlanChangeMode = "activate" | "upgrade" | "downgrade";
 
@@ -121,6 +123,12 @@ export function SubscriptionPanel({
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "";
   const paypalReady = clientId.length > 0 && !clientId.startsWith("your-");
   const isActive = empresa.estado_suscripcion === "active";
+  const onTrial = isTrialActive({
+    estado_suscripcion: empresa.estado_suscripcion,
+    trial_ends_at: empresa.trial_ends_at,
+    paypal_subscription_id: empresa.paypal_subscription_id,
+  });
+  const trialDaysLeft = onTrial ? getTrialDaysRemaining(empresa.trial_ends_at) : null;
   const isBasic = empresa.plan === "basic";
   const isPro = empresa.plan === "pro";
   const proximoCobro = empresa.proximo_cobro;
@@ -136,7 +144,19 @@ export function SubscriptionPanel({
         </Button>
       </PageHeader>
 
-      {isActive && (
+      {onTrial && trialDaysLeft !== null && (
+        <Card className="border-info/30 bg-info/5">
+          <CardHeader>
+            <CardTitle className="text-base">Periodo de prueba activo</CardTitle>
+            <CardDescription>
+              Te quedan {trialDaysLeft} día{trialDaysLeft === 1 ? "" : "s"} de los {TRIAL_DAYS} días
+              gratuitos. Activa el pago con PayPal para continuar sin interrupciones cuando termine.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      {isActive && !onTrial && (
         <Card>
           <CardHeader>
             <CardTitle>Plan activo: {empresa.plan?.toUpperCase() ?? "—"}</CardTitle>
@@ -289,7 +309,7 @@ export function SubscriptionPanel({
         </Card>
       )}
 
-      {!isActive && (
+      {(!isActive || onTrial) && !empresa.paypal_subscription_id && (
         <>
           <CurrencyToggle currency={currency} onChange={setCurrency} />
           <p className="text-sm text-muted-foreground">

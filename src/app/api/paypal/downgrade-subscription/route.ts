@@ -122,6 +122,7 @@ export async function POST(request: Request) {
         leads_limite_mes: PLANS.basic.leadsLimit,
         paypal_subscription_id: subscriptionId,
         estado_suscripcion: "active",
+        trial_ends_at: null,
         ...PRO_ONLY_EMPRESA_FIELDS,
       })
       .eq("id", body.empresaId);

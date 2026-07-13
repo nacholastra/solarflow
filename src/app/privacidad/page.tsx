@@ -102,6 +102,28 @@ export default function PrivacidadPage() {
                 hash de IP para trazabilidad sin almacenar la dirección completa.
               </p>
             </section>
+            <section className="space-y-3">
+              <h2 className="text-lg font-semibold text-foreground">8. Documentos legales</h2>
+              <p>
+                Consulta también nuestros{" "}
+                <Link href="/terminos" className="text-foreground underline-offset-4 hover:underline">
+                  términos de servicio
+                </Link>
+                ,{" "}
+                <Link href="/aviso-legal" className="text-foreground underline-offset-4 hover:underline">
+                  aviso legal
+                </Link>
+                ,{" "}
+                <Link href="/cookies" className="text-foreground underline-offset-4 hover:underline">
+                  política de cookies
+                </Link>{" "}
+                y el{" "}
+                <Link href="/dpa" className="text-foreground underline-offset-4 hover:underline">
+                  encargo de tratamiento (DPA)
+                </Link>
+                .
+              </p>
+            </section>
           </div>
 
           <p className="mt-10">

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Contact,
   CreditCard,
+  HelpCircle,
   KanbanSquare,
   LayoutDashboard,
   LogOut,
@@ -26,6 +27,7 @@ const nav = [
   { label: "Contactos", href: "/dashboard/contacts", icon: Contact },
   { label: "Integraciones", href: "/dashboard/integrations", icon: Webhook },
   { label: "Equipo", href: "/dashboard/team", icon: Users },
+  { label: "Ayuda", href: "/dashboard/ayuda", icon: HelpCircle },
 ];
 
 const account = [
