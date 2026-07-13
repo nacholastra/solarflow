@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { PLANS, getPlanPrice, getEurToUsdRate } from "@/lib/config/plans";
 import { TRIAL_DAYS } from "@/lib/config/trial";
+import type { LaunchOfferStatus } from "@/lib/config/launch-offer-status";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,7 +54,9 @@ const planMeta = {
   },
 } as const;
 
-export function PricingSection() {
+export function PricingSection({ offer }: { offer: LaunchOfferStatus }) {
+  const discount = offer.active ? offer.discountPercent : 0;
+
   return (
     <section id="precios" className="scroll-mt-16 border-b border-border">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
@@ -62,7 +65,11 @@ export function PricingSection() {
             align="center"
             eyebrow="Precios"
             title="Planes claros, sin letra pequeña"
-            description={`${TRIAL_DAYS} días de prueba gratuita. Facturación mensual con PayPal. Sin permanencia. Precios en euros; referencia USD al tipo ${getEurToUsdRate().toFixed(2)}. Los leads de prueba del panel no consumen cuota.`}
+            description={
+              offer.active
+                ? `${TRIAL_DAYS} días gratis y ${offer.discountPercent}% de descuento de por vida en tu plan para los ${offer.earlyBirdLimit} primeros clientes (quedan ${offer.slotsRemaining}). Sin permanencia.`
+                : `${TRIAL_DAYS} días de prueba gratuita. Facturación mensual con PayPal. Sin permanencia. IVA no incluido.`
+            }
           />
         </RevealOnScroll>
 
@@ -70,55 +77,78 @@ export function PricingSection() {
           {(["basic", "pro"] as const).map((id, index) => {
             const plan = PLANS[id];
             const meta = planMeta[id];
+            const fullPrice = getPlanPrice(id, "EUR");
+            const salePrice = getPlanPrice(id, "EUR", { discountPercent: discount });
+            const saleUsd = getPlanPrice(id, "USD", { discountPercent: discount });
+
             return (
               <RevealOnScroll key={id} delay={index * 100}>
-              <Card
-                className={cn("relative flex h-full flex-col", meta.featured && "border-solar/50 shadow-elevated")}
-              >
-                <CardHeader className={cn(meta.featured && "pt-8")}>
-                  {meta.featured && (
-                    <Badge variant="solar" className="mb-3 w-fit">
-                      Más completo
-                    </Badge>
+                <Card
+                  className={cn(
+                    "relative flex h-full flex-col",
+                    meta.featured && "border-solar/50 shadow-elevated",
                   )}
-                  <CardTitle className="text-lg">{plan.name}</CardTitle>
-                  <CardDescription>{meta.description}</CardDescription>
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-semibold tracking-tight text-foreground">
-                      {plan.priceEur}
-                    </span>
-                    <span className="text-sm text-muted-foreground">€ / mes</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    ≈ {getPlanPrice(id, "USD")} $ / mes · IVA no incluido
-                  </p>
-                </CardHeader>
-                <CardContent className="flex-1 pt-0">
-                  <ul className="flex flex-col gap-3">
-                    {planFeatures[id].map((feature) => (
-                      <li key={feature} className="flex items-start gap-2.5 text-sm text-foreground">
-                        <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-positive/10 text-positive">
-                          <Check className="size-2.5" />
+                >
+                  <CardHeader className={cn(meta.featured && "pt-8")}>
+                    {meta.featured && (
+                      <Badge variant="solar" className="mb-3 w-fit">
+                        Más completo
+                      </Badge>
+                    )}
+                    {offer.active && (
+                      <Badge variant="outline" className="mb-3 w-fit border-solar/40 text-solar">
+                        −{offer.discountPercent}% lanzamiento
+                      </Badge>
+                    )}
+                    <CardTitle className="text-lg">{plan.name}</CardTitle>
+                    <CardDescription>{meta.description}</CardDescription>
+                    <div className="mt-4 flex flex-wrap items-baseline gap-2">
+                      {discount > 0 && (
+                        <span className="text-lg text-muted-foreground line-through">
+                          {fullPrice} €
                         </span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter className="flex-col gap-2">
-                  <Button
-                    variant={meta.featured ? "solar" : "outline"}
-                    size="lg"
-                    className="w-full"
-                    asChild
-                  >
-                    <Link href="/register">Empezar con {plan.name}</Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="w-full text-muted-foreground" asChild>
-                    <Link href="#contacto">¿Dudas? Contáctanos</Link>
-                  </Button>
-                </CardFooter>
-              </Card>
+                      )}
+                      <span className="text-4xl font-semibold tracking-tight text-foreground">
+                        {salePrice}
+                      </span>
+                      <span className="text-sm text-muted-foreground">€ / mes</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      ≈ {saleUsd} $ / mes · IVA no incluido
+                      {discount > 0 ? ` · tipo cambio ${getEurToUsdRate().toFixed(2)}` : ""}
+                    </p>
+                    <p className="mt-2 text-xs font-medium text-positive">
+                      Incluye {TRIAL_DAYS} días de prueba gratis
+                    </p>
+                  </CardHeader>
+                  <CardContent className="flex-1 pt-0">
+                    <ul className="flex flex-col gap-3">
+                      {planFeatures[id].map((feature) => (
+                        <li key={feature} className="flex items-start gap-2.5 text-sm text-foreground">
+                          <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-positive/10 text-positive">
+                            <Check className="size-2.5" />
+                          </span>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter className="flex-col gap-2">
+                    <Button
+                      variant={meta.featured ? "solar" : "outline"}
+                      size="lg"
+                      className="w-full"
+                      asChild
+                    >
+                      <Link href="/register">
+                        {offer.active ? `Probar ${TRIAL_DAYS} días gratis` : `Empezar con ${plan.name}`}
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" className="w-full text-muted-foreground" asChild>
+                      <Link href="#contacto">¿Dudas? Contáctanos</Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
               </RevealOnScroll>
             );
           })}

@@ -1,16 +1,19 @@
 import { BRAND } from "@/lib/config/brand";
+import { TRIAL_DAYS } from "@/lib/config/trial";
+import { LAUNCH_OFFER } from "@/lib/config/launch-offer";
 
 /** Copy de marketing alineado con lo que el producto implementa hoy. */
 export const MARKETING = {
   hero: {
-    eyebrow: "Software B2B para instaladoras en España",
+    eyebrow: `${TRIAL_DAYS} días gratis · Oferta de lanzamiento −${LAUNCH_OFFER.discountPercent}%`,
     title: "Capta leads solares desde tu web y ciérralos con un CRM claro",
     subtitle:
       "Simulador embebible con estimaciones por localidad, captura con consentimiento RGPD y gestión en Kanban. Sin promesas vacías: sabes qué incluye cada plan antes de pagar.",
     highlights: [
+      `${TRIAL_DAYS} días de prueba gratuita`,
+      `−${LAUNCH_OFFER.discountPercent}% para los ${LAUNCH_OFFER.earlyBirdLimit} primeros`,
       "Simulador embebible en tu web",
       "CRM Kanban con 6 estados",
-      "Consentimiento RGPD integrado",
     ],
   },
   honesty: {

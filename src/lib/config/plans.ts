@@ -26,13 +26,41 @@ export function getEurToUsdRate(): number {
   return Number.isFinite(rate) && rate > 0 ? rate : 1.09;
 }
 
-export function getPlanPrice(plan: PlanId, currency: Currency): number {
+export function getPlanPrice(
+  plan: PlanId,
+  currency: Currency,
+  options?: { discountPercent?: number },
+): number {
   const eur = PLANS[plan].priceEur;
-  if (currency === "EUR") return eur;
-  return Math.round(eur * getEurToUsdRate());
+  const discount = options?.discountPercent ?? 0;
+  const discountedEur =
+    discount > 0 ? Math.round(eur * (1 - discount / 100)) : eur;
+  if (currency === "EUR") return discountedEur;
+  return Math.round(discountedEur * getEurToUsdRate());
 }
 
-export function getPayPalPlanId(plan: PlanId, currency: Currency): string | undefined {
+type PlanIdOpts = { earlyBird?: boolean };
+
+export function getPayPalPlanId(
+  plan: PlanId,
+  currency: Currency,
+  options?: PlanIdOpts,
+): string | undefined {
+  if (options?.earlyBird) {
+    const launchMap: Record<PlanId, Record<Currency, string | undefined>> = {
+      basic: {
+        EUR: process.env.PAYPAL_PLAN_ID_BASIC_EUR_LAUNCH,
+        USD: process.env.PAYPAL_PLAN_ID_BASIC_USD_LAUNCH,
+      },
+      pro: {
+        EUR: process.env.PAYPAL_PLAN_ID_PRO_EUR_LAUNCH,
+        USD: process.env.PAYPAL_PLAN_ID_PRO_USD_LAUNCH,
+      },
+    };
+    const launchId = launchMap[plan][currency];
+    if (launchId) return launchId;
+  }
+
   const envMap: Record<PlanId, Record<Currency, string | undefined>> = {
     basic: {
       EUR: process.env.PAYPAL_PLAN_ID_BASIC_EUR,
@@ -44,6 +72,14 @@ export function getPayPalPlanId(plan: PlanId, currency: Currency): string | unde
     },
   };
   return envMap[plan][currency];
+}
+
+/** IDs aceptados al verificar una suscripción (regular y early bird). */
+export function getAcceptedPayPalPlanIds(plan: PlanId, currency: Currency): string[] {
+  return [
+    getPayPalPlanId(plan, currency, { earlyBird: true }),
+    getPayPalPlanId(plan, currency, { earlyBird: false }),
+  ].filter((id): id is string => Boolean(id));
 }
 
 export function getLeadsLimit(plan: PlanId): number {

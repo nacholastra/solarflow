@@ -28,7 +28,7 @@ const columns = [
   },
 ];
 
-const trustItems = ["PVGIS", "RGPD", "14 días gratis", "Sin permanencia", "PayPal mensual"];
+const trustItems = ["PVGIS", "RGPD", "14 días gratis", "−30% early bird", "Sin permanencia"];
 
 export function SiteFooter() {
   return (

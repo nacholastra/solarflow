@@ -4,7 +4,11 @@ import { TRIAL_DAYS } from "@/lib/config/trial";
 export const LANDING_FAQS = [
   {
     question: "¿Hay periodo de prueba?",
-    answer: `Sí. Al registrarte tienes ${TRIAL_DAYS} días de prueba gratuita con acceso al plan que elijas (Basic o Pro). Puedes configurar el simulador, instalar el widget y recibir leads. Activa el pago con PayPal cuando quieras continuar.`,
+    answer: `Sí. Al registrarte tienes ${TRIAL_DAYS} días de prueba gratuita con acceso al plan que elijas (Basic o Pro). Puedes configurar el simulador, instalar el widget y recibir leads. Cuando termina la prueba, el widget deja de captar leads hasta que actives el pago con PayPal.`,
+  },
+  {
+    question: "¿Hay descuento de lanzamiento?",
+    answer: `Los primeros 20 clientes tienen un 30% de descuento permanente en su plan, además de los ${TRIAL_DAYS} días gratis. Las plazas se reservan al crear la cuenta.`,
   },
   {
     question: "¿Para quién está pensado SolarFlow?",

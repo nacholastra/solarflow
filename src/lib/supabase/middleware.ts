@@ -31,6 +31,7 @@ export async function updateSession(request: NextRequest) {
     !pathname.startsWith("/api/leads") &&
     !pathname.startsWith("/api/localidades") &&
     !pathname.startsWith("/api/contact") &&
+    !pathname.startsWith("/api/cron/") &&
     !pathname.startsWith("/api/paypal/webhook");
 
   if (!supabaseUrl || !supabaseAnonKey) {
@@ -58,6 +59,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/api/localidades") ||
     pathname.startsWith("/api/leads") ||
     pathname.startsWith("/api/contact") ||
+    pathname.startsWith("/api/cron/") ||
     pathname.startsWith("/api/auth/register") ||
     pathname.startsWith("/api/auth/resend-confirmation") ||
     pathname.startsWith("/api/paypal/webhook") ||

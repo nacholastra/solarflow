@@ -14,6 +14,8 @@ export type SubscriptionEmpresa = Pick<
   | "trial_ends_at"
 > & {
   proximo_cobro: string | null;
+  early_bird: boolean;
+  early_bird_discount_pct: number | null;
 };
 
 export const getSubscriptionData = cache(
@@ -22,7 +24,7 @@ export const getSubscriptionData = cache(
     const { data } = await supabase
       .from("empresas")
       .select(
-        "id, plan, moneda_facturacion, estado_suscripcion, leads_limite_mes, leads_usados_mes, paypal_subscription_id, proximo_cobro, trial_ends_at",
+        "id, plan, moneda_facturacion, estado_suscripcion, leads_limite_mes, leads_usados_mes, paypal_subscription_id, proximo_cobro, trial_ends_at, early_bird, early_bird_discount_pct",
       )
       .eq("id", empresaId)
       .single();
@@ -32,6 +34,8 @@ export const getSubscriptionData = cache(
     return {
       ...data,
       proximo_cobro: data.proximo_cobro ?? null,
+      early_bird: Boolean(data.early_bird),
+      early_bird_discount_pct: data.early_bird_discount_pct ?? null,
     } as SubscriptionEmpresa;
   },
 );

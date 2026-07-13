@@ -1,4 +1,4 @@
-import { getPayPalPlanId, type Currency, type PlanId } from "@/lib/config/plans";
+import { getAcceptedPayPalPlanIds, getPayPalPlanId, type Currency, type PlanId } from "@/lib/config/plans";
 
 export function getPayPalApiBase(): string {
   return process.env.PAYPAL_MODE === "live"
@@ -61,10 +61,20 @@ export async function getPayPalNextBillingTime(subscriptionId: string): Promise<
   }
 }
 
-export function subscriptionMatchesPlan(sub: PayPalSubscription, plan: PlanId, currency: Currency): boolean {
-  const expectedPlanId = getPayPalPlanId(plan, currency);
-  if (!expectedPlanId || !sub.plan_id) return false;
-  return sub.plan_id === expectedPlanId;
+export function subscriptionMatchesPlan(
+  sub: PayPalSubscription,
+  plan: PlanId,
+  currency: Currency,
+  options?: { earlyBird?: boolean },
+): boolean {
+  if (!sub.plan_id) return false;
+
+  if (options?.earlyBird) {
+    const preferred = getPayPalPlanId(plan, currency, { earlyBird: true });
+    if (preferred) return sub.plan_id === preferred;
+  }
+
+  return getAcceptedPayPalPlanIds(plan, currency).includes(sub.plan_id);
 }
 
 export async function cancelPayPalSubscription(subscriptionId: string): Promise<void> {

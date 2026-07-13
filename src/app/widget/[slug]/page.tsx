@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { WidgetSimulator } from "@/components/widget/widget-simulator";
-import { isSubscriptionUsable } from "@/lib/empresa/subscription-access";
+import {
+  expireTrialIfNeeded,
+  isSubscriptionUsable,
+} from "@/lib/empresa/subscription-access";
 
 export default async function WidgetPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -13,7 +16,11 @@ export default async function WidgetPage({ params }: { params: Promise<{ slug: s
     .eq("slug", slug)
     .single();
 
-  if (!empresa || !isSubscriptionUsable(empresa)) notFound();
+  if (!empresa) notFound();
+
+  await expireTrialIfNeeded(supabase, empresa.id, empresa);
+
+  if (!isSubscriptionUsable(empresa)) notFound();
 
   const widgetEmpresa = {
     ...empresa,

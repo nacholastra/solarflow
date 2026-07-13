@@ -64,11 +64,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Sin permisos para esta empresa" }, { status: 403 });
     }
 
-    const planId = getPayPalPlanId(body.plan, body.currency);
+    const { data: empresaRow } = await supabase
+      .from("empresas")
+      .select("early_bird")
+      .eq("id", body.empresaId)
+      .single();
+
+    const earlyBird = Boolean(empresaRow?.early_bird);
+    const planId = getPayPalPlanId(body.plan, body.currency, { earlyBird });
     if (!planId) {
       return NextResponse.json(
         {
-          error: `Plan PayPal no configurado para ${body.plan.toUpperCase()} en ${body.currency}. Revisa PAYPAL_PLAN_ID_* en Vercel.`,
+          error: `Plan PayPal no configurado para ${body.plan.toUpperCase()} en ${body.currency}${earlyBird ? " (early bird)" : ""}. Revisa PAYPAL_PLAN_ID_* en Vercel.`,
         },
         { status: 500 },
       );

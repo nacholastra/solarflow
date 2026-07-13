@@ -41,6 +41,8 @@ export type Database = {
           proximo_cobro: string | null;
           trial_ends_at: string | null;
           terms_accepted_at: string | null;
+          early_bird: boolean;
+          early_bird_discount_pct: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -69,6 +71,8 @@ export type Database = {
           proximo_cobro?: string | null;
           trial_ends_at?: string | null;
           terms_accepted_at?: string | null;
+          early_bird?: boolean;
+          early_bird_discount_pct?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -97,6 +101,8 @@ export type Database = {
           proximo_cobro?: string | null;
           trial_ends_at?: string | null;
           terms_accepted_at?: string | null;
+          early_bird?: boolean;
+          early_bird_discount_pct?: number | null;
           created_at?: string;
           updated_at?: string;
         };

@@ -129,6 +129,7 @@ export function SubscriptionPanel({
     paypal_subscription_id: empresa.paypal_subscription_id,
   });
   const trialDaysLeft = onTrial ? getTrialDaysRemaining(empresa.trial_ends_at) : null;
+  const discountPct = empresa.early_bird ? (empresa.early_bird_discount_pct ?? 0) : 0;
   const isBasic = empresa.plan === "basic";
   const isPro = empresa.plan === "pro";
   const proximoCobro = empresa.proximo_cobro;
@@ -150,7 +151,22 @@ export function SubscriptionPanel({
             <CardTitle className="text-base">Periodo de prueba activo</CardTitle>
             <CardDescription>
               Te quedan {trialDaysLeft} día{trialDaysLeft === 1 ? "" : "s"} de los {TRIAL_DAYS} días
-              gratuitos. Activa el pago con PayPal para continuar sin interrupciones cuando termine.
+              gratuitos. Cuando termine, el widget dejará de recibir leads hasta que actives PayPal.
+              {empresa.early_bird && discountPct > 0
+                ? ` Tienes ${discountPct}% de descuento early bird bloqueado en tu cuenta.`
+                : ""}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      {empresa.early_bird && discountPct > 0 && !onTrial && (
+        <Card className="border-solar/30 bg-solar/5">
+          <CardHeader>
+            <CardTitle className="text-base">Descuento early bird (−{discountPct}%)</CardTitle>
+            <CardDescription>
+              Formas parte de los primeros clientes. Tu precio de plan aplica el {discountPct}% de
+              descuento permanente.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -313,7 +329,10 @@ export function SubscriptionPanel({
         <>
           <CurrencyToggle currency={currency} onChange={setCurrency} />
           <p className="text-sm text-muted-foreground">
-            Precios base en euros. El importe en dólares se calcula al tipo de cambio actual.
+            Precios base en euros.
+            {discountPct > 0
+              ? ` Tu cuenta tiene −${discountPct}% early bird aplicado.`
+              : " El importe en dólares se calcula al tipo de cambio actual."}
           </p>
           <div className="grid gap-4 md:grid-cols-2">
             {(["basic", "pro"] as PlanId[]).map((p) => (
@@ -325,9 +344,17 @@ export function SubscriptionPanel({
                 <CardHeader>
                   <CardTitle>{PLANS[p].name}</CardTitle>
                   <CardDescription>
-                    {formatCurrency(getPlanPrice(p, currency), currency)}/mes
+                    {discountPct > 0 && (
+                      <span className="mr-2 line-through opacity-60">
+                        {formatCurrency(getPlanPrice(p, currency), currency)}
+                      </span>
+                    )}
+                    {formatCurrency(getPlanPrice(p, currency, { discountPercent: discountPct }), currency)}
+                    /mes
                     {currency === "USD" && (
-                      <span className="block text-xs">≈ {PLANS[p].priceEur} € al cambio actual</span>
+                      <span className="block text-xs">
+                        ≈ {getPlanPrice(p, "EUR", { discountPercent: discountPct })} € al cambio actual
+                      </span>
                     )}
                   </CardDescription>
                 </CardHeader>

@@ -49,11 +49,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "La suscripción PayPal no está activa" }, { status: 400 });
     }
 
-    if (!subscriptionMatchesPlan(subscription, body.plan, body.currency)) {
+    const service = await createServiceClient();
+    const { data: empresaBilling } = await service
+      .from("empresas")
+      .select("early_bird")
+      .eq("id", body.empresaId)
+      .single();
+
+    if (
+      !subscriptionMatchesPlan(subscription, body.plan, body.currency, {
+        earlyBird: Boolean(empresaBilling?.early_bird),
+      })
+    ) {
       return NextResponse.json({ error: "El plan de PayPal no coincide" }, { status: 400 });
     }
 
-    const service = await createServiceClient();
     const updatePayload: Record<string, unknown> = {
       paypal_subscription_id: body.subscriptionId,
       plan: body.plan as PlanId,

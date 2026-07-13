@@ -25,6 +25,7 @@ Ejecutar en Supabase SQL Editor, en orden:
 10. **`011_contact_inquiries.sql`** — formulario de contacto de la landing
 11. **`012_contact_inquiries_gestionado.sql`** — estado gestionado en consultas
 12. **`013_trial_and_terms.sql`** — periodo de prueba y aceptación de términos
+13. **`014_early_bird.sql`** — descuento de lanzamiento (primeros clientes)
 
 > Si el proyecto se creó con `003_repair_partial_schema.sql`, omitir 001 y usar 003 en su lugar.
 
@@ -97,7 +98,8 @@ Copiar `.env.example` a `.env.local`. Obligatorias en producción:
 
 ## Checklist de despliegue
 
-- [ ] Migraciones 005–013 aplicadas en Supabase
+- [ ] Migraciones 005–014 aplicadas en Supabase
+- [ ] `CRON_SECRET` configurado (cron diario de trials)
 - [ ] Supabase Auth: confirmación de email activada
 - [ ] Redirect URL `https://tu-dominio/auth/callback` en Supabase
 - [ ] `PAYPAL_WEBHOOK_ID` configurado en Vercel

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { TRIAL_DAYS } from "@/lib/config/trial";
 
 export function HeroCTAs() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,7 +34,7 @@ export function HeroCTAs() {
     <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
       <Button size="lg" variant="solar" asChild>
         <Link href="/register">
-          Probar SolarFlow
+          Probar {TRIAL_DAYS} días gratis
           <ArrowRight className="size-4" />
         </Link>
       </Button>

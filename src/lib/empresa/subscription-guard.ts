@@ -18,15 +18,16 @@ export async function isEmpresaActive(
   if (!data) return false;
 
   await expireTrialIfNeeded(service, empresaId, data);
-  if (
-    data.trial_ends_at &&
-    !data.paypal_subscription_id &&
-    new Date(data.trial_ends_at) <= new Date()
-  ) {
-    return false;
-  }
-
-  return isSubscriptionUsable(data);
+  return isSubscriptionUsable({
+    ...data,
+    // Si acaba de expirar, reflejar pending para no depender de estado antiguo
+    estado_suscripcion:
+      !data.paypal_subscription_id &&
+      data.trial_ends_at &&
+      new Date(data.trial_ends_at) <= new Date()
+        ? "pending"
+        : data.estado_suscripcion,
+  });
 }
 
 export function isEmpresaActiveSync(empresa: EmpresaSubscriptionFields): boolean {

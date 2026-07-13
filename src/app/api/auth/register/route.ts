@@ -7,6 +7,7 @@ import { createAnonAuthClient, fetchInviteByToken, getInviteStatus } from "@/lib
 import { getSiteUrl } from "@/lib/config/site";
 import { PLANS } from "@/lib/config/plans";
 import { getTrialEndDate } from "@/lib/config/trial";
+import { LAUNCH_OFFER } from "@/lib/config/launch-offer";
 import { z } from "zod";
 
 const schema = z.object({
@@ -155,6 +156,13 @@ export async function POST(request: Request) {
 
     const trialEndsAt = getTrialEndDate();
 
+    const { count: earlyBirdUsed } = await service
+      .from("empresas")
+      .select("*", { count: "exact", head: true })
+      .eq("early_bird", true);
+
+    const earlyBird = (earlyBirdUsed ?? 0) < LAUNCH_OFFER.earlyBirdLimit;
+
     const { data: empresa, error: empresaError } = await service
       .from("empresas")
       .insert({
@@ -166,6 +174,8 @@ export async function POST(request: Request) {
         estado_suscripcion: "active",
         trial_ends_at: trialEndsAt.toISOString(),
         terms_accepted_at: new Date().toISOString(),
+        early_bird: earlyBird,
+        early_bird_discount_pct: earlyBird ? LAUNCH_OFFER.discountPercent : null,
       })
       .select("id")
       .single();

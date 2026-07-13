@@ -1,6 +1,10 @@
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
-import { getTrialDaysRemaining, isTrialActive } from "@/lib/empresa/subscription-access";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import {
+  expireTrialIfNeeded,
+  getTrialDaysRemaining,
+  isTrialActive,
+} from "@/lib/empresa/subscription-access";
 
 export type BillingStatus = {
   estado: "pending" | "active" | "suspended" | "cancelled";
@@ -10,17 +14,37 @@ export type BillingStatus = {
   onTrial: boolean;
   trialDaysRemaining: number | null;
   hasPaypal: boolean;
+  earlyBird: boolean;
+  earlyBirdDiscountPct: number | null;
 };
 
 export const getBillingStatus = cache(async (empresaId: string): Promise<BillingStatus | null> => {
   const supabase = await createClient();
   const { data: empresa } = await supabase
     .from("empresas")
-    .select("estado_suscripcion, plan, proximo_cobro, trial_ends_at, paypal_subscription_id")
+    .select(
+      "estado_suscripcion, plan, proximo_cobro, trial_ends_at, paypal_subscription_id, early_bird, early_bird_discount_pct",
+    )
     .eq("id", empresaId)
     .single();
 
   if (!empresa) return null;
+
+  // Cierra el trial en BD si ya venció (dashboard siempre ve estado real).
+  if (
+    empresa.estado_suscripcion === "active" &&
+    !empresa.paypal_subscription_id &&
+    empresa.trial_ends_at &&
+    new Date(empresa.trial_ends_at) <= new Date()
+  ) {
+    try {
+      const service = await createServiceClient();
+      await expireTrialIfNeeded(service, empresaId, empresa);
+      empresa.estado_suscripcion = "pending";
+    } catch (e) {
+      console.warn("getBillingStatus expire trial:", e);
+    }
+  }
 
   const proximoCobro = empresa.proximo_cobro ?? null;
   let diasRestantes: number | null = null;
@@ -41,5 +65,7 @@ export const getBillingStatus = cache(async (empresaId: string): Promise<Billing
     onTrial,
     trialDaysRemaining,
     hasPaypal,
+    earlyBird: Boolean(empresa.early_bird),
+    earlyBirdDiscountPct: empresa.early_bird_discount_pct ?? null,
   };
 });

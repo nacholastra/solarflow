@@ -174,7 +174,8 @@ function RegisterForm() {
                 })}
               </div>
               <p className="text-xs text-muted-foreground">
-                {TRIAL_DAYS} días de prueba gratuita incluidos. Activa el pago cuando quieras continuar.
+                {TRIAL_DAYS} días de prueba gratuita incluidos.
+                {` Los primeros 20 clientes tienen 30% de descuento permanente.`}
               </p>
             </div>
           )}
