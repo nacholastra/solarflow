@@ -21,7 +21,7 @@ npm run dev
 Ejecutar en Supabase SQL Editor (en orden, ver `SECURITY.md`):
 
 1. `supabase/migrations/001_initial_schema.sql` (o `003_repair_partial_schema.sql`)
-2. Migraciones `002`–`013` según `SECURITY.md`
+2. Migraciones `002`–`014` según `SECURITY.md`
 3. `supabase/seed/localidades.sql`
 
 ## Desplegar en Vercel
@@ -50,3 +50,9 @@ supabase/         # migraciones SQL y seed
 ## Lanzamiento
 
 Checklist completo en `SECURITY.md`. Páginas legales: `/terminos`, `/privacidad`, `/aviso-legal`, `/cookies`, `/dpa`. Centro de ayuda: `/ayuda`.
+
+## Validación comercial (90 días)
+
+Kit go-to-market España (outreach, demo, pipeline, kill/expand): ver [`docs/gtm/README.md`](docs/gtm/README.md).
+
+Objetivo: ≥ 50 conversaciones → ≥ 10 demos → ≥ 3 pagos antes de pivotar país o producto.
