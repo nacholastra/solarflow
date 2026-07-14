@@ -27,7 +27,7 @@ const WidgetSimulator = dynamic(
 export function SimulatorPanel({ empresa, appUrl }: { empresa: SimulatorEmpresa; appUrl: string }) {
   const router = useRouter();
   const [activating, setActivating] = useState(false);
-  const embedCode = `<iframe src="${appUrl}/widget/${empresa.slug}" width="100%" height="680" frameborder="0" style="border:none;border-radius:12px;"></iframe>`;
+  const embedCode = `<iframe src="${appUrl}/widget/${empresa.slug}" width="100%" height="780" frameborder="0" style="border:none;border-radius:12px;"></iframe>`;
   const isActive = empresa.estado_suscripcion === "active";
 
   useEffect(() => {

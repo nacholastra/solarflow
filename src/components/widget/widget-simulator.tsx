@@ -241,10 +241,10 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
 
   return (
     <div
-      className="mx-auto max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-elevated"
+      className="mx-auto flex max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-elevated"
       style={{ "--brand": brandColor } as React.CSSProperties}
     >
-      <div className="px-6 py-5 text-white" style={{ backgroundColor: brandColor }}>
+      <div className="shrink-0 px-6 py-5 text-white" style={{ backgroundColor: brandColor }}>
         <div className="flex items-center gap-3">
           {empresa.logo_url ? (
             <Image
@@ -273,7 +273,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
         </div>
       </div>
 
-      <div className="space-y-5 p-6">
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-6">
         {errorMsg && step < lastStep && (
           <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {errorMsg}
@@ -457,8 +457,21 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
               </div>
             </div>
 
+            <Button
+              type="button"
+              onClick={() => setStep(4)}
+              style={{ backgroundColor: brandColor }}
+              className="h-11 w-full text-white hover:opacity-90"
+            >
+              Continuar con mis datos <ChevronRight className="h-4 w-4" />
+            </Button>
+
             {proyeccionTeaser && (
-              <div className="relative overflow-hidden rounded-xl border border-dashed border-border bg-muted/30 p-4 text-left">
+              <button
+                type="button"
+                onClick={() => setStep(4)}
+                className="relative w-full overflow-hidden rounded-xl border border-dashed border-border bg-muted/30 p-4 text-left transition hover:border-[var(--brand)]/50"
+              >
                 <div className="pointer-events-none select-none blur-[6px]" aria-hidden>
                   <p className="text-xs text-muted-foreground">Ahorro acumulado a 15 años</p>
                   <p className="mt-1 text-2xl font-bold" style={{ color: brandColor }}>
@@ -474,10 +487,10 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
                     Proyección a largo plazo y estudio completo
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Déjanos un contacto y te lo guardamos + te respondemos sin coste
+                    Pulsa aquí o arriba para dejar tu contacto y desbloquearlo
                   </p>
                 </div>
-              </div>
+              </button>
             )}
 
             <p className="text-xs text-muted-foreground">{BRAND.disclaimer}</p>
@@ -626,62 +639,62 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
             )}
           </div>
         )}
-
-        {step < lastStep && (
-          <div className="flex justify-between pt-2">
-            <Button
-              variant="ghost"
-              onClick={() => setStep((s) => Math.max(0, s - 1))}
-              disabled={step === 0}
-            >
-              <ChevronLeft className="h-4 w-4" /> Atrás
-            </Button>
-
-            {step < 2 && (
-              <Button
-                onClick={() => setStep((s) => s + 1)}
-                disabled={(step === 1 && !localidadId) || (step === 2 && !kwh)}
-                style={{ backgroundColor: brandColor }}
-                className="text-white hover:opacity-90"
-              >
-                Siguiente <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
-
-            {step === 2 && (
-              <Button
-                onClick={goToPreview}
-                disabled={!kwh}
-                style={{ backgroundColor: brandColor }}
-                className="text-white hover:opacity-90"
-              >
-                Ver mi estimación <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
-
-            {step === 3 && (
-              <Button
-                onClick={() => setStep(4)}
-                style={{ backgroundColor: brandColor }}
-                className="text-white hover:opacity-90"
-              >
-                Guardar estudio completo <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
-
-            {step === 4 && (
-              <Button
-                onClick={submitLead}
-                disabled={loading || !nombre || !email || !telefono || !rgpd}
-                style={{ backgroundColor: brandColor }}
-                className="text-white hover:opacity-90"
-              >
-                {loading ? "Guardando..." : "Ver proyección completa"}
-              </Button>
-            )}
-          </div>
-        )}
       </div>
+
+      {step < lastStep && (
+        <div className="flex shrink-0 justify-between gap-2 border-t border-border bg-card px-6 py-3">
+          <Button
+            variant="ghost"
+            onClick={() => setStep((s) => Math.max(0, s - 1))}
+            disabled={step === 0}
+          >
+            <ChevronLeft className="h-4 w-4" /> Atrás
+          </Button>
+
+          {step < 2 && (
+            <Button
+              onClick={() => setStep((s) => s + 1)}
+              disabled={(step === 1 && !localidadId) || (step === 2 && !kwh)}
+              style={{ backgroundColor: brandColor }}
+              className="text-white hover:opacity-90"
+            >
+              Siguiente <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
+
+          {step === 2 && (
+            <Button
+              onClick={goToPreview}
+              disabled={!kwh}
+              style={{ backgroundColor: brandColor }}
+              className="text-white hover:opacity-90"
+            >
+              Ver mi estimación <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
+
+          {step === 3 && (
+            <Button
+              onClick={() => setStep(4)}
+              style={{ backgroundColor: brandColor }}
+              className="text-white hover:opacity-90"
+            >
+              Continuar <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
+
+          {step === 4 && (
+            <Button
+              onClick={submitLead}
+              disabled={loading || !nombre || !email || !telefono || !rgpd}
+              style={{ backgroundColor: brandColor }}
+              className="text-white hover:opacity-90"
+            >
+              {loading ? "Guardando..." : "Ver proyección completa"}
+            </Button>
+          )}
+        </div>
+      )}
 
       {watermark && (
         <div className="border-t border-border bg-muted/50 px-4 py-2 text-center">
