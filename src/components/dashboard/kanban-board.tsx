@@ -126,9 +126,9 @@ export function KanbanBoard({ empresaId, initialLeads }: { empresaId: string; in
     return (
       <DashboardEmptyState
         title="Aún no tienes leads"
-        description="Comparte tu simulador en la web o pruébalo en modo preview. Los contactos que envíen el formulario aparecerán aquí."
+        description="Genera un lead de prueba en el simulador (no consume cuota). Así ves el CRM con algo tuyo antes de publicar en la web."
         actionHref="/dashboard/simulator"
-        actionLabel="Configurar simulador"
+        actionLabel="Generar lead de prueba"
       />
     );
   }

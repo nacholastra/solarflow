@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, MessageCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { TRIAL_DAYS } from "@/lib/config/trial";
@@ -39,10 +39,7 @@ export function HeroCTAs() {
         </Link>
       </Button>
       <Button size="lg" variant="outline" asChild>
-        <a href="#contacto">
-          <MessageCircle className="size-4" />
-          Hablar con nosotros
-        </a>
+        <a href="#producto">Ver el simulador</a>
       </Button>
     </div>
   );

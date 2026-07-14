@@ -2,12 +2,17 @@ import Link from "next/link";
 import { Check, Circle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { BRAND } from "@/lib/config/brand";
 import { cn } from "@/lib/utils";
 import { isTrialActive } from "@/lib/empresa/subscription-access";
 
+const DEFAULT_BRAND_COLOR = "#F59E0B";
+
 type OnboardingChecklistProps = {
   privacyUrl: string | null;
+  logoUrl: string | null;
+  colorMarca: string | null;
   hasPaypal: boolean;
   trialEndsAt: string | null;
   estadoSuscripcion: string;
@@ -16,6 +21,8 @@ type OnboardingChecklistProps = {
 
 export function OnboardingChecklist({
   privacyUrl,
+  logoUrl,
+  colorMarca,
   hasPaypal,
   trialEndsAt,
   estadoSuscripcion,
@@ -27,47 +34,73 @@ export function OnboardingChecklist({
     paypal_subscription_id: hasPaypal ? "active" : null,
   });
 
+  const hasPrivacy = Boolean(privacyUrl?.trim());
+  const simulatorTouched =
+    hasPrivacy ||
+    Boolean(logoUrl?.trim()) ||
+    Boolean(colorMarca && colorMarca.toUpperCase() !== DEFAULT_BRAND_COLOR);
+
   const steps = [
     {
+      id: "account",
+      label: "Cuenta creada",
+      description: "Prueba gratuita activa — ya estás dentro",
+      done: true as boolean,
+      href: "/dashboard",
+    },
+    {
       id: "simulator",
-      label: "Configura tu simulador",
-      description: "Marca, logo y política de privacidad",
-      done: Boolean(privacyUrl?.trim()),
+      label: "Personaliza tu simulador",
+      description: "Logo, color o política de privacidad",
+      done: simulatorTouched,
       href: "/dashboard/simulator",
     },
     {
       id: "embed",
-      label: "Instala el widget en tu web",
-      description: "Copia el iframe desde el simulador",
-      done: Boolean(privacyUrl?.trim()),
+      label: "Listo para publicar en tu web",
+      description: "Añade la URL de privacidad y copia el iframe",
+      done: hasPrivacy,
       href: "/dashboard/simulator",
     },
     {
       id: "lead",
-      label: "Recibe tu primer lead",
-      description: "Prueba el modo vista previa o publica el widget",
+      label: "Genera tu primer lead",
+      description: "Usa la vista previa: el lead de prueba no consume cuota",
       done: totalLeads > 0,
-      href: "/dashboard/crm",
+      href: "/dashboard/simulator",
     },
     {
       id: "subscription",
-      label: onTrial ? "Activa tu suscripción antes de que termine la prueba" : "Suscripción activa",
-      description: onTrial ? "Pago mensual con PayPal, sin permanencia" : "Tu plan está activo",
+      label: onTrial
+        ? totalLeads > 0
+          ? "Activa el plan para no perder leads reales"
+          : "Activa tu suscripción antes de que termine la prueba"
+        : "Suscripción activa",
+      description: onTrial
+        ? totalLeads > 0
+          ? "Ya tienes actividad en el CRM — sin plan, el widget deja de captar"
+          : "Pago mensual con PayPal, sin permanencia"
+        : "Tu plan está activo",
       done: hasPaypal || !onTrial,
       href: "/dashboard/subscription",
     },
   ];
 
+  const actionable = steps.filter((s) => s.id !== "account");
+  const completedActionable = actionable.filter((s) => s.done).length;
+  if (completedActionable === actionable.length) return null;
+
   const completed = steps.filter((s) => s.done).length;
-  if (completed === steps.length) return null;
+  const progressPct = Math.round((completed / steps.length) * 100);
 
   return (
     <Card className="border-primary/20 bg-primary/5">
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Primeros pasos</CardTitle>
         <CardDescription>
-          {completed} de {steps.length} completados — configura {BRAND.name} en pocos minutos.
+          {completed} de {steps.length} · {progressPct}% — configura {BRAND.name} en pocos minutos.
         </CardDescription>
+        <Progress value={progressPct} className="mt-3 h-2" aria-label={`Progreso ${progressPct}%`} />
       </CardHeader>
       <CardContent className="space-y-3 pt-0">
         <ul className="space-y-2">

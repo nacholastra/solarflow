@@ -31,7 +31,7 @@ export default async function DashboardPage() {
     supabase
       .from("empresas")
       .select(
-        "nombre_empresa, plan, leads_limite_mes, leads_usados_mes, estado_suscripcion, privacy_url, trial_ends_at, paypal_subscription_id",
+        "nombre_empresa, plan, leads_limite_mes, leads_usados_mes, estado_suscripcion, privacy_url, logo_url, color_marca, trial_ends_at, paypal_subscription_id",
       )
       .eq("id", empresaId)
       .single(),
@@ -72,6 +72,8 @@ export default async function DashboardPage() {
 
       <OnboardingChecklist
         privacyUrl={empresa.privacy_url}
+        logoUrl={empresa.logo_url}
+        colorMarca={empresa.color_marca}
         hasPaypal={Boolean(empresa.paypal_subscription_id)}
         trialEndsAt={empresa.trial_ends_at}
         estadoSuscripcion={empresa.estado_suscripcion}

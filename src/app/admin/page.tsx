@@ -118,7 +118,7 @@ export default function AdminPage() {
     [empresas],
   );
 
-  if (loading) return <div className="h-64 animate-pulse rounded-xl bg-neutral-900" />;
+  if (loading) return <div className="h-64 animate-pulse rounded-xl bg-muted" />;
 
   return (
     <div className="space-y-6">
@@ -137,19 +137,19 @@ export default function AdminPage() {
           { label: "Plan Basic", value: stats.basic },
           { label: "Sin plan", value: stats.sinPlan },
         ].map((s) => (
-          <Card key={s.label} className="border-neutral-800 bg-neutral-900 text-neutral-100">
+          <Card key={s.label}>
             <CardHeader className="pb-2">
-              <CardDescription className="text-neutral-400">{s.label}</CardDescription>
+              <CardDescription>{s.label}</CardDescription>
               <CardTitle className="text-3xl">{s.value}</CardTitle>
             </CardHeader>
           </Card>
         ))}
       </div>
 
-      <Card className="border-neutral-800 bg-neutral-900 text-neutral-100">
+      <Card>
         <CardHeader>
           <CardTitle>Empresas registradas</CardTitle>
-          <CardDescription className="text-neutral-400">
+          <CardDescription>
             Listado de cuentas con filtros por plan y estado de suscripción.
           </CardDescription>
         </CardHeader>
@@ -159,10 +159,10 @@ export default function AdminPage() {
               placeholder="Buscar por nombre, slug o email..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="max-w-sm border-neutral-800 bg-neutral-950 text-neutral-100"
+              className="max-w-sm"
             />
             <select
-              className="h-10 rounded-md border border-neutral-800 bg-neutral-950 px-3 text-sm text-neutral-100"
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground"
               value={planFilter}
               onChange={(e) => setPlanFilter(e.target.value as typeof planFilter)}
             >
@@ -172,7 +172,7 @@ export default function AdminPage() {
               <option value="sin_plan">Sin plan</option>
             </select>
             <select
-              className="h-10 rounded-md border border-neutral-800 bg-neutral-950 px-3 text-sm text-neutral-100"
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground"
               value={estadoFilter}
               onChange={(e) => setEstadoFilter(e.target.value as typeof estadoFilter)}
             >
@@ -185,9 +185,9 @@ export default function AdminPage() {
             </select>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-neutral-800">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full min-w-[900px] text-sm">
-              <thead className="bg-neutral-900">
+              <thead className="bg-muted/50">
                 <tr>
                   {["Empresa", "Plan", "Estado", "Leads", "Equipo", "Admin", "Alta", "Acciones"].map(
                     (h) => (
@@ -200,20 +200,20 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {filtered.map((e) => (
-                  <tr key={e.id} className="border-t border-neutral-800">
+                  <tr key={e.id} className="border-t border-border">
                     <td className="px-3 py-3">
                       <p className="font-medium">{e.nombre_empresa}</p>
-                      <p className="text-xs text-neutral-500">{e.slug}</p>
+                      <p className="text-xs text-muted-foreground">{e.slug}</p>
                     </td>
                     <td className="px-3 py-3">
                       <span
                         className={cn(
                           "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
                           e.plan === "pro"
-                            ? "bg-amber-500/15 text-amber-400"
+                            ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
                             : e.plan === "basic"
-                              ? "bg-sky-500/15 text-sky-400"
-                              : "bg-neutral-500/15 text-neutral-400",
+                              ? "bg-sky-500/15 text-sky-700 dark:text-sky-400"
+                              : "bg-muted text-muted-foreground",
                         )}
                       >
                         {e.plan ?? "Sin plan"}
@@ -221,7 +221,7 @@ export default function AdminPage() {
                     </td>
                     <td className="px-3 py-3">
                       <select
-                        className="rounded-md border border-neutral-700 bg-neutral-950 px-2 py-1 text-xs capitalize text-neutral-100"
+                        className="rounded-md border border-input bg-background px-2 py-1 text-xs capitalize text-foreground"
                         value={e.estado_suscripcion}
                         onChange={(ev) => updateEstado(e.id, ev.target.value)}
                       >
@@ -257,16 +257,12 @@ export default function AdminPage() {
           </div>
 
           {filtered.length === 0 && (
-            <p className="text-center text-sm text-neutral-500">No hay empresas con esos filtros</p>
+            <p className="text-center text-sm text-muted-foreground">No hay empresas con esos filtros</p>
           )}
 
-          <div className="flex flex-wrap gap-2 text-xs text-neutral-500">
-            <Badge variant="outline" className="border-neutral-700 text-neutral-400">
-              {filtered.length} mostradas
-            </Badge>
-            <Badge variant="outline" className="border-neutral-700 text-neutral-400">
-              {empresas.length} total
-            </Badge>
+          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+            <Badge variant="outline">{filtered.length} mostradas</Badge>
+            <Badge variant="outline">{empresas.length} total</Badge>
           </div>
         </CardContent>
       </Card>
@@ -279,7 +275,6 @@ export default function AdminPage() {
         consequences={ADMIN_DELETE_CONSEQUENCES}
         loading={deleting}
         onConfirm={handleDeleteConfirm}
-        dark
       />
     </div>
   );

@@ -8,6 +8,7 @@ import { Logo } from "@/components/brand/logo";
 import { adminNav, isAdminNavActive } from "@/lib/admin/nav";
 import { useAdminInquiries } from "@/components/admin/admin-inquiries-context";
 import { InquiriesBell } from "@/components/admin/inquiries-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function NavItem({
   href,
@@ -91,6 +92,12 @@ export function AdminSidebar() {
       </nav>
 
       <div className="border-t border-sidebar-border p-3">
+        <div className="mb-2 flex items-center justify-between px-3">
+          <span className="text-xs font-medium uppercase tracking-wider text-sidebar-foreground/40">
+            Tema
+          </span>
+          <ThemeToggle variant="sidebar" />
+        </div>
         <button
           type="button"
           onClick={handleLogout}

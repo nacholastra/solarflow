@@ -4,23 +4,23 @@ import { RevealOnScroll } from "@/components/marketing/reveal-on-scroll";
 const steps = [
   {
     number: "01",
-    title: "Crea tu cuenta",
-    body: "Regístrate, elige Basic o Pro y activa la suscripción con PayPal. Sin permanencia.",
+    title: "Empieza la prueba gratis",
+    body: "Crea la cuenta, elige Basic o Pro y entra al panel. Tienes 14 días para ver valor antes de pagar.",
   },
   {
     number: "02",
-    title: "Configura el simulador",
-    body: "Ajusta color, logo, €/kWp, autoconsumo, kWp máximo y enlace a tu política de privacidad.",
+    title: "Hazlo tuyo",
+    body: "Ajusta color, logo, €/kWp y privacidad. Cada cambio deja el simulador con tu marca.",
   },
   {
     number: "03",
-    title: "Publica en tu web",
-    body: "Instala el widget desde tu panel. Prueba con leads de prueba antes de ir a producción.",
+    title: "Prueba y publica",
+    body: "Genera un lead de vista previa (no consume cuota) y copia el iframe a tu web.",
   },
   {
     number: "04",
     title: "Gestiona y automatiza",
-    body: "Recibe leads en el Kanban. En Pro, exporta contactos en CSV o envía cada lead a Zapier o Make.",
+    body: "Recibe leads en el Kanban. En Pro, exporta CSV o conecta Zapier y Make.",
   },
 ];
 
@@ -29,7 +29,7 @@ export function HowItWorksSection() {
     <section id="como-funciona" className="scroll-mt-16 border-b border-border bg-card">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
         <RevealOnScroll>
-          <SectionHeader eyebrow="Cómo funciona" title="De registro a primer lead en España, en cuatro pasos" />
+          <SectionHeader eyebrow="Cómo funciona" title="De la prueba al primer lead, en cuatro pasos" />
         </RevealOnScroll>
 
         <ol className="mt-12 grid gap-8 md:grid-cols-4">

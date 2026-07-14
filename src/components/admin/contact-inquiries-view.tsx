@@ -130,12 +130,12 @@ export function ContactInquiriesView() {
         </p>
       </div>
 
-      <Card className="overflow-hidden border-neutral-800 bg-neutral-900 text-neutral-100">
-        <CardHeader className="border-b border-neutral-800 pb-4">
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b border-border pb-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <CardTitle className="text-base">Bandeja de contacto</CardTitle>
-              <CardDescription className="text-neutral-400">
+              <CardDescription>
                 {pendingCount > 0
                   ? `${pendingCount} pendiente${pendingCount === 1 ? "" : "s"} por revisar`
                   : "Sin mensajes pendientes"}
@@ -145,7 +145,7 @@ export function ContactInquiriesView() {
               <Button
                 size="sm"
                 variant="outline"
-                className="h-8 border-neutral-700 text-xs"
+                className="h-8 text-xs"
                 onClick={handleRefresh}
                 disabled={refreshing}
               >
@@ -163,14 +163,14 @@ export function ContactInquiriesView() {
                   key={item.id}
                   size="sm"
                   variant={filter === item.id ? "secondary" : "ghost"}
-                  className={cn("h-8 gap-1.5 text-xs", filter !== item.id && "text-neutral-400")}
+                  className={cn("h-8 gap-1.5 text-xs", filter !== item.id && "text-muted-foreground")}
                   onClick={() => setFilter(item.id)}
                 >
                   {item.label}
                   <span
                     className={cn(
                       "tabular-nums",
-                      filter === item.id ? "text-neutral-300" : "text-neutral-500",
+                      filter === item.id ? "text-foreground" : "text-muted-foreground",
                     )}
                   >
                     ({item.count})
@@ -182,9 +182,9 @@ export function ContactInquiriesView() {
         </CardHeader>
 
         <CardContent className="grid min-h-[32rem] gap-0 p-0 lg:grid-cols-[minmax(0,18rem)_1fr]">
-          <div className="max-h-80 overflow-y-auto border-b border-neutral-800 lg:max-h-none lg:border-b-0 lg:border-r">
+          <div className="max-h-80 overflow-y-auto border-b border-border lg:max-h-none lg:border-b-0 lg:border-r">
             {filtered.length === 0 ? (
-              <p className="px-4 py-12 text-center text-sm text-neutral-500">
+              <p className="px-4 py-12 text-center text-sm text-muted-foreground">
                 {filter === "pendientes"
                   ? "No hay mensajes pendientes."
                   : filter === "gestionadas"
@@ -215,7 +215,7 @@ export function ContactInquiriesView() {
                 onDelete={() => setDeleteTarget(selected)}
               />
             ) : (
-              <p className="px-4 py-12 text-center text-sm text-neutral-500">
+              <p className="px-4 py-12 text-center text-sm text-muted-foreground">
                 Selecciona un mensaje para ver el detalle.
               </p>
             )}
@@ -247,7 +247,6 @@ export function ContactInquiriesView() {
         confirmLabel="Eliminar mensaje"
         loading={deleting}
         onConfirm={handleDeleteConfirm}
-        dark
       />
     </div>
   );
@@ -270,10 +269,10 @@ function InquiryListItem({
         type="button"
         onClick={onSelect}
         className={cn(
-          "w-full border-b border-neutral-800/80 px-4 py-3 text-left transition-colors hover:bg-neutral-950",
-          selected && "bg-neutral-950",
+          "w-full border-b border-border/80 px-4 py-3 text-left transition-colors hover:bg-muted/60",
+          selected && "bg-muted",
           isNew && "border-l-2 border-l-solar bg-solar/5",
-          !inquiry.gestionado && !selected && !isNew && "border-l-2 border-l-neutral-600",
+          !inquiry.gestionado && !selected && !isNew && "border-l-2 border-l-border",
         )}
       >
         <div className="flex items-start justify-between gap-2">
@@ -282,11 +281,11 @@ function InquiryListItem({
             {isNew && (
               <span className="size-2 rounded-full bg-solar" title="Nuevo" aria-label="Nuevo" />
             )}
-            <time className="text-[10px] text-neutral-500">{formatRelative(inquiry.created_at)}</time>
+            <time className="text-[10px] text-muted-foreground">{formatRelative(inquiry.created_at)}</time>
           </div>
         </div>
-        <p className="mt-0.5 truncate text-xs text-neutral-400">{inquiry.email}</p>
-        <p className="mt-1 line-clamp-2 text-xs text-neutral-500">{inquiry.mensaje}</p>
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">{inquiry.email}</p>
+        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{inquiry.mensaje}</p>
       </button>
     </li>
   );
@@ -310,8 +309,8 @@ function InquiryDetail({
         <Badge
           variant="outline"
           className={cn(
-            "border-neutral-700 text-xs",
-            inquiry.gestionado ? "text-neutral-500" : "text-solar",
+            "text-xs",
+            inquiry.gestionado ? "text-muted-foreground" : "border-solar/50 text-solar",
           )}
         >
           {inquiry.gestionado ? "Gestionada" : "Pendiente"}
@@ -320,43 +319,41 @@ function InquiryDetail({
 
       <dl className="grid gap-3 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-xs text-neutral-500">Correo</dt>
+          <dt className="text-xs text-muted-foreground">Correo</dt>
           <dd className="break-all">{inquiry.email}</dd>
         </div>
         {inquiry.empresa && (
           <div>
-            <dt className="text-xs text-neutral-500">Empresa</dt>
+            <dt className="text-xs text-muted-foreground">Empresa</dt>
             <dd>{inquiry.empresa}</dd>
           </div>
         )}
         {inquiry.telefono && (
           <div>
-            <dt className="text-xs text-neutral-500">Teléfono</dt>
+            <dt className="text-xs text-muted-foreground">Teléfono</dt>
             <dd>{inquiry.telefono}</dd>
           </div>
         )}
         <div>
-          <dt className="text-xs text-neutral-500">Fecha</dt>
+          <dt className="text-xs text-muted-foreground">Fecha</dt>
           <dd>{new Date(inquiry.created_at).toLocaleString("es-ES")}</dd>
         </div>
       </dl>
 
-      <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
-        <p className="mb-2 text-xs text-neutral-500">Mensaje</p>
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-200">
-          {inquiry.mensaje}
-        </p>
+      <div className="rounded-lg border border-border bg-muted/40 p-4">
+        <p className="mb-2 text-xs text-muted-foreground">Mensaje</p>
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{inquiry.mensaje}</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant="outline" className="border-neutral-700" asChild>
+        <Button size="sm" variant="outline" asChild>
           <a href={`mailto:${encodeURIComponent(inquiry.email)}`}>
             <Mail className="size-3.5" />
             Responder
           </a>
         </Button>
         {inquiry.telefono && (
-          <Button size="sm" variant="outline" className="border-neutral-700" asChild>
+          <Button size="sm" variant="outline" asChild>
             <a href={`tel:${inquiry.telefono.replace(/\s/g, "")}`}>
               <Phone className="size-3.5" />
               Llamar
@@ -366,7 +363,6 @@ function InquiryDetail({
         <Button
           size="sm"
           variant={inquiry.gestionado ? "outline" : "secondary"}
-          className={inquiry.gestionado ? "border-neutral-700" : undefined}
           disabled={updating}
           onClick={() => onToggleGestionado(inquiry.id, !inquiry.gestionado)}
         >

@@ -7,7 +7,7 @@ import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
 export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <AdminInquiriesProvider>
-      <div className="dark flex h-dvh overflow-hidden bg-background">
+      <div className="flex h-dvh overflow-hidden bg-background text-foreground">
         <AdminSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-muted/35 dark:bg-background">
           <AdminMobileNav />

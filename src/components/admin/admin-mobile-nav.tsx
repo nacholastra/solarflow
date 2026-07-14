@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { adminNav, isAdminNavActive } from "@/lib/admin/nav";
 import { useAdminInquiries } from "@/components/admin/admin-inquiries-context";
 import { InquiriesBell } from "@/components/admin/inquiries-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AdminMobileNav() {
   const pathname = usePathname();
@@ -28,6 +29,10 @@ export function AdminMobileNav() {
       <div className="flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar px-4">
         <Logo href="/admin" inverted />
         <div className="flex items-center gap-1">
+          <ThemeToggle
+            variant="sidebar"
+            className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          />
           <InquiriesBell compact />
           <Button
             variant="ghost"

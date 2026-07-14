@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Sun } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, Sun } from "lucide-react";
 import { gastoToKwh, kwhToGasto, desgloseFactura } from "@/lib/solar/billing-es";
+import { calcularSimulacion } from "@/lib/solar/calculator";
 import type { Localidad, SimulacionResultado, TipoInmueble } from "@/lib/solar/types";
 import { CCAA_LIST } from "@/lib/solar/types";
 import { BRAND } from "@/lib/config/brand";
@@ -39,6 +40,8 @@ interface LocalidadOption {
   ccaa: string;
 }
 
+const STEPS = ["Tipo", "Ubicación", "Consumo", "Vista previa", "Contacto", "Estudio"] as const;
+
 export function WidgetSimulator({ empresa, preview = false }: { empresa: EmpresaWidget; preview?: boolean }) {
   const [step, setStep] = useState(0);
   const [tipo, setTipo] = useState<TipoInmueble>("residencial");
@@ -61,6 +64,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
   const [honeypot, setHoneypot] = useState("");
 
   const brandColor = empresa.color_marca;
+  const lastStep = STEPS.length - 1;
 
   useEffect(() => {
     if (!ccaa) return;
@@ -76,16 +80,24 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
   }, [ccaa]);
 
   useEffect(() => {
-    if (!localidadId) { setLocalidadFull(null); return; }
+    if (!localidadId) {
+      setLocalidadFull(null);
+      return;
+    }
     fetch(`/api/localidades/${localidadId}`)
       .then((r) => r.json())
-      .then((data: Localidad) => { if (data.id) setLocalidadFull(data); });
+      .then((data: Localidad) => {
+        if (data.id) setLocalidadFull(data);
+      });
   }, [localidadId]);
 
   const syncFromGasto = useCallback(
     (val: string, loc: Localidad) => {
       const g = parseFloat(val);
-      if (isNaN(g) || g <= 0) { setKwh(""); return; }
+      if (isNaN(g) || g <= 0) {
+        setKwh("");
+        return;
+      }
       const k = gastoToKwh(g, loc, tipo);
       setKwh(String(k));
     },
@@ -95,7 +107,10 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
   const syncFromKwh = useCallback(
     (val: string, loc: Localidad) => {
       const k = parseFloat(val);
-      if (isNaN(k) || k <= 0) { setGasto(""); return; }
+      if (isNaN(k) || k <= 0) {
+        setGasto("");
+        return;
+      }
       const g = kwhToGasto(k, loc, tipo);
       setGasto(String(g));
     },
@@ -121,6 +136,42 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
     return calcularAhorroProyectado(resultado.ahorro_anual_eur, anos);
   }, [resultado, anosProyeccion]);
 
+  /** Vista previa bloqueada: mismo motor, horizonte fijo (sin fake). */
+  const proyeccionTeaser = useMemo(() => {
+    if (!resultado) return null;
+    return calcularAhorroProyectado(resultado.ahorro_anual_eur, 15);
+  }, [resultado]);
+
+  function buildResultado(): SimulacionResultado | null {
+    if (!localidadFull) return null;
+    const kwhNum = parseFloat(kwh);
+    if (!Number.isFinite(kwhNum) || kwhNum <= 0) return null;
+    return calcularSimulacion({
+      localidad: localidadFull,
+      tipoInmueble: tipo,
+      consumoKwhMensual: kwhNum,
+      empresaConfig: {
+        precio_eur_kwp: Number(empresa.precio_eur_kwp),
+        tarifa_kwh_override: empresa.tarifa_kwh_override
+          ? Number(empresa.tarifa_kwh_override)
+          : undefined,
+        ratio_autoconsumo: Number(empresa.ratio_autoconsumo),
+        kwp_max: Number(empresa.kwp_max),
+      },
+    });
+  }
+
+  function goToPreview() {
+    setErrorMsg("");
+    const next = buildResultado();
+    if (!next) {
+      setErrorMsg("Revisa el consumo para calcular la estimación.");
+      return;
+    }
+    setResultado(next);
+    setStep(3);
+  }
+
   async function submitLead() {
     if (!localidadFull || !rgpd) return;
     setLoading(true);
@@ -145,16 +196,17 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
           preview,
         }),
       });
-      const json = (await res.json()) as { resultado?: SimulacionResultado; error?: string | { formErrors?: string[] } };
+      const json = (await res.json()) as {
+        resultado?: SimulacionResultado;
+        error?: string | { formErrors?: string[] };
+      };
       if (!res.ok) {
-        const msg = typeof json.error === "string"
-          ? json.error
-          : "Error al guardar el lead";
+        const msg = typeof json.error === "string" ? json.error : "Error al guardar el lead";
         setErrorMsg(msg);
         return;
       }
-      setResultado(json.resultado ?? null);
-      setStep(4);
+      setResultado(json.resultado ?? resultado);
+      setStep(5);
       if (typeof window !== "undefined" && canUseGtm(empresa.plan) && empresa.gtm_id) {
         (window as Window & { dataLayer?: Record<string, unknown>[] }).dataLayer?.push({
           event: "generate_lead",
@@ -185,15 +237,23 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
     setAnosProyeccion(10);
   }
 
-  const steps = ["Tipo", "Ubicación", "Consumo", "Contacto", "Resultados"];
   const watermark = showWidgetWatermark(empresa.plan);
 
   return (
-    <div className="mx-auto max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-elevated" style={{ "--brand": brandColor } as React.CSSProperties}>
+    <div
+      className="mx-auto max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-elevated"
+      style={{ "--brand": brandColor } as React.CSSProperties}
+    >
       <div className="px-6 py-5 text-white" style={{ backgroundColor: brandColor }}>
         <div className="flex items-center gap-3">
           {empresa.logo_url ? (
-            <Image src={empresa.logo_url} alt="" width={40} height={40} className="rounded-lg bg-white/20 object-contain" />
+            <Image
+              src={empresa.logo_url}
+              alt=""
+              width={40}
+              height={40}
+              className="rounded-lg bg-white/20 object-contain"
+            />
           ) : (
             <Sun className="h-10 w-10" />
           )}
@@ -203,33 +263,40 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
           </div>
         </div>
         <div className="mt-4 flex gap-1">
-          {steps.map((s, i) => (
-            <div key={s} className={`h-1 flex-1 rounded-full ${i <= step ? "bg-white" : "bg-white/30"}`} />
+          {STEPS.map((s, i) => (
+            <div
+              key={s}
+              className={`h-1 flex-1 rounded-full ${i <= step ? "bg-white" : "bg-white/30"}`}
+              title={s}
+            />
           ))}
         </div>
       </div>
 
-      <div className="p-6 space-y-5">
-        {errorMsg && step < 4 && (
+      <div className="space-y-5 p-6">
+        {errorMsg && step < lastStep && (
           <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {errorMsg}
           </div>
         )}
-        {preview && step < 4 && (
-          <p className="text-xs text-center text-muted-foreground bg-muted rounded-md py-2">
+        {preview && step < lastStep && (
+          <p className="rounded-md bg-muted py-2 text-center text-xs text-muted-foreground">
             Modo prueba — se guarda en tu CRM como “Prueba” y no consume tu cuota mensual
           </p>
         )}
+
         {step === 0 && (
           <>
-            <h2 className="font-semibold text-lg">¿Qué tipo de inmueble es?</h2>
+            <h2 className="text-lg font-semibold">¿Qué tipo de inmueble es?</h2>
             <div className="grid grid-cols-2 gap-3">
               {(["residencial", "comercial"] as TipoInmueble[]).map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setTipo(t)}
-                  className={`rounded-xl border-2 p-4 text-left capitalize transition-colors ${tipo === t ? "border-[var(--brand)] bg-muted" : "border-border"}`}
+                  className={`rounded-xl border-2 p-4 text-left capitalize transition-colors ${
+                    tipo === t ? "border-[var(--brand)] bg-muted" : "border-border"
+                  }`}
                 >
                   {t}
                 </button>
@@ -240,17 +307,24 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
 
         {step === 1 && (
           <>
-            <h2 className="font-semibold text-lg">¿Dónde está ubicado?</h2>
+            <h2 className="text-lg font-semibold">¿Dónde está ubicado?</h2>
             <div className="space-y-3">
               <div>
                 <Label>Comunidad Autónoma</Label>
                 <select
                   className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
                   value={ccaa}
-                  onChange={(e) => { setCcaa(e.target.value); setLocalidadId(""); }}
+                  onChange={(e) => {
+                    setCcaa(e.target.value);
+                    setLocalidadId("");
+                  }}
                 >
                   <option value="">Selecciona...</option>
-                  {CCAA_LIST.map((c) => <option key={c} value={c}>{c}</option>)}
+                  {CCAA_LIST.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -262,7 +336,11 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
                   disabled={!ccaa}
                 >
                   <option value="">Selecciona ciudad...</option>
-                  {localidades.map((l) => <option key={l.id} value={l.id}>{l.nombre}</option>)}
+                  {localidades.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.nombre}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -271,33 +349,77 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
 
         {step === 2 && (
           <>
-            <h2 className="font-semibold text-lg">Tu consumo eléctrico</h2>
+            <h2 className="text-lg font-semibold">Tu consumo eléctrico</h2>
             <div className="flex rounded-lg border p-1">
-              <button type="button" className={`flex-1 rounded-md py-2 text-sm ${modoConsumo === "gasto" ? "bg-muted font-medium" : ""}`} onClick={() => setModoConsumo("gasto")}>€/mes</button>
-              <button type="button" className={`flex-1 rounded-md py-2 text-sm ${modoConsumo === "kwh" ? "bg-muted font-medium" : ""}`} onClick={() => setModoConsumo("kwh")}>kWh/mes</button>
+              <button
+                type="button"
+                className={`flex-1 rounded-md py-2 text-sm ${modoConsumo === "gasto" ? "bg-muted font-medium" : ""}`}
+                onClick={() => setModoConsumo("gasto")}
+              >
+                €/mes
+              </button>
+              <button
+                type="button"
+                className={`flex-1 rounded-md py-2 text-sm ${modoConsumo === "kwh" ? "bg-muted font-medium" : ""}`}
+                onClick={() => setModoConsumo("kwh")}
+              >
+                kWh/mes
+              </button>
             </div>
             {modoConsumo === "gasto" ? (
               <div>
                 <Label>¿Cuánto pagas al mes?</Label>
-                <Input type="number" value={gasto} onChange={(e) => { setModoConsumo("gasto"); setGasto(e.target.value); }} placeholder="85" className="mt-1" />
-                {kwh && localidadFull && <p className="text-sm text-muted-foreground mt-1">≈ {kwh} kWh/mes según tarifas de {localidadFull.nombre}</p>}
+                <Input
+                  type="number"
+                  value={gasto}
+                  onChange={(e) => {
+                    setModoConsumo("gasto");
+                    setGasto(e.target.value);
+                  }}
+                  placeholder="85"
+                  className="mt-1"
+                />
+                {kwh && localidadFull && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    ≈ {kwh} kWh/mes según tarifas de {localidadFull.nombre}
+                  </p>
+                )}
               </div>
             ) : (
               <div>
                 <Label>¿Cuántos kWh consumes al mes?</Label>
-                <Input type="number" value={kwh} onChange={(e) => { setModoConsumo("kwh"); setKwh(e.target.value); }} placeholder="250" className="mt-1" />
-                {gasto && localidadFull && <p className="text-sm text-muted-foreground mt-1">≈ {gasto} €/mes con impuestos incluidos</p>}
+                <Input
+                  type="number"
+                  value={kwh}
+                  onChange={(e) => {
+                    setModoConsumo("kwh");
+                    setKwh(e.target.value);
+                  }}
+                  placeholder="250"
+                  className="mt-1"
+                />
+                {gasto && localidadFull && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    ≈ {gasto} €/mes con impuestos incluidos
+                  </p>
+                )}
               </div>
             )}
             {desglose && (
               <div>
-                <button type="button" className="text-sm underline text-muted-foreground" onClick={() => setShowDesglose(!showDesglose)}>
+                <button
+                  type="button"
+                  className="text-sm text-muted-foreground underline"
+                  onClick={() => setShowDesglose(!showDesglose)}
+                >
                   {showDesglose ? "Ocultar" : "Ver"} desglose de factura
                 </button>
                 {showDesglose && (
-                  <div className="mt-2 rounded-lg bg-muted p-3 text-xs space-y-1">
+                  <div className="mt-2 space-y-1 rounded-lg bg-muted p-3 text-xs">
                     <p>Energía: {desglose.termino_energia} €</p>
-                    <p>Potencia ({desglose.potencia_kw} kW): {desglose.termino_potencia} €</p>
+                    <p>
+                      Potencia ({desglose.potencia_kw} kW): {desglose.termino_potencia} €
+                    </p>
                     <p>Peajes y cargos: {desglose.peajes_cargos} €</p>
                     <p>IEE: {desglose.iee} €</p>
                     <p>Impuesto: {desglose.impuesto_final} €</p>
@@ -306,43 +428,150 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
                 )}
               </div>
             )}
-            <p className="text-xs text-muted-foreground">Basado en potencia típica {tipo === "residencial" ? "3,45 kW" : "10 kW"}</p>
+            <p className="text-xs text-muted-foreground">
+              Basado en potencia típica {tipo === "residencial" ? "3,45 kW" : "10 kW"}
+            </p>
           </>
         )}
 
-        {step === 3 && (
+        {step === 3 && resultado && (
+          <div className="space-y-4 text-center">
+            <h2 className="text-xl font-bold" style={{ color: brandColor }}>
+              Tu estimación ya está lista
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Según tu ubicación y consumo — sin compromiso ni registro todavía.
+            </p>
+            <div className="grid grid-cols-2 gap-3 text-left">
+              <div className="rounded-xl bg-muted p-4">
+                <p className="text-xs text-muted-foreground">Instalación</p>
+                <p className="text-xl font-bold">{formatNumber(resultado.kwp_estimado)} kWp</p>
+              </div>
+              <div className="rounded-xl bg-muted p-4">
+                <p className="text-xs text-muted-foreground">Ahorro anual</p>
+                <p className="text-xl font-bold">{formatCurrency(resultado.ahorro_anual_eur)}</p>
+              </div>
+              <div className="col-span-2 rounded-xl bg-muted p-4">
+                <p className="text-xs text-muted-foreground">Recuperación inversión</p>
+                <p className="text-xl font-bold">{formatNumber(resultado.payback_anos)} años</p>
+              </div>
+            </div>
+
+            {proyeccionTeaser && (
+              <div className="relative overflow-hidden rounded-xl border border-dashed border-border bg-muted/30 p-4 text-left">
+                <div className="pointer-events-none select-none blur-[6px]" aria-hidden>
+                  <p className="text-xs text-muted-foreground">Ahorro acumulado a 15 años</p>
+                  <p className="mt-1 text-2xl font-bold" style={{ color: brandColor }}>
+                    {formatCurrency(proyeccionTeaser.ahorro_total_eur)}
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Con inflación energética y proyección a tu medida…
+                  </p>
+                </div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/55 px-4 text-center backdrop-blur-[1px]">
+                  <Lock className="size-4 text-muted-foreground" aria-hidden />
+                  <p className="text-sm font-medium text-foreground">
+                    Proyección a largo plazo y estudio completo
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Déjanos un contacto y te lo guardamos + te respondemos sin coste
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground">{BRAND.disclaimer}</p>
+          </div>
+        )}
+
+        {step === 4 && (
           <>
-            <h2 className="font-semibold text-lg">Datos de contacto</h2>
-            <p className="text-sm text-muted-foreground">Completa para ver tu estudio de rentabilidad</p>
-            <input type="text" name="website" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} className="hidden" tabIndex={-1} autoComplete="off" />
+            <h2 className="text-lg font-semibold">Guarda tu estudio completo</h2>
+            <p className="text-sm text-muted-foreground">
+              Ya viste tu estimación. Déjanos tus datos para enviarte la proyección a largo plazo y el
+              seguimiento personalizado.
+            </p>
+            <input
+              type="text"
+              name="website"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              className="hidden"
+              tabIndex={-1}
+              autoComplete="off"
+            />
             <div className="space-y-3">
-              <div><Label>Nombre</Label><Input value={nombre} onChange={(e) => setNombre(e.target.value)} className="mt-1" /></div>
-              <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" /></div>
-              <div><Label>Teléfono</Label><Input value={telefono} onChange={(e) => setTelefono(e.target.value)} className="mt-1" /></div>
+              <div>
+                <Label>Nombre</Label>
+                <Input value={nombre} onChange={(e) => setNombre(e.target.value)} className="mt-1" />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Teléfono</Label>
+                <Input value={telefono} onChange={(e) => setTelefono(e.target.value)} className="mt-1" />
+              </div>
               <label className="flex items-start gap-2 text-sm">
-                <input type="checkbox" checked={rgpd} onChange={(e) => setRgpd(e.target.checked)} className="mt-1" />
+                <input
+                  type="checkbox"
+                  checked={rgpd}
+                  onChange={(e) => setRgpd(e.target.checked)}
+                  className="mt-1"
+                />
                 <span>
                   Acepto el tratamiento de mis datos para recibir el estudio.
-                  {empresa.privacy_url && <> <a href={empresa.privacy_url} target="_blank" rel="noopener noreferrer" className="underline">Política de privacidad</a></>}
+                  {empresa.privacy_url && (
+                    <>
+                      {" "}
+                      <a
+                        href={empresa.privacy_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Política de privacidad
+                      </a>
+                    </>
+                  )}
                 </span>
               </label>
             </div>
           </>
         )}
 
-        {step === 4 && resultado && proyeccion && (
-          <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold" style={{ color: brandColor }}>¡Tu estudio está listo!</h2>
+        {step === 5 && resultado && proyeccion && (
+          <div className="space-y-4 text-center">
+            <h2 className="text-2xl font-bold" style={{ color: brandColor }}>
+              ¡Tu estudio está listo!
+            </h2>
             <div className="grid grid-cols-2 gap-3 text-left">
-              <div className="rounded-xl bg-muted p-4"><p className="text-xs text-muted-foreground">Instalación</p><p className="text-xl font-bold">{formatNumber(resultado.kwp_estimado)} kWp</p></div>
-              <div className="rounded-xl bg-muted p-4"><p className="text-xs text-muted-foreground">Ahorro anual</p><p className="text-xl font-bold">{formatCurrency(resultado.ahorro_anual_eur)}</p></div>
-              <div className="rounded-xl bg-muted p-4 col-span-2"><p className="text-xs text-muted-foreground">Recuperación inversión</p><p className="text-xl font-bold">{formatNumber(resultado.payback_anos)} años</p></div>
+              <div className="rounded-xl bg-muted p-4">
+                <p className="text-xs text-muted-foreground">Instalación</p>
+                <p className="text-xl font-bold">{formatNumber(resultado.kwp_estimado)} kWp</p>
+              </div>
+              <div className="rounded-xl bg-muted p-4">
+                <p className="text-xs text-muted-foreground">Ahorro anual</p>
+                <p className="text-xl font-bold">{formatCurrency(resultado.ahorro_anual_eur)}</p>
+              </div>
+              <div className="col-span-2 rounded-xl bg-muted p-4">
+                <p className="text-xs text-muted-foreground">Recuperación inversión</p>
+                <p className="text-xl font-bold">{formatNumber(resultado.payback_anos)} años</p>
+              </div>
             </div>
 
-            <div className="rounded-xl border bg-muted/40 p-4 text-left space-y-3">
+            <div className="space-y-3 rounded-xl border bg-muted/40 p-4 text-left">
               <div>
-                <Label htmlFor="anos_proyeccion" className="text-sm font-medium">¿A cuántos años quieres proyectar el ahorro?</Label>
-                <div className="mt-2 flex flex-wrap gap-2 items-center">
+                <Label htmlFor="anos_proyeccion" className="text-sm font-medium">
+                  ¿A cuántos años quieres proyectar el ahorro?
+                </Label>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
                   <Input
                     id="anos_proyeccion"
                     type="number"
@@ -358,7 +587,11 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
                       key={a}
                       type="button"
                       onClick={() => setAnosProyeccion(a)}
-                      className={`rounded-md px-2.5 py-1 text-xs border transition-colors ${anosProyeccion === a ? "bg-background font-medium border-[var(--brand)]" : "text-muted-foreground hover:bg-background"}`}
+                      className={`rounded-md border px-2.5 py-1 text-xs transition-colors ${
+                        anosProyeccion === a
+                          ? "border-[var(--brand)] bg-background font-medium"
+                          : "text-muted-foreground hover:bg-background"
+                      }`}
                     >
                       {a}a
                     </button>
@@ -366,12 +599,15 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
                 </div>
               </div>
               <div className="rounded-lg p-4 text-center" style={{ backgroundColor: `${brandColor}15` }}>
-                <p className="text-xs text-muted-foreground">Ahorro acumulado estimado a {proyeccion.anos} años</p>
-                <p className="text-3xl font-bold mt-1" style={{ color: brandColor }}>
+                <p className="text-xs text-muted-foreground">
+                  Ahorro acumulado estimado a {proyeccion.anos} años
+                </p>
+                <p className="mt-1 text-3xl font-bold" style={{ color: brandColor }}>
                   {formatCurrency(proyeccion.ahorro_total_eur)}
                 </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Incluye inflación del {Math.round(INFLACION_ENERGIA_ANUAL * 100)}% anual en el precio de la electricidad
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Incluye inflación del {Math.round(INFLACION_ENERGIA_ANUAL * 100)}% anual en el precio
+                  de la electricidad
                 </p>
               </div>
             </div>
@@ -391,12 +627,17 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
           </div>
         )}
 
-        {step < 4 && (
+        {step < lastStep && (
           <div className="flex justify-between pt-2">
-            <Button variant="ghost" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
+            <Button
+              variant="ghost"
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              disabled={step === 0}
+            >
               <ChevronLeft className="h-4 w-4" /> Atrás
             </Button>
-            {step < 3 ? (
+
+            {step < 2 && (
               <Button
                 onClick={() => setStep((s) => s + 1)}
                 disabled={(step === 1 && !localidadId) || (step === 2 && !kwh)}
@@ -405,14 +646,37 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
               >
                 Siguiente <ChevronRight className="h-4 w-4" />
               </Button>
-            ) : (
+            )}
+
+            {step === 2 && (
+              <Button
+                onClick={goToPreview}
+                disabled={!kwh}
+                style={{ backgroundColor: brandColor }}
+                className="text-white hover:opacity-90"
+              >
+                Ver mi estimación <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+
+            {step === 3 && (
+              <Button
+                onClick={() => setStep(4)}
+                style={{ backgroundColor: brandColor }}
+                className="text-white hover:opacity-90"
+              >
+                Guardar estudio completo <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+
+            {step === 4 && (
               <Button
                 onClick={submitLead}
                 disabled={loading || !nombre || !email || !telefono || !rgpd}
                 style={{ backgroundColor: brandColor }}
                 className="text-white hover:opacity-90"
               >
-                {loading ? "Calculando..." : "Ver resultados"}
+                {loading ? "Guardando..." : "Ver proyección completa"}
               </Button>
             )}
           </div>

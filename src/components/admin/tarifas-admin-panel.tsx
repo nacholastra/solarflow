@@ -155,10 +155,10 @@ export function TarifasAdminPanel() {
       </div>
 
       {active && (
-        <Card className="border-neutral-800 bg-neutral-900 text-neutral-100">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base">Periodo activo: {active.periodo}</CardTitle>
-            <CardDescription className="text-neutral-400">
+            <CardDescription>
               Energía {active.precio_energia_medio} €/kWh · Vertido ×{active.precio_vertido_factor} ·
               IEE {(active.iee_pct * 100).toFixed(3)}%
               {active.activated_at
@@ -170,13 +170,7 @@ export function TarifasAdminPanel() {
       )}
 
       <div className="flex flex-wrap gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          className="border-neutral-700"
-          disabled={saving}
-          onClick={() => void propose()}
-        >
+        <Button size="sm" variant="outline" disabled={saving} onClick={() => void propose()}>
           Proponer borrador del mes
         </Button>
         <Button size="sm" variant="ghost" disabled={loading || saving} onClick={() => void refresh()}>
@@ -184,10 +178,10 @@ export function TarifasAdminPanel() {
         </Button>
       </div>
 
-      <Card className="border-neutral-800 bg-neutral-900 text-neutral-100">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base">Nuevo / editar borrador</CardTitle>
-          <CardDescription className="text-neutral-400">
+          <CardDescription>
             Periodo en formato YYYY-MM. No afecta al simulador hasta activarlo.
           </CardDescription>
         </CardHeader>
@@ -209,12 +203,21 @@ export function TarifasAdminPanel() {
               ] as const
             ).map(([key, label]) => (
               <div key={key} className="space-y-1.5">
-                <Label className="text-xs text-neutral-400">{label}</Label>
+                <Label className="text-xs text-muted-foreground">{label}</Label>
                 <Input
                   value={form[key]}
                   onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-                  className="border-neutral-700 bg-neutral-950"
-                  required={key === "periodo" || key.startsWith("precio") || key.includes("pct") || key.includes("peaje") || key.includes("cargo") || key.includes("alquiler") || key.includes("iee") || key.includes("iva") || key.includes("vertido")}
+                  required={
+                    key === "periodo" ||
+                    key.startsWith("precio") ||
+                    key.includes("pct") ||
+                    key.includes("peaje") ||
+                    key.includes("cargo") ||
+                    key.includes("alquiler") ||
+                    key.includes("iee") ||
+                    key.includes("iva") ||
+                    key.includes("vertido")
+                  }
                 />
               </div>
             ))}
@@ -227,15 +230,15 @@ export function TarifasAdminPanel() {
         </CardContent>
       </Card>
 
-      <Card className="overflow-hidden border-neutral-800 bg-neutral-900 text-neutral-100">
+      <Card className="overflow-hidden">
         <CardHeader>
           <CardTitle className="text-base">Histórico</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
-            <p className="px-4 py-8 text-center text-sm text-neutral-500">Cargando…</p>
+            <p className="px-4 py-8 text-center text-sm text-muted-foreground">Cargando…</p>
           ) : tariffs.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-neutral-500">
+            <p className="px-4 py-8 text-center text-sm text-muted-foreground">
               Sin periodos. Ejecutá la migración 015 en Supabase.
             </p>
           ) : (
@@ -243,26 +246,26 @@ export function TarifasAdminPanel() {
               {tariffs.map((t) => (
                 <li
                   key={t.id}
-                  className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-800 px-4 py-3"
+                  className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3"
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{t.periodo}</span>
+                      <span className="font-medium text-foreground">{t.periodo}</span>
                       <Badge
                         variant="outline"
                         className={cn(
-                          "border-neutral-700 text-xs",
+                          "text-xs",
                           t.estado === "active" && "border-solar/50 text-solar",
-                          t.estado === "draft" && "text-amber-400",
+                          t.estado === "draft" && "border-amber-500/40 text-amber-600 dark:text-amber-400",
                         )}
                       >
                         {t.estado}
                       </Badge>
                       {t.propuesta_automatica && (
-                        <span className="text-[10px] text-neutral-500">auto</span>
+                        <span className="text-[10px] text-muted-foreground">auto</span>
                       )}
                     </div>
-                    <p className="mt-0.5 text-xs text-neutral-500">
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {t.precio_energia_medio} €/kWh · vertido ×{t.precio_vertido_factor}
                       {t.fuente ? ` · ${t.fuente}` : ""}
                     </p>

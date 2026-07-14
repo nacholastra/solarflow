@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -34,69 +38,62 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-neutral-950 px-4">
+    <div className="relative flex min-h-dvh items-center justify-center bg-background px-4">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-800 text-neutral-100">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-foreground">
             <ShieldCheck className="h-6 w-6" />
           </div>
-          <h1 className="text-xl font-semibold text-neutral-100">Panel de administración</h1>
-          <p className="mt-1 text-sm text-neutral-500">Acceso restringido</p>
+          <h1 className="text-xl font-semibold text-foreground">Panel de administración</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Acceso restringido</p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+          className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-soft"
         >
           {error && (
-            <div className="rounded-lg border border-red-900/50 bg-red-950/40 px-3 py-2.5 text-sm text-red-300">
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
               {error}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="username"
-              className="text-xs font-medium uppercase tracking-wide text-neutral-500"
-            >
+            <Label htmlFor="username" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Usuario
-            </label>
-            <input
+            </Label>
+            <Input
               id="username"
               type="text"
               autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="h-11 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 text-neutral-100 outline-none focus:border-neutral-600"
+              className="h-11"
               required
             />
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="password"
-              className="text-xs font-medium uppercase tracking-wide text-neutral-500"
-            >
+            <Label htmlFor="password" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Contraseña
-            </label>
-            <input
+            </Label>
+            <Input
               id="password"
               type="password"
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-11 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 text-neutral-100 outline-none focus:border-neutral-600"
+              className="h-11"
               required
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="h-11 w-full rounded-lg bg-neutral-100 font-medium text-neutral-900 transition hover:bg-white disabled:opacity-60"
-          >
+          <Button type="submit" disabled={loading} className="h-11 w-full">
             {loading ? "Accediendo…" : "Entrar"}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

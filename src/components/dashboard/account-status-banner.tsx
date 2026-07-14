@@ -24,21 +24,37 @@ export function AccountStatusBanner({ status }: { status: BillingStatus | null }
   if (!status) return null;
 
   if (status.onTrial && status.trialDaysRemaining !== null) {
+    const days = status.trialDaysRemaining;
     const cuando =
-      status.trialDaysRemaining <= 0
-        ? "hoy"
-        : status.trialDaysRemaining === 1
-          ? "mañana"
-          : `en ${status.trialDaysRemaining} días`;
+      days <= 0 ? "hoy" : days === 1 ? "mañana" : `en ${days} días`;
+
+    const earlyBirdNote =
+      status.earlyBird && status.earlyBirdDiscountPct
+        ? ` Tu −${status.earlyBirdDiscountPct}% de lanzamiento ya está reservado en la cuenta.`
+        : "";
+
+    const message =
+      days > 7
+        ? <>
+            Te quedan <strong>{days} días</strong> de prueba para personalizar el simulador y captar leads.
+            {earlyBirdNote} Activa el plan cuando quieras: sin permanencia.
+          </>
+        : days > 3
+          ? <>
+              Tu prueba termina {cuando}. Activa el plan para seguir recibiendo leads sin interrupciones.
+              {earlyBirdNote}
+            </>
+          : <>
+              La prueba termina <strong>{cuando}</strong>. Sin suscripción activa, el widget dejará de
+              recibir leads nuevos.
+              {earlyBirdNote}
+            </>;
 
     return (
       <div className="surface-info mb-6 flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-2">
           <CalendarClock className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>
-            Estás en <strong>periodo de prueba gratuito</strong>. Termina {cuando}. Activa tu
-            suscripción para seguir recibiendo leads sin interrupciones.
-          </p>
+          <p>{message}</p>
         </div>
         <Button size="sm" className="shrink-0 bg-info-emphasis text-white hover:bg-info-emphasis/90" asChild>
           <Link href="/dashboard/subscription">Activar plan</Link>
