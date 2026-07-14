@@ -1,8 +1,5 @@
 import { desgloseFactura } from "./billing-es";
-import type { SimulacionInput, SimulacionResultado } from "./types";
-
-/** Precio estimado de compensación de excedentes (simplificado, ~50% del precio de compra). */
-const PRECIO_VERTIDO_FACTOR = 0.5;
+import { PRECIO_VERTIDO_FACTOR_DEFAULT, type SimulacionInput, type SimulacionResultado } from "./types";
 
 export function calcularSimulacion(input: SimulacionInput): SimulacionResultado {
   const { localidad, tipoInmueble, consumoKwhMensual, empresaConfig } = input;
@@ -26,7 +23,11 @@ export function calcularSimulacion(input: SimulacionInput): SimulacionResultado 
     consumoAnual,
   );
   const excedenteKwh = Math.max(0, produccionAnual - autoconsumoKwh);
-  const precioVertido = precioKwh * PRECIO_VERTIDO_FACTOR;
+  const vertidoFactor =
+    Number.isFinite(localidad.precio_vertido_factor) && localidad.precio_vertido_factor >= 0
+      ? localidad.precio_vertido_factor
+      : PRECIO_VERTIDO_FACTOR_DEFAULT;
+  const precioVertido = precioKwh * vertidoFactor;
   const ahorroAnual =
     autoconsumoKwh * precioKwh + excedenteKwh * precioVertido;
   const inversion = kwpEstimado * empresaConfig.precio_eur_kwp;

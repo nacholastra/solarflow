@@ -1,4 +1,9 @@
-import { IEE_RATE, type DesgloseFactura, type Localidad, type TipoInmueble } from "./types";
+import {
+  IEE_RATE_DEFAULT,
+  type DesgloseFactura,
+  type Localidad,
+  type TipoInmueble,
+} from "./types";
 
 function getPotenciaKw(localidad: Localidad, tipo: TipoInmueble): number {
   return tipo === "residencial"
@@ -14,6 +19,11 @@ function calcImpuestoFinal(subtotal: number, iee: number, localidad: Localidad):
   return base * (localidad.iva_pct / 100);
 }
 
+function getIeeRate(localidad: Localidad): number {
+  const rate = localidad.iee_pct;
+  return Number.isFinite(rate) && rate >= 0 ? rate : IEE_RATE_DEFAULT;
+}
+
 /** Calcula factura mensual completa para un consumo en kWh */
 export function desgloseFactura(
   kwhMensual: number,
@@ -26,7 +36,7 @@ export function desgloseFactura(
   const peajesCargos = kwhMensual * (localidad.peaje_te_kwh + localidad.cargo_sistema_kwh);
   const alquiler = localidad.alquiler_contador_mes;
   const subtotal = terminoEnergia + terminoPotencia + peajesCargos + alquiler;
-  const iee = subtotal * IEE_RATE;
+  const iee = subtotal * getIeeRate(localidad);
   const impuestoFinal = calcImpuestoFinal(subtotal, iee, localidad);
   const total = subtotal + iee + impuestoFinal;
 

@@ -29,6 +29,10 @@ export interface Localidad {
   usa_igic: boolean;
   iva_pct: number;
   igic_energia_pct: number;
+  /** Impuesto especial electricidad (fracción, ej. 0.05112696). */
+  iee_pct: number;
+  /** Fracción del precio de compra usada como compensación de excedentes. */
+  precio_vertido_factor: number;
 }
 
 export interface DesgloseFactura {
@@ -100,4 +104,8 @@ export const CCAA_LIST = [
   "País Vasco",
 ] as const;
 
-export const IEE_RATE = 0.05112696;
+export const IEE_RATE_DEFAULT = 0.05112696;
+export const PRECIO_VERTIDO_FACTOR_DEFAULT = 0.5;
+
+/** @deprecated Usar localidad.iee_pct; se mantiene como fallback. */
+export const IEE_RATE = IEE_RATE_DEFAULT;

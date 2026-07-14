@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { gastoToKwh } from "@/lib/solar/billing-es";
 import { calcularSimulacion } from "@/lib/solar/calculator";
-import type { Localidad, TipoInmueble } from "@/lib/solar/types";
+import { mapLocalidadRow } from "@/lib/solar/map-localidad";
+import type { TipoInmueble } from "@/lib/solar/types";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { hashClientIp } from "@/lib/security/ip-hash";
 import {
@@ -103,26 +104,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Localidad no válida" }, { status: 400 });
     }
 
-    const localidad: Localidad = {
-      id: locRow.id,
-      nombre: locRow.nombre,
-      slug: locRow.slug,
-      provincia: locRow.provincia,
-      ccaa: locRow.ccaa,
-      lat: Number(locRow.lat),
-      lon: Number(locRow.lon),
-      produccion_kwh_kwp_anual: Number(locRow.produccion_kwh_kwp_anual),
-      precio_energia_kwh: Number(locRow.precio_energia_kwh),
-      peaje_te_kwh: Number(locRow.peaje_te_kwh),
-      cargo_sistema_kwh: Number(locRow.cargo_sistema_kwh),
-      precio_potencia_kw_mes: Number(locRow.precio_potencia_kw_mes),
-      alquiler_contador_mes: Number(locRow.alquiler_contador_mes),
-      potencia_tipica_residencial_kw: Number(locRow.potencia_tipica_residencial_kw),
-      potencia_tipica_comercial_kw: Number(locRow.potencia_tipica_comercial_kw),
-      usa_igic: locRow.usa_igic,
-      iva_pct: Number(locRow.iva_pct),
-      igic_energia_pct: Number(locRow.igic_energia_pct),
-    };
+    const localidad = mapLocalidadRow(locRow as Record<string, unknown>);
 
     const kwhMensual =
       data.campo_origen_consumo === "gasto" && data.gasto_mensual_eur
