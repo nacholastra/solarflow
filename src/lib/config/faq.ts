@@ -37,7 +37,7 @@ export const LANDING_FAQS = [
   },
   {
     question: "¿Qué diferencia hay entre Basic y Pro?",
-    answer: `Basic (${PLANS.basic.priceEur} €/mes): ${PLANS.basic.leadsLimit} leads/mes, ${PLANS.basic.teamLimit} usuarios, simulador, CRM y marca SolarFlow visible. Pro (${PLANS.pro.priceEur} €/mes): ${PLANS.pro.leadsLimit} leads/mes, ${PLANS.pro.teamLimit} usuarios, marca blanca, GTM en el widget, exportación CSV y webhooks.`,
+    answer: `Basic (${PLANS.basic.priceEur} €/mes): ${PLANS.basic.leadsLimit} leads/mes, ${PLANS.basic.teamLimit} usuarios, simulador, CRM y marca SolarFlow visible. Pro (${PLANS.pro.priceEur} €/mes): incluye todo lo de Basic, más ${PLANS.pro.leadsLimit} leads/mes, ${PLANS.pro.teamLimit} usuarios, marca blanca, GTM en el widget, exportación CSV y webhooks.`,
   },
   {
     question: "¿Hay permanencia o contrato anual?",

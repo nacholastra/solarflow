@@ -17,30 +17,36 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-const planFeatures = {
-  basic: [
-    `${PLANS.basic.leadsLimit} leads reales al mes (cuota del plan)`,
-    `${PLANS.basic.teamLimit} usuarios: 1 Admin + 1 Comercial`,
-    "Simulador embebible + vista previa + iframe",
-    "Personalización de color y logo",
-    'Marca "Powered by SolarFlow" visible en el widget',
-    "Motor ROI configurable (€/kWp, autoconsumo, kWp máx.)",
-    "CRM Kanban (6 estados) con notas por lead",
-    "Listado de contactos con buscador",
-    "Panel con KPIs y barra de uso del plan",
-    "Atención mediante formulario de contacto",
-  ],
-  pro: [
-    `${PLANS.pro.leadsLimit} leads reales al mes`,
-    `Hasta ${PLANS.pro.teamLimit} usuarios en equipo`,
-    "Todo lo incluido en Basic",
-    "Marca blanca: sin watermark SolarFlow",
-    "Google Tag Manager en el widget",
-    "Exportación CSV de contactos",
-    "Webhooks HTTPS (Zapier, Make, etc.)",
-    "Prueba de webhook desde el panel",
-    "Upgrade desde Basic sin crear cuenta nueva",
-  ],
+type PlanFeatureBlock = {
+  items: string[];
+  intro?: string;
+};
+
+const planFeatures: Record<"basic" | "pro", PlanFeatureBlock> = {
+  basic: {
+    items: [
+      `${PLANS.basic.leadsLimit} leads reales al mes`,
+      `${PLANS.basic.teamLimit} usuarios (1 Admin + 1 Comercial)`,
+      "Simulador embebible + vista previa + iframe",
+      "Personalización de color y logo",
+      "Motor ROI configurable (€/kWp, autoconsumo, kWp máx.)",
+      "CRM Kanban (6 estados) + listado de contactos",
+      "Panel con KPIs y uso del plan",
+      'Marca "Powered by SolarFlow" en el widget',
+    ],
+  },
+  pro: {
+    intro: "Incluye todo lo del plan Basic, y además:",
+    items: [
+      `${PLANS.pro.leadsLimit} leads reales al mes (×10 vs Basic)`,
+      `Hasta ${PLANS.pro.teamLimit} usuarios en equipo`,
+      "Marca blanca: sin watermark SolarFlow",
+      "Google Tag Manager en el widget",
+      "Exportación CSV de contactos",
+      "Webhooks HTTPS (Zapier, Make, etc.)",
+      "Prueba de webhook desde el panel",
+    ],
+  },
 };
 
 const planMeta = {
@@ -73,33 +79,40 @@ export function PricingSection({ offer }: { offer: LaunchOfferStatus }) {
           />
         </RevealOnScroll>
 
-        <div className="mx-auto mt-12 grid max-w-3xl gap-8 md:grid-cols-2">
+        <div className="mx-auto mt-12 grid max-w-3xl gap-8 md:grid-cols-2 md:items-stretch">
           {(["basic", "pro"] as const).map((id, index) => {
             const plan = PLANS[id];
             const meta = planMeta[id];
+            const features = planFeatures[id];
             const fullPrice = getPlanPrice(id, "EUR");
             const salePrice = getPlanPrice(id, "EUR", { discountPercent: discount });
             const saleUsd = getPlanPrice(id, "USD", { discountPercent: discount });
 
             return (
-              <RevealOnScroll key={id} delay={index * 100}>
+              <RevealOnScroll key={id} delay={index * 100} className="h-full">
                 <Card
                   className={cn(
                     "relative flex h-full flex-col",
                     meta.featured && "border-solar/50 shadow-elevated",
                   )}
                 >
-                  <CardHeader className={cn(meta.featured && "pt-8")}>
-                    {meta.featured && (
-                      <Badge variant="solar" className="mb-3 w-fit">
-                        Más completo
-                      </Badge>
-                    )}
-                    {offer.active && (
-                      <Badge variant="outline" className="mb-3 w-fit border-solar/40 text-solar">
-                        −{offer.discountPercent}% lanzamiento
-                      </Badge>
-                    )}
+                  <CardHeader className={cn("pb-4", meta.featured && "pt-8")}>
+                    <div className="mb-3 flex min-h-7 flex-wrap gap-2">
+                      {meta.featured ? (
+                        <Badge variant="solar" className="w-fit">
+                          Más completo
+                        </Badge>
+                      ) : (
+                        <span className="invisible text-xs" aria-hidden>
+                          placeholder
+                        </span>
+                      )}
+                      {offer.active && (
+                        <Badge variant="outline" className="w-fit border-solar/40 text-solar">
+                          −{offer.discountPercent}% lanzamiento
+                        </Badge>
+                      )}
+                    </div>
                     <CardTitle className="text-lg">{plan.name}</CardTitle>
                     <CardDescription>{meta.description}</CardDescription>
                     <div className="mt-4 flex flex-wrap items-baseline gap-2">
@@ -121,10 +134,17 @@ export function PricingSection({ offer }: { offer: LaunchOfferStatus }) {
                       Incluye {TRIAL_DAYS} días de prueba gratis
                     </p>
                   </CardHeader>
-                  <CardContent className="flex-1 pt-0">
-                    <ul className="flex flex-col gap-3">
-                      {planFeatures[id].map((feature) => (
-                        <li key={feature} className="flex items-start gap-2.5 text-sm text-foreground">
+
+                  <CardContent className="flex flex-1 flex-col gap-3 pt-0">
+                    {features.intro && (
+                      <p className="text-sm font-semibold text-foreground">{features.intro}</p>
+                    )}
+                    <ul className="flex flex-col gap-2.5">
+                      {features.items.map((feature) => (
+                        <li
+                          key={feature}
+                          className="flex items-start gap-2.5 text-sm text-foreground"
+                        >
                           <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-positive/10 text-positive">
                             <Check className="size-2.5" />
                           </span>
@@ -133,7 +153,8 @@ export function PricingSection({ offer }: { offer: LaunchOfferStatus }) {
                       ))}
                     </ul>
                   </CardContent>
-                  <CardFooter className="flex-col gap-2">
+
+                  <CardFooter className="mt-auto flex-col gap-2">
                     <Button
                       variant={meta.featured ? "solar" : "outline"}
                       size="lg"
@@ -141,10 +162,17 @@ export function PricingSection({ offer }: { offer: LaunchOfferStatus }) {
                       asChild
                     >
                       <Link href="/register">
-                        {offer.active ? `Probar ${TRIAL_DAYS} días gratis` : `Empezar con ${plan.name}`}
+                        {offer.active
+                          ? `Probar ${TRIAL_DAYS} días gratis`
+                          : `Empezar con ${plan.name}`}
                       </Link>
                     </Button>
-                    <Button variant="ghost" size="sm" className="w-full text-muted-foreground" asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full text-muted-foreground"
+                      asChild
+                    >
                       <Link href="#contacto">¿Dudas? Contáctanos</Link>
                     </Button>
                   </CardFooter>
