@@ -40,7 +40,8 @@ interface LocalidadOption {
   ccaa: string;
 }
 
-const STEPS = ["Tipo", "Ubicación", "Consumo", "Vista previa", "Contacto", "Estudio"] as const;
+/** 4 pantallas: inmueble+ubicación → consumo → estimación+contacto → estudio */
+const STEPS = ["Inmueble", "Consumo", "Resultados", "Estudio"] as const;
 
 export function WidgetSimulator({ empresa, preview = false }: { empresa: EmpresaWidget; preview?: boolean }) {
   const [step, setStep] = useState(0);
@@ -98,8 +99,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
         setKwh("");
         return;
       }
-      const k = gastoToKwh(g, loc, tipo);
-      setKwh(String(k));
+      setKwh(String(gastoToKwh(g, loc, tipo)));
     },
     [tipo],
   );
@@ -111,8 +111,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
         setGasto("");
         return;
       }
-      const g = kwhToGasto(k, loc, tipo);
-      setGasto(String(g));
+      setGasto(String(kwhToGasto(k, loc, tipo)));
     },
     [tipo],
   );
@@ -132,11 +131,12 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
 
   const proyeccion = useMemo(() => {
     if (!resultado) return null;
-    const anos = Math.min(30, Math.max(1, anosProyeccion));
-    return calcularAhorroProyectado(resultado.ahorro_anual_eur, anos);
+    return calcularAhorroProyectado(
+      resultado.ahorro_anual_eur,
+      Math.min(30, Math.max(1, anosProyeccion)),
+    );
   }, [resultado, anosProyeccion]);
 
-  /** Vista previa bloqueada: mismo motor, horizonte fijo (sin fake). */
   const proyeccionTeaser = useMemo(() => {
     if (!resultado) return null;
     return calcularAhorroProyectado(resultado.ahorro_anual_eur, 15);
@@ -161,7 +161,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
     });
   }
 
-  function goToPreview() {
+  function goToEstimate() {
     setErrorMsg("");
     const next = buildResultado();
     if (!next) {
@@ -169,7 +169,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
       return;
     }
     setResultado(next);
-    setStep(3);
+    setStep(2);
   }
 
   async function submitLead() {
@@ -201,12 +201,11 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
         error?: string | { formErrors?: string[] };
       };
       if (!res.ok) {
-        const msg = typeof json.error === "string" ? json.error : "Error al guardar el lead";
-        setErrorMsg(msg);
+        setErrorMsg(typeof json.error === "string" ? json.error : "Error al guardar el lead");
         return;
       }
       setResultado(json.resultado ?? resultado);
-      setStep(5);
+      setStep(3);
       if (typeof window !== "undefined" && canUseGtm(empresa.plan) && empresa.gtm_id) {
         (window as Window & { dataLayer?: Record<string, unknown>[] }).dataLayer?.push({
           event: "generate_lead",
@@ -258,7 +257,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
             <Sun className="h-10 w-10" />
           )}
           <div>
-            <p className="font-bold text-lg">{empresa.nombre_empresa}</p>
+            <p className="text-lg font-bold">{empresa.nombre_empresa}</p>
             <p className="text-sm opacity-90">Simulador solar gratuito</p>
           </div>
         </div>
@@ -287,14 +286,14 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
 
         {step === 0 && (
           <>
-            <h2 className="text-lg font-semibold">¿Qué tipo de inmueble es?</h2>
+            <h2 className="text-lg font-semibold">Tu inmueble</h2>
             <div className="grid grid-cols-2 gap-3">
               {(["residencial", "comercial"] as TipoInmueble[]).map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setTipo(t)}
-                  className={`rounded-xl border-2 p-4 text-left capitalize transition-colors ${
+                  className={`rounded-xl border-2 p-3 text-left capitalize transition-colors ${
                     tipo === t ? "border-[var(--brand)] bg-muted" : "border-border"
                   }`}
                 >
@@ -302,12 +301,6 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
                 </button>
               ))}
             </div>
-          </>
-        )}
-
-        {step === 1 && (
-          <>
-            <h2 className="text-lg font-semibold">¿Dónde está ubicado?</h2>
             <div className="space-y-3">
               <div>
                 <Label>Comunidad Autónoma</Label>
@@ -347,7 +340,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
           </>
         )}
 
-        {step === 2 && (
+        {step === 1 && (
           <>
             <h2 className="text-lg font-semibold">Tu consumo eléctrico</h2>
             <div className="flex rounded-lg border p-1">
@@ -434,86 +427,59 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
           </>
         )}
 
-        {step === 3 && resultado && (
-          <div className="space-y-4 text-center">
-            <h2 className="text-xl font-bold" style={{ color: brandColor }}>
-              Tu estimación ya está lista
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Según tu ubicación y consumo — sin compromiso ni registro todavía.
-            </p>
-            <div className="grid grid-cols-2 gap-3 text-left">
-              <div className="rounded-xl bg-muted p-4">
-                <p className="text-xs text-muted-foreground">Instalación</p>
-                <p className="text-xl font-bold">{formatNumber(resultado.kwp_estimado)} kWp</p>
+        {step === 2 && resultado && (
+          <div className="space-y-5">
+            <div className="space-y-3 text-center">
+              <h2 className="text-xl font-bold" style={{ color: brandColor }}>
+                Tu estimación
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Déjanos tu contacto para desbloquear la proyección a largo plazo.
+              </p>
+              <div className="grid grid-cols-2 gap-3 text-left">
+                <div className="rounded-xl bg-muted p-3">
+                  <p className="text-xs text-muted-foreground">Instalación</p>
+                  <p className="text-lg font-bold">{formatNumber(resultado.kwp_estimado)} kWp</p>
+                </div>
+                <div className="rounded-xl bg-muted p-3">
+                  <p className="text-xs text-muted-foreground">Ahorro anual</p>
+                  <p className="text-lg font-bold">{formatCurrency(resultado.ahorro_anual_eur)}</p>
+                </div>
+                <div className="col-span-2 rounded-xl bg-muted p-3">
+                  <p className="text-xs text-muted-foreground">Recuperación inversión</p>
+                  <p className="text-lg font-bold">{formatNumber(resultado.payback_anos)} años</p>
+                </div>
               </div>
-              <div className="rounded-xl bg-muted p-4">
-                <p className="text-xs text-muted-foreground">Ahorro anual</p>
-                <p className="text-xl font-bold">{formatCurrency(resultado.ahorro_anual_eur)}</p>
-              </div>
-              <div className="col-span-2 rounded-xl bg-muted p-4">
-                <p className="text-xs text-muted-foreground">Recuperación inversión</p>
-                <p className="text-xl font-bold">{formatNumber(resultado.payback_anos)} años</p>
-              </div>
+
+              {proyeccionTeaser && (
+                <div className="relative overflow-hidden rounded-xl border border-dashed border-border bg-muted/30 p-3 text-left">
+                  <div className="pointer-events-none select-none blur-[5px]" aria-hidden>
+                    <p className="text-xs text-muted-foreground">Ahorro acumulado a 15 años</p>
+                    <p className="mt-1 text-xl font-bold" style={{ color: brandColor }}>
+                      {formatCurrency(proyeccionTeaser.ahorro_total_eur)}
+                    </p>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center gap-2 bg-background/55 px-3 text-center backdrop-blur-[1px]">
+                    <Lock className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+                    <p className="text-xs font-medium text-foreground">
+                      Proyección completa al guardar tus datos
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <Button
-              type="button"
-              onClick={() => setStep(4)}
-              style={{ backgroundColor: brandColor }}
-              className="h-11 w-full text-white hover:opacity-90"
-            >
-              Continuar con mis datos <ChevronRight className="h-4 w-4" />
-            </Button>
-
-            {proyeccionTeaser && (
-              <button
-                type="button"
-                onClick={() => setStep(4)}
-                className="relative w-full overflow-hidden rounded-xl border border-dashed border-border bg-muted/30 p-4 text-left transition hover:border-[var(--brand)]/50"
-              >
-                <div className="pointer-events-none select-none blur-[6px]" aria-hidden>
-                  <p className="text-xs text-muted-foreground">Ahorro acumulado a 15 años</p>
-                  <p className="mt-1 text-2xl font-bold" style={{ color: brandColor }}>
-                    {formatCurrency(proyeccionTeaser.ahorro_total_eur)}
-                  </p>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Con inflación energética y proyección a tu medida…
-                  </p>
-                </div>
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/55 px-4 text-center backdrop-blur-[1px]">
-                  <Lock className="size-4 text-muted-foreground" aria-hidden />
-                  <p className="text-sm font-medium text-foreground">
-                    Proyección a largo plazo y estudio completo
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Pulsa aquí o arriba para dejar tu contacto y desbloquearlo
-                  </p>
-                </div>
-              </button>
-            )}
-
-            <p className="text-xs text-muted-foreground">{BRAND.disclaimer}</p>
-          </div>
-        )}
-
-        {step === 4 && (
-          <>
-            <h2 className="text-lg font-semibold">Guarda tu estudio completo</h2>
-            <p className="text-sm text-muted-foreground">
-              Ya viste tu estimación. Déjanos tus datos para enviarte la proyección a largo plazo y el
-              seguimiento personalizado.
-            </p>
-            <input
-              type="text"
-              name="website"
-              value={honeypot}
-              onChange={(e) => setHoneypot(e.target.value)}
-              className="hidden"
-              tabIndex={-1}
-              autoComplete="off"
-            />
-            <div className="space-y-3">
+            <div className="space-y-3 border-t border-border pt-4 text-left">
+              <h3 className="text-sm font-semibold">Tus datos</h3>
+              <input
+                type="text"
+                name="website"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                className="hidden"
+                tabIndex={-1}
+                autoComplete="off"
+              />
               <div>
                 <Label>Nombre</Label>
                 <Input value={nombre} onChange={(e) => setNombre(e.target.value)} className="mt-1" />
@@ -556,10 +522,10 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
                 </span>
               </label>
             </div>
-          </>
+          </div>
         )}
 
-        {step === 5 && resultado && proyeccion && (
+        {step === 3 && resultado && proyeccion && (
           <div className="space-y-4 text-center">
             <h2 className="text-2xl font-bold" style={{ color: brandColor }}>
               ¡Tu estudio está listo!
@@ -651,10 +617,10 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
             <ChevronLeft className="h-4 w-4" /> Atrás
           </Button>
 
-          {step < 2 && (
+          {step === 0 && (
             <Button
-              onClick={() => setStep((s) => s + 1)}
-              disabled={(step === 1 && !localidadId) || (step === 2 && !kwh)}
+              onClick={() => setStep(1)}
+              disabled={!localidadId}
               style={{ backgroundColor: brandColor }}
               className="text-white hover:opacity-90"
             >
@@ -662,9 +628,9 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
             </Button>
           )}
 
-          {step === 2 && (
+          {step === 1 && (
             <Button
-              onClick={goToPreview}
+              onClick={goToEstimate}
               disabled={!kwh}
               style={{ backgroundColor: brandColor }}
               className="text-white hover:opacity-90"
@@ -673,17 +639,7 @@ export function WidgetSimulator({ empresa, preview = false }: { empresa: Empresa
             </Button>
           )}
 
-          {step === 3 && (
-            <Button
-              onClick={() => setStep(4)}
-              style={{ backgroundColor: brandColor }}
-              className="text-white hover:opacity-90"
-            >
-              Continuar <ChevronRight className="h-4 w-4" />
-            </Button>
-          )}
-
-          {step === 4 && (
+          {step === 2 && (
             <Button
               onClick={submitLead}
               disabled={loading || !nombre || !email || !telefono || !rgpd}
