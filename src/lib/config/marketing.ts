@@ -5,15 +5,15 @@ import { LAUNCH_OFFER } from "@/lib/config/launch-offer";
 /** Copy de marketing alineado con lo que el producto implementa hoy. */
 export const MARKETING = {
   hero: {
-    eyebrow: `${TRIAL_DAYS} días gratis · Oferta de lanzamiento −${LAUNCH_OFFER.discountPercent}%`,
-    title: "Capta leads solares desde tu web y ciérralos con un CRM claro",
+    eyebrow: "Hecho para instaladoras solares en España",
+    title: "Capta leads solares en España desde tu web y ciérralos con un CRM claro",
     subtitle:
-      "Simulador embebible con estimaciones por localidad, captura con consentimiento RGPD y gestión en Kanban. Sin promesas vacías: sabes qué incluye cada plan antes de pagar.",
+      "Software B2B para el mercado español: simulador embebible con estimaciones por localidad (PVGIS, tarifas, peajes, IVA/IGIC), captura con RGPD y CRM Kanban. Pensado para instaladoras e integradores fotovoltaicos que operan en España.",
     highlights: [
+      "Mercado: España (localidades y fiscalidad local)",
       `${TRIAL_DAYS} días de prueba gratuita`,
       `−${LAUNCH_OFFER.discountPercent}% para los ${LAUNCH_OFFER.earlyBirdLimit} primeros`,
-      "Simulador embebible en tu web",
-      "CRM Kanban con 6 estados",
+      "Simulador embebible + CRM Kanban",
     ],
   },
   honesty: {

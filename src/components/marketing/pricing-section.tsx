@@ -67,8 +67,8 @@ export function PricingSection({ offer }: { offer: LaunchOfferStatus }) {
             title="Planes claros, sin letra pequeña"
             description={
               offer.active
-                ? `${TRIAL_DAYS} días gratis y ${offer.discountPercent}% de descuento de por vida en tu plan para los ${offer.earlyBirdLimit} primeros clientes (quedan ${offer.slotsRemaining}). Sin permanencia.`
-                : `${TRIAL_DAYS} días de prueba gratuita. Facturación mensual con PayPal. Sin permanencia. IVA no incluido.`
+                ? `Para instaladoras en España: ${TRIAL_DAYS} días gratis y ${offer.discountPercent}% de descuento permanente para los ${offer.earlyBirdLimit} primeros (quedan ${offer.slotsRemaining}). Sin permanencia. Precios en euros.`
+                : `Para instaladoras solares en España. ${TRIAL_DAYS} días de prueba gratuita. Facturación mensual con PayPal. Sin permanencia. IVA no incluido.`
             }
           />
         </RevealOnScroll>

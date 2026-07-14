@@ -14,7 +14,7 @@ export function ProductShowcase() {
             align="center"
             eyebrow="El simulador"
             title="Lo que ve tu visitante antes de dejar sus datos"
-            description="Un flujo guiado: tipo de inmueble, localidad, consumo y resultado con kWp, ahorro y payback. Después, formulario con consentimiento RGPD."
+            description="Flujo guiado para el mercado español: tipo de inmueble, localidad en España, consumo y resultado con kWp, ahorro y payback. Después, formulario con consentimiento RGPD."
           />
         </RevealOnScroll>
 

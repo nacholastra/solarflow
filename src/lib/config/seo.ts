@@ -56,7 +56,7 @@ export function buildLandingMetadata(): Metadata {
           url: ogImage,
           width: 512,
           height: 512,
-          alt: "SolarFlow — Simulador solar y CRM para instaladoras",
+          alt: "SolarFlow — Simulador solar y CRM para instaladoras en España",
         },
       ],
     },

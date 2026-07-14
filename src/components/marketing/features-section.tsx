@@ -26,7 +26,7 @@ const features = [
   {
     icon: MapPin,
     title: "Estimación por localidad",
-    body: "Producción solar (PVGIS) y tarifas españolas por ciudad. Siempre como orientación, no como proyecto ejecutivo.",
+    body: "Producción solar (PVGIS) y tarifas españolas por ciudad, con IVA o IGIC según corresponde. Siempre como orientación, no como proyecto ejecutivo.",
   },
   {
     icon: ShieldCheck,
@@ -77,8 +77,8 @@ export function FeaturesSection() {
           <RevealOnScroll>
             <SectionHeader
               eyebrow="Funcionalidades"
-              title="Todo lo que necesitas después del simulador"
-              description="SolarFlow cubre captación web y seguimiento comercial. No incluye diseño eléctrico, gestión de obra ni facturación de instalaciones."
+              title="Hecho para el mercado fotovoltaico español"
+              description="Captación web y seguimiento comercial con datos de localidades en España. No incluye diseño eléctrico, gestión de obra ni facturación de instalaciones."
             />
           </RevealOnScroll>
 

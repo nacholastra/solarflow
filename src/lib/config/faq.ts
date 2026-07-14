@@ -13,7 +13,7 @@ export const LANDING_FAQS = [
   {
     question: "¿Para quién está pensado SolarFlow?",
     answer:
-      "Para instaladoras, integradores y empresas del sector fotovoltaico en España que quieren captar leads desde su web con un simulador profesional y gestionarlos en un CRM sencillo.",
+      "Para instaladoras, integradores y empresas del sector fotovoltaico que operan en España y quieren captar leads desde su web con un simulador adaptado al mercado español (localidades, PVGIS, tarifas, peajes, IVA/IGIC) y gestionarlos en un CRM sencillo.",
   },
   {
     question: "¿Cómo se instala el simulador en mi web?",

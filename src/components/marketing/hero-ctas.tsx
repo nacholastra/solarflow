@@ -34,7 +34,7 @@ export function HeroCTAs() {
     <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
       <Button size="lg" variant="solar" asChild>
         <Link href="/register">
-          Probar {TRIAL_DAYS} días gratis
+          Probar {TRIAL_DAYS} días en España
           <ArrowRight className="size-4" />
         </Link>
       </Button>

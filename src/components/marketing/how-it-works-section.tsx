@@ -29,7 +29,7 @@ export function HowItWorksSection() {
     <section id="como-funciona" className="scroll-mt-16 border-b border-border bg-card">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 md:px-6 md:py-24">
         <RevealOnScroll>
-          <SectionHeader eyebrow="Cómo funciona" title="De registro a primer lead en cuatro pasos" />
+          <SectionHeader eyebrow="Cómo funciona" title="De registro a primer lead en España, en cuatro pasos" />
         </RevealOnScroll>
 
         <ol className="mt-12 grid gap-8 md:grid-cols-4">
