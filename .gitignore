@@ -29,7 +29,7 @@ yarn-error.log*
 
 # env files
 .env
-.env*.local
+.env.*
 !.env.example
 
 # typescript
@@ -42,9 +42,5 @@ next-env.d.ts
 # supabase cli cache
 supabase/.temp/
 
-# v0 reference extract (local only)
+# local design extract
 _v0-design/
-.env
-.env.*
-!.env.example
-.env*
